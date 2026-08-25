@@ -1,3 +1,5 @@
+# define que datos necesitamos cuanado alguien registre un producto
+
 from pydantic import BaseModel
 from decimal import Decimal
 from datetime import datetime

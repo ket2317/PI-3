@@ -1,3 +1,5 @@
+# explica al programa como esta estructurada la tabla productos en la base de datos
+
 from sqlalchemy import Column, BigInteger, Text, Numeric, Boolean, DateTime
 from sqlalchemy.sql import func
 
