@@ -11,3 +11,6 @@ app.include_router(auth_router)
 @app.get("/")
 def root(request: Request):
     return templates.TemplateResponse(request=request,name="dashboard.html")
+
+def test():
+    return "hola k k "
