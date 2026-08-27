@@ -1,0 +1,32 @@
+body { margin: 0; font-family: Arial, sans-serif;}
+
+/* Barra lateral */
+nav {
+    position: fixed;
+    left: 0; top: 0;
+    width: 220px;
+    height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 20px; }
+
+/* Enlaces de la barra lateral */
+nav a { text-decoration: none; padding: 15px; }
+
+/* Título */
+h1 { margin-left: 260px; }
+
+/* Contenedor de las tarjetas */
+.card {
+    margin-left: 260px;
+    margin-top: 20px;
+    padding: 20px;
+    width: 250px;
+    min-height: 100px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+/* Título de las tarjetas */
+.card h2 { margin: 0; }
