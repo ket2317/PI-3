@@ -1,4 +1,4 @@
-# explica al programa como esta estructurada la tabla sucursales en la base de datos
+#
 
 from sqlalchemy import Column, BigInteger, Text, Boolean, DateTime
 from sqlalchemy.sql import func

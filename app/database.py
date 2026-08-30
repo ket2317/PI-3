@@ -16,7 +16,11 @@ if not DATABASE_URL:
 
 
 # Crea la conexión con PostgreSQL
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=300
+)
 
 
 # Crea sesiones para trabajar con la base de datos

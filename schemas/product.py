@@ -10,6 +10,7 @@ class ProductCreate(BaseModel):
     nombre: str
     precio: Decimal
     iva: Decimal
+    categoria_id: int | None = None
 
 
 class ProductResponse(BaseModel):
@@ -19,6 +20,7 @@ class ProductResponse(BaseModel):
     nombre: str
     precio: Decimal
     iva: Decimal
+    categoria_id: int | None
     activo: bool
 
     model_config = {
