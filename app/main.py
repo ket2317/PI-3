@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from routers.products import router as products_router
-from routers.sucursales import router as sucursales_router
+from routers.branches import router as sucursales_router
 from routers.users import router as users_router
 from models.category import Category
-from models.roles import Role
-from routers.categorias import router as categories_router
+from models.role import Role
+from routers.categories import router as categories_router
 
 app = FastAPI()
 

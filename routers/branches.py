@@ -1,11 +1,10 @@
 # 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from models.sucursal import Sucursal
-from schemas.sucursal import SucursalCreate, SucursalResponse
-from fastapi import HTTPException
+from models.branch  import Sucursal
+from schemas.branch import SucursalCreate, SucursalResponse
 
 
 router = APIRouter(
