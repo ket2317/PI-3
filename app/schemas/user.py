@@ -15,6 +15,21 @@ class UserCreate(BaseModel):
     rol_id: int
     sucursal_id: int | None = None
 
+class AuthUser(BaseModel):
+    id : int
+    nombre : str
+    correo : str
+    rol :  str
+    sucursal_id : int | None
+
+class UserUpdate(BaseModel):
+    nombre : str
+    correo : str
+    password: str | None = None
+    rol_id : int
+    sucursal_id : int | None = None
+    activo : bool = True
+
 
 class UserResponse(BaseModel):
     id: int
@@ -26,3 +41,5 @@ class UserResponse(BaseModel):
     activo: bool
 
     model_config = {"from_attributes": True}
+
+

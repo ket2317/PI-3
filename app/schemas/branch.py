@@ -19,3 +19,4 @@ class SucursalResponse(SucursalCreate):
     activo: bool
 
     model_config = {"from_attributes": True}
+
