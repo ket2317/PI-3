@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
+from app.routers import inventory
 
 # Importar los modelos registra una sola vez todas las tablas en Base.metadata.
 from app.models import branch, category, product, user  # noqa: F401
@@ -13,7 +14,7 @@ app.include_router(branches.router)
 app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(users.router)
-
+app.include_router(inventory.router)
 
 @app.get("/")
 def root(request: Request):
