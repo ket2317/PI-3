@@ -10,6 +10,7 @@ from app.routers import payment_methods
 from app.routers import sales
 from app.routers import sale_details
 from app.routers import entries
+from app.routers import entry_details
 
 
 templates = Jinja2Templates(directory="app/templates")
@@ -25,6 +26,7 @@ app.include_router(payment_methods.router)
 app.include_router(sales.router)
 app.include_router(sale_details.router)
 app.include_router(entries.router)
+app.include_router(entry_details.router)
 
 @app.get("/")
 def root(request: Request):
