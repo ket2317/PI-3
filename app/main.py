@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 
 
-# Importar los modelos registra una sola vez todas las tablas en Base.metadata.
 
 from app.routers import auth, branches, categories, products, users
 from app.routers import inventory
