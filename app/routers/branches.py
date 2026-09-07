@@ -2,45 +2,86 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies.auth import require_admin, require_admin_or_manager
 from app.models.branch import Sucursal
-from app.schemas.branch import SucursalCreate, SucursalResponse
+from app.models.user import User
+from app.schemas.branch import SucursalCreate, SucursalResponse, SucursalUpdate
+
 
 router = APIRouter(prefix="/sucursales", tags=["Sucursales"])
 
 
+def get_branch_or_404(sucursal_id: int, db: Session) -> Sucursal:
+    branch = db.query(Sucursal).filter(Sucursal.id == sucursal_id).first()
+    if branch is None:
+        raise HTTPException(status_code=404, detail="Sucursal no encontrada")
+    return branch
+
+
+def ensure_branch_access(user: User, sucursal_id: int) -> None:
+    if user.role_name == "GERENTE" and user.sucursal_id != sucursal_id:
+        raise HTTPException(status_code=403, detail="No puedes acceder a otra sucursal")
+
+
 @router.get("/", response_model=list[SucursalResponse])
-def obtener_sucursales(db: Session = Depends(get_db)):
-    return db.query(Sucursal).all()
+def obtener_sucursales(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_or_manager),
+):
+    query = db.query(Sucursal).filter(Sucursal.activo.is_(True))
+    if current_user.role_name == "GERENTE":
+        query = query.filter(Sucursal.id == current_user.sucursal_id)
+    return query.all()
 
 
-@router.post("/", response_model=SucursalResponse)
-def crear_sucursal(sucursal: SucursalCreate, db: Session = Depends(get_db)):
-    nueva_sucursal = Sucursal(**sucursal.model_dump(), activo=True)
-    db.add(nueva_sucursal)
+@router.get("/{sucursal_id}", response_model=SucursalResponse)
+def obtener_sucursal(
+    sucursal_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_or_manager),
+):
+    ensure_branch_access(current_user, sucursal_id)
+    return get_branch_or_404(sucursal_id, db)
+
+
+@router.post("/", response_model=SucursalResponse, status_code=201)
+def crear_sucursal(
+    data: SucursalCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    branch = Sucursal(**data.model_dump(), activo=True)
+    db.add(branch)
     db.commit()
-    db.refresh(nueva_sucursal)
-    return nueva_sucursal
+    db.refresh(branch)
+    return branch
 
 
 @router.put("/{sucursal_id}", response_model=SucursalResponse)
 def actualizar_sucursal(
-    sucursal_id: int, sucursal: SucursalCreate, db: Session = Depends(get_db)
+    sucursal_id: int,
+    data: SucursalUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_or_manager),
 ):
-    sucursal_db = db.query(Sucursal).filter(Sucursal.id == sucursal_id).first()
-    if not sucursal_db:
-        raise HTTPException(status_code=404, detail="Sucursal no encontrada")
-    sucursal_db.nombre = sucursal.nombre
-    sucursal_db.direccion = sucursal.direccion
+    ensure_branch_access(current_user, sucursal_id)
+    branch = get_branch_or_404(sucursal_id, db)
+    branch.nombre = data.nombre
+    branch.direccion = data.direccion
+    if current_user.role_name == "ADMIN":
+        branch.activo = data.activo
     db.commit()
-    db.refresh(sucursal_db)
-    return sucursal_db
+    db.refresh(branch)
+    return branch
 
 
 @router.delete("/{sucursal_id}")
-def desactivar_sucursal(sucursal_id: int, db: Session = Depends(get_db)):
-    sucursal_db = db.query(Sucursal).filter(Sucursal.id == sucursal_id).first()
-    if not sucursal_db:
-        raise HTTPException(status_code=404, detail="Sucursal no encontrada")
-    sucursal_db.activo = False
+def desactivar_sucursal(
+    sucursal_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    branch = get_branch_or_404(sucursal_id, db)
+    branch.activo = False
     db.commit()
     return {"message": "Sucursal desactivada correctamente"}

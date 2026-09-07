@@ -1,16 +1,15 @@
 from datetime import datetime
 
-from pydantic import BaseModel
-
-class BranchCreate(BaseModel):
-    name: str
-    address: str
-    phone: str
+from pydantic import BaseModel, Field
 
 
 class SucursalCreate(BaseModel):
-    nombre: str
-    direccion: str
+    nombre: str = Field(min_length=2, max_length=120)
+    direccion: str = Field(min_length=3, max_length=250)
+
+
+class SucursalUpdate(SucursalCreate):
+    activo: bool = True
 
 
 class SucursalResponse(SucursalCreate):
@@ -19,4 +18,3 @@ class SucursalResponse(SucursalCreate):
     activo: bool
 
     model_config = {"from_attributes": True}
-
