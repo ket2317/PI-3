@@ -1,8 +1,11 @@
 from datetime import datetime
+
 from pydantic import BaseModel, Field
+
 
 class CategoryCreate(BaseModel):
     nombre: str = Field(min_length=2, max_length=120)
+
 
 class CategoryResponse(CategoryCreate):
     id: int
