@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.dependencies.auth import get_current_user
-from app.models.user import User
+from app.models.user import Role, User
 from app.schemas.user import AuthUser, UserLogin
 
 
@@ -16,7 +16,7 @@ def to_auth_user(user: User) -> AuthUser:
         id=user.id,
         nombre=user.nombre,
         correo=user.correo,
-        rol=user.rol.nombre,
+        rol=user.role_name,
         sucursal_id=user.sucursal_id,
     )
 
@@ -52,20 +52,25 @@ def login(
             detail="Correo o contraseña incorrectos",
         )
 
-    if user.rol is None:
+    role = db.query(Role).filter(Role.id == user.rol_id).first()
+    if role is None:
         raise HTTPException(
             status_code=403,
             detail="El usuario no tiene un rol válido",
         )
 
+    user.role_name = role.nombre
     request.session.clear()
     request.session["user_id"] = user.id
 
     return to_auth_user(user)
 
+@router.get("/me", response_model=AuthUser)
+def me(current_user: User = Depends(get_current_user)):
+    return to_auth_user(current_user)
+
 @router.post("/logout")
 def logout(request:Request):
     request.session.clear()
     return {"message":"Session Cerrada"}
-
 

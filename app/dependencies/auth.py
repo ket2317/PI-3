@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException,Request,status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.user import User
+from app.models.user import Role, User
 
 
 
@@ -32,25 +32,28 @@ def get_current_user (
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail = "sesion invalida o usuario inactivo"
         )
+    role = db.query(Role).filter(Role.id == user.rol_id).first()
+    if role is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="El usuario no tiene un rol valido",
+        )
+
+    user.role_name = role.nombre
     return user
 
-def require_roloes (*allowed_roles) -> Callable:
+def require_roles (*allowed_roles:str) -> Callable:
     def check_role (
             current_user : User = Depends(get_current_user),
 
     ) -> User:
-        if current_user.rol is None:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-            detail= " El usuario no tiene un rol valido"
-            )
-
-        if current_user.rol not in allowed_roles:
+        if current_user.role_name not in allowed_roles:
             raise  HTTPException(status_code= status.HTTP_403_FORBIDDEN,
             detail= "No tienes permiso para esta operacion")
 
         return current_user
 
     return  check_role
-require_admin = require_roloes("ADMIN")
-require_admin_or_manager = require_roloes("ADMIN","GERENTE")
-require_authenticated = require_roloes("ADMIN","GERENTE","CAJERO")
+require_admin = require_roles("ADMIN")
+require_admin_or_manager = require_roles("ADMIN", "GERENTE")
+require_authenticated = require_roles("ADMIN", "GERENTE", "CAJERO")
