@@ -18,11 +18,11 @@ class Product(Base):
     nombre = Column(Text, nullable=False)
 
     precio = Column(
-        Numeric(10,2), 
+        Numeric(12,2), 
         nullable=False
     )
     iva = Column(
-        Numeric(5,2), 
+        Numeric(5,4), 
         nullable=False
     )
     categoria_id = Column(
@@ -40,5 +40,6 @@ class Product(Base):
 
     inventarios = relationship(
         "Inventory",
-        back_populates="producto"
+        back_populates="producto",
+        cascade="all, delete-orphan"
     )

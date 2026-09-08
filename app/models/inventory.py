@@ -6,28 +6,31 @@ from app.database import Base
 
 
 class Inventory(Base):
-    __tablename__ = "inventario"
+    __tablename__ = "inventarios"
 
     id = Column(BigInteger, primary_key=True, index=True)
 
     sucursal_id = Column(
         BigInteger,
         ForeignKey("sucursales.id"),
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     producto_id = Column(
         BigInteger,
         ForeignKey("productos.id"),
-        nullable=False
+        nullable=False,
+        index=True
     )
 
-    cantidad = Column(BigInteger, nullable=False, default=0)
-    stock_minimo = Column(BigInteger, nullable=False, default=0)
+    existencia = Column(BigInteger, nullable=False, default=0)
+    stock_minimo = Column(BigInteger, nullable=False, default=5)
 
-    created_at = Column(
+    actualizado_at = Column(
         DateTime(timezone=True),
-        server_default=func.now()
+        server_default=func.now(),
+        onupdate=func.now()
     )
 
     producto = relationship(
@@ -39,19 +42,19 @@ class Inventory(Base):
         "Sucursal",
         back_populates="inventarios"
     )
-
+    
     __table_args__ = (
         UniqueConstraint(
             "sucursal_id",
             "producto_id",
-            name="uq_inventario_sucursal_producto"
+            name="uq_inventarios_sucursal_producto"
         ),
         CheckConstraint(
-            "cantidad >= 0",
-            name="ck_inventario_cantidad_no_negativa"
+            "existencia >= 0",
+            name="ck_inventarios_existencia_no_negativa"
         ),
         CheckConstraint(
             "stock_minimo >= 0",
-            name="ck_inventario_stock_minimo_no_negativo"
+            name="ck_inventarios_stock_minimo_no_negativo"
         ),
     )

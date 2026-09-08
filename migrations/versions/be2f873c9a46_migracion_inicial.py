@@ -43,6 +43,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('nombre')
     )
+    op.execute("""
+        INSERT INTO roles (nombre)
+        VALUES ('ADMIN'), ('GERENTE'), ('CAJERO')
+    """)
+    
     op.create_index(op.f('ix_roles_id'), 'roles', ['id'], unique=False)
     op.create_table('sucursales',
     sa.Column('id', sa.BigInteger(), nullable=False),

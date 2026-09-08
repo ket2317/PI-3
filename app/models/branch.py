@@ -17,8 +17,9 @@ class Sucursal(Base):
     nombre = Column(Text, nullable=False)
     direccion = Column(Text, nullable=False)
 
-    telefono = Column(Text, nullable=True)
+    telefono = Column(Text, nullable=False)
     contacto = Column(Text, nullable=True)
+
 
     gerente_id = Column(
         BigInteger,
@@ -27,7 +28,8 @@ class Sucursal(Base):
             name="fk_sucursales_gerente",
             use_alter=True
         ),
-        nullable=True
+        nullable=True,
+        unique=True
     )
 
     activo = Column(Boolean, default=True, nullable=False)
@@ -40,10 +42,12 @@ class Sucursal(Base):
 
     gerente = relationship(
         "User",
-        foreign_keys=[gerente_id]
+        foreign_keys=[gerente_id],
+        post_update=True
     )
 
     inventarios = relationship(
         "Inventory",
-        back_populates="sucursal"
+        back_populates="sucursal",
+        cascade="all, delete-orphan"
     )
