@@ -1,32 +1,10 @@
-body { margin: 0; font-family: Arial, sans-serif;}
-
-/* Barra lateral */
-nav {
-    position: fixed;
-    left: 0; top: 0;
-    width: 220px;
-    height: 100vh;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    padding: 20px; }
-
-/* Enlaces de la barra lateral */
-nav a { text-decoration: none; padding: 15px; }
-
-/* Título */
-h1 { margin-left: 260px; }
-
-/* Contenedor de las tarjetas */
-.card {
-    margin-left: 260px;
-    margin-top: 20px;
-    padding: 20px;
-    width: 250px;
-    min-height: 100px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-}
-
-/* Título de las tarjetas */
-.card h2 { margin: 0; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: #f4f6f8; color: #1f2937; font-family: Arial, sans-serif; }
+nav { position: fixed; inset: 0 auto 0 0; width: 230px; display: flex; flex-direction: column; gap: 8px; padding: 24px 18px; background: #172554; color: white; }
+nav strong { margin-bottom: 20px; font-size: 1.2rem; }
+nav a { padding: 11px 12px; border-radius: 8px; color: white; text-decoration: none; }
+nav a:hover { background: #ffffff1f; }
+#logout-button { margin-top: auto; min-height: 42px; border: 1px solid #ffffff66; border-radius: 8px; background: transparent; color: white; cursor: pointer; }
+main { margin-left: 230px; padding: 48px; }
+#current-user { max-width: 520px; padding: 20px; border-radius: 12px; background: white; box-shadow: 0 4px 18px #00000012; }
+@media (max-width: 700px) { nav { position: static; width: 100%; min-height: auto; } main { margin-left: 0; padding: 28px; } }

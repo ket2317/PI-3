@@ -1,46 +1,23 @@
 <!DOCTYPE html>
-
-<html>
-    <head>
-        <title>Dashboard</title>
-        <link rel="stylesheet" href="app/static/css/dashboard.css">
-    </head>
-
-    <body>
-        <h1>Punto de Venta</h1>
-
-        <nav>
-            <a href="/branches">Sucursales</a>
-            <a href="/products">Productos</a>
-            <a href="/inventory">Inventario</a>
-            <a href="/sales">Ventas</a>
-            <a href="/users">Usuarios</a>
-            <a href="/reports">Reportes</a>
-        </nav>
-
-        <div class="card">
-            <h2>Productos</h2>
-        </div>
-
-        <div class="card">
-            <h2>Inventario</h2>
-        </div>
-
-        <div class="card">
-            <h2>Ventas</h2>
-        </div>
-
-        <div class="card">
-            <h2>Sucursales</h2>
-        </div>
-
-        <div class="card">
-            <h2>Usuarios</h2>
-        </div>
-
-        <div class="card">
-            <h2>Reportes</h2>
-        </div>
-
-    </body>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel principal</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <nav>
+    <strong>Punto de Venta</strong>
+    <a class="admin-only" href="/sucursales-ui">Sucursales</a>
+    <a class="authenticated" href="/productos-ui">Productos</a>
+    <a class="admin-manager" href="/inventario-ui">Inventario</a>
+    <button id="logout-button" type="button">Cerrar sesión</button>
+  </nav>
+  <main>
+    <h1>Panel principal</h1>
+    <p id="current-user">Cargando usuario...</p>
+  </main>
+  <script src="/static/js/dashboard.js"></script>
+</body>
 </html>
