@@ -7,8 +7,8 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 # Importar los modelos registra una sola vez todas las tablas en Base.metadata.
-from app.models import branch, category, product, user  # noqa: F401
-from app.routers import auth, branches, categories, products, users
+from app.models import branch, category, inventory, product, user  # noqa: F401
+from app.routers import auth, branches, categories, inventory, products, users
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -35,6 +35,7 @@ app.include_router(branches.router)
 app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(users.router)
+app.include_router(inventory.router)
 
 
 @app.get("/")

@@ -58,13 +58,17 @@ def obtener_inventario(
 
 @router.get("/bajo-stock", response_model=list[InventoryResponse])
 def obtener_bajo_stock(
-    limite: int = Query(default=5, ge=0),
+    limite: int | None = Query(default=None, ge=0),
     sucursal_id: int | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin_or_manager),
 ):
     branch_id = resolve_read_branch(current_user, sucursal_id, db)
-    query = db.query(Inventory).filter(Inventory.cantidad <= limite)
+    query = db.query(Inventory)
+    if limite is None:
+        query = query.filter(Inventory.existencia <= Inventory.stock_minimo)
+    else:
+        query = query.filter(Inventory.existencia <= limite)
     if branch_id is not None:
         query = query.filter(Inventory.sucursal_id == branch_id)
     return query.all()
@@ -96,11 +100,13 @@ def actualizar_inventario(
         inventory = Inventory(
             sucursal_id=branch_id,
             producto_id=producto_id,
-            cantidad=data.cantidad,
+            existencia=data.existencia,
+            stock_minimo=data.stock_minimo,
         )
         db.add(inventory)
     else:
-        inventory.cantidad = data.cantidad
+        inventory.existencia = data.existencia
+        inventory.stock_minimo = data.stock_minimo
 
     try:
         db.commit()

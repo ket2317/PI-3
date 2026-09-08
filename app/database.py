@@ -14,6 +14,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("No se encontró DATABASE_URL en el archivo .env")
 
+# Convierte postgres:// a postgresql:// para SQLAlchemy
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace(
+        "postgres://",
+        "postgresql+psycopg2://",
+        1
+    )
 
 # Crea la conexión con PostgreSQL
 engine = create_engine(

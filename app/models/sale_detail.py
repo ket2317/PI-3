@@ -4,8 +4,8 @@ from sqlalchemy.sql import func
 from app.database import Base
 
 
-class Sale(Base):
-    __tablename__ = "ventas"
+class SaleDetail(Base):
+    __tablename__ = "detalle_ventas"
 
     id = Column(BigInteger, primary_key=True, index=True)
 
@@ -14,24 +14,20 @@ class Sale(Base):
         server_default=func.now()
     )
 
-    sucursal_id = Column(
+    venta_id = Column(
         BigInteger,
-        ForeignKey("sucursales.id"),
+        ForeignKey("ventas.id"),
         nullable=False
     )
 
-    usuario_id = Column(
+    producto_id = Column(
         BigInteger,
-        ForeignKey("usuarios.id"),
+        ForeignKey("productos.id"),
         nullable=False
     )
 
-    metodo_pago_id = Column(
-        BigInteger,
-        ForeignKey("metodos_pago.id"),
-        nullable=False
-    )
+    cantidad = Column(BigInteger, nullable=False)
 
-    subtotal = Column(Numeric(10, 2), nullable=False)
+    precio_unitario = Column(Numeric(10, 2), nullable=False)
     iva = Column(Numeric(10, 2), nullable=False)
-    total = Column(Numeric(10, 2), nullable=False)
+    subtotal = Column(Numeric(10, 2), nullable=False)

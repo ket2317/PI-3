@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -52,8 +53,12 @@ def crear_sucursal(
 ):
     branch = Sucursal(**data.model_dump(), activo=True)
     db.add(branch)
-    db.commit()
-    db.refresh(branch)
+    try:
+        db.commit()
+        db.refresh(branch)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Conflicto al crear la sucursal")
     return branch
 
 
@@ -68,10 +73,17 @@ def actualizar_sucursal(
     branch = get_branch_or_404(sucursal_id, db)
     branch.nombre = data.nombre
     branch.direccion = data.direccion
+    branch.telefono = data.telefono
+    branch.contacto = data.contacto
     if current_user.role_name == "ADMIN":
         branch.activo = data.activo
-    db.commit()
-    db.refresh(branch)
+        branch.gerente_id = data.gerente_id
+    try:
+        db.commit()
+        db.refresh(branch)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Conflicto al actualizar la sucursal")
     return branch
 
 
