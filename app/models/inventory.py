@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, CheckConstraint, UniqueConstraint
+from sqlalchemy import BigInteger, CheckConstraint, Column, DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -24,8 +24,8 @@ class Inventory(Base):
         index=True
     )
 
-    existencia = Column(BigInteger, nullable=False, default=0)
-    stock_minimo = Column(BigInteger, nullable=False, default=5)
+    existencia = Column(Integer, nullable=False, default=0)
+    stock_minimo = Column(Integer, nullable=False, default=5)
 
     actualizado_at = Column(
         DateTime(timezone=True),
@@ -42,7 +42,7 @@ class Inventory(Base):
         "Sucursal",
         back_populates="inventarios"
     )
-    
+
     __table_args__ = (
         UniqueConstraint(
             "sucursal_id",

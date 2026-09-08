@@ -18,11 +18,11 @@ class Product(Base):
     nombre = Column(Text, nullable=False)
 
     precio = Column(
-        Numeric(12,2), 
+        Numeric(12, 2),
         nullable=False
     )
     iva = Column(
-        Numeric(5,4), 
+        Numeric(5, 4),
         nullable=False
     )
     categoria_id = Column(

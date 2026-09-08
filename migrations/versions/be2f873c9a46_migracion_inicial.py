@@ -47,7 +47,7 @@ def upgrade() -> None:
         INSERT INTO roles (nombre)
         VALUES ('ADMIN'), ('GERENTE'), ('CAJERO')
     """)
-    
+
     op.create_index(op.f('ix_roles_id'), 'roles', ['id'], unique=False)
     op.create_table('sucursales',
     sa.Column('id', sa.BigInteger(), nullable=False),
@@ -58,7 +58,6 @@ def upgrade() -> None:
     sa.Column('contacto', sa.Text(), nullable=True),
     sa.Column('gerente_id', sa.BigInteger(), nullable=True),
     sa.Column('activo', sa.Boolean(), nullable=False),
-    sa.ForeignKeyConstraint(['gerente_id'], ['usuarios.id'], name='fk_sucursales_gerente', use_alter=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_sucursales_id'), 'sucursales', ['id'], unique=False)
