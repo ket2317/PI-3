@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/static/css/crud.css">
+</head>
+<body>
+  <main class="crud-page">
+  <h1>Inventario</h1>
+  <div id="page-error" class="page-error" role="alert" hidden></div>
+
+  <form id="inventory-form">
+    <label>Producto <input type="number" id="inventory-product-id" min="1" required></label>
+    <label>Existencia <input type="number" id="inventory-quantity" min="0" required></label>
+    <label>Stock mínimo <input type="number" id="inventory-minimum" min="0" value="5" required></label>
+    <label id="inventory-branch-field">Sucursal <input type="number" id="inventory-branch-id" min="1"></label>
+    <button type="submit">Actualizar inventario</button>
+  </form>
+
+  <table>
+    <thead><tr><th>Producto</th><th>Existencia</th><th>Stock mínimo</th></tr></thead>
+    <tbody id="inventory-body"></tbody>
+  </table>
+  </main>
+
+  <script src="/static/js/inventory.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/static/css/crud.css">
+</head>
+<body>
+  <main class="crud-page">
+  <h1>Sucursales</h1>
+  <div id="page-error" class="page-error" role="alert" hidden></div>
+
+  <form id="branch-form">
+    <input type="text" id="branch-name">
+    <input type="text" id="branch-address">
+    <input type="text" id="branch-phone">
+    <input type="text" id="branch-contact">
+    <input type="number" id="branch-manager-id">
+    <button type="submit">Guardar</button>
+  </form>
+
+  <table>
+    <thead><tr><th>ID</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Contacto</th><th>Gerente</th></tr></thead>
+    <tbody id="branches-body"></tbody>
+  </table>
+  </main>
+
+  <script src="/static/js/branches.js"></script>
+</body>
+</html>
