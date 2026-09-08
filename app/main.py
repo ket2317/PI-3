@@ -1,12 +1,15 @@
 import os
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 # Importar los modelos registra una sola vez todas las tablas en Base.metadata.
+from app.database import get_db
 from app.models import branch, category, inventory, product, user  # noqa: F401
 from app.routers import auth, branches, categories, inventory, products, users
 
@@ -22,7 +25,7 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=session_secret,
     same_site = "lax",
-    https_only = False
+    https_only=os.getenv("RENDER") == "true",
 )
 app.mount(
     "/static",
@@ -36,6 +39,12 @@ app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(users.router)
 app.include_router(inventory.router)
+
+
+@app.get("/health", tags=["Sistema"])
+def health(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+    return {"status": "ok"}
 
 
 @app.get("/")

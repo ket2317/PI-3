@@ -43,3 +43,22 @@ Desarrollar una solución integral para la gestión de pequeños negocios que pe
 Este proyecto utiliza la licencia **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
 Consultar el archivo `LICENSE` para más información.
+
+---
+
+## Despliegue en Render
+
+El repositorio incluye `render.yaml` para crear el servicio FastAPI y PostgreSQL mediante un Blueprint.
+
+1. En Render, seleccionar **New > Blueprint** y conectar este repositorio.
+2. Confirmar que la rama sea `main`.
+3. Proporcionar valores secretos para `ADMIN_EMAIL` y `ADMIN_PASSWORD` cuando Render los solicite.
+4. Crear los recursos y esperar a que finalice el primer despliegue.
+
+El comando de inicio aplica las migraciones de Alembic, crea de forma idempotente el primer administrador y arranca Uvicorn. `DATABASE_URL` se obtiene de Render PostgreSQL y `SESSION_SECRET` se genera automáticamente; ninguna credencial real debe guardarse en Git.
+
+Cuando termine el despliegue, comprobar:
+
+- `/health` responde `{"status":"ok"}`.
+- `/login` carga el formulario.
+- El administrador puede iniciar sesión con las variables configuradas.
