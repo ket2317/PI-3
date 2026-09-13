@@ -51,3 +51,8 @@ class Sucursal(Base):
         back_populates="sucursal",
         cascade="all, delete-orphan"
     )
+
+    productos = relationship(
+        "Product",
+        back_populates="sucursal"
+    )
