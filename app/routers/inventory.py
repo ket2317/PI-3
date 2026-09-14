@@ -91,6 +91,12 @@ def actualizar_inventario(
     if product is None:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
 
+    if product.sucursal_id != branch_id:
+        raise HTTPException(
+            status_code=422,
+            detail="El producto no pertenece a la sucursal indicada",
+        )
+
     inventory = db.query(Inventory).filter(
         Inventory.sucursal_id == branch_id,
         Inventory.producto_id == producto_id,

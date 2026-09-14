@@ -5,12 +5,12 @@ from pydantic import BaseModel, Field
 
 
 class ProductCreate(BaseModel):
+    sucursal_id: int
     codigo: str = Field(min_length=1, max_length=80)
     nombre: str = Field(min_length=2, max_length=150)
     precio: Decimal = Field(gt=0)
     iva: Decimal = Field(ge=0, le=1)
     categoria_id: int | None = None
-
 
 class ProductResponse(ProductCreate):
     id: int
