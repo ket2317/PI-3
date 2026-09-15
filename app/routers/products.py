@@ -7,6 +7,7 @@ from app.dependencies.auth import (
     ensure_branch_access,
     get_current_user,
     require_admin_or_manager,
+    require_authenticated,
 )
 
 from app.models.branch import Sucursal
@@ -116,7 +117,7 @@ def ensure_unique_code(
 def obtener_productos(
     sucursal_id: int | None = Query(default=None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin_or_manager),
+    current_user: User = Depends(require_authenticated),
 ):
     allowed_branch_id = ensure_branch_access(
         current_user,
@@ -144,7 +145,7 @@ def obtener_productos(
 def obtener_producto(
     producto_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin_or_manager),
+    current_user: User = Depends(require_authenticated),
 ):
     product = get_product_or_404(
         producto_id,

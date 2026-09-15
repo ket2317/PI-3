@@ -10,8 +10,27 @@ from sqlalchemy.orm import Session
 
 # Importar los modelos registra una sola vez todas las tablas en Base.metadata.
 from app.database import get_db
-from app.models import branch, category, inventory, product, user  # noqa: F401
-from app.routers import auth, branches, categories, inventory, products, users
+from app.models import (  # noqa: F401
+    branch,
+    category,
+    inventory,
+    payment_method,
+    product,
+    sale,
+    sale_detail,
+    user,
+)
+from app.routers import (
+    auth,
+    branches,
+    categories,
+    inventory,
+    payment_methods,
+    products,
+    reports,
+    sales,
+    users,
+)
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -39,6 +58,9 @@ app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(users.router)
 app.include_router(inventory.router)
+app.include_router(sales.router)
+app.include_router(payment_methods.router)
+app.include_router(reports.router)
 
 
 @app.get("/health", tags=["Sistema"])
@@ -84,4 +106,25 @@ def inventory_page(request: Request):
     return templates.TemplateResponse(
         request = request,
         name = "inventory.html",
+    )
+
+@app.get("/ventas-ui")
+def sales_page(request: Request):
+    return templates.TemplateResponse(
+        request = request,
+        name = "sales.html",
+    )
+
+@app.get("/usuarios-ui")
+def users_page(request: Request):
+    return templates.TemplateResponse(
+        request = request,
+        name = "users.html",
+    )
+
+@app.get("/reportes-ui")
+def reports_page(request: Request):
+    return templates.TemplateResponse(
+        request = request,
+        name = "reports.html",
     )

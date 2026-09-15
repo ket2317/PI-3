@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies.auth import require_admin, require_admin_or_manager
+from app.dependencies.auth import require_admin, require_admin_or_manager, require_authenticated
 from app.models.branch import Sucursal
 from app.models.user import User
 from app.schemas.branch import SucursalCreate, SucursalResponse, SucursalUpdate
@@ -20,17 +20,17 @@ def get_branch_or_404(sucursal_id: int, db: Session) -> Sucursal:
 
 
 def ensure_branch_access(user: User, sucursal_id: int) -> None:
-    if user.role_name == "GERENTE" and user.sucursal_id != sucursal_id:
+    if user.role_name in ("GERENTE", "CAJERO") and user.sucursal_id != sucursal_id:
         raise HTTPException(status_code=403, detail="No puedes acceder a otra sucursal")
 
 
 @router.get("/", response_model=list[SucursalResponse])
 def obtener_sucursales(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin_or_manager),
+    current_user: User = Depends(require_authenticated),
 ):
     query = db.query(Sucursal).filter(Sucursal.activo.is_(True))
-    if current_user.role_name == "GERENTE":
+    if current_user.role_name in ("GERENTE", "CAJERO"):
         query = query.filter(Sucursal.id == current_user.sucursal_id)
     return query.all()
 
@@ -39,7 +39,7 @@ def obtener_sucursales(
 def obtener_sucursal(
     sucursal_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin_or_manager),
+    current_user: User = Depends(require_authenticated),
 ):
     ensure_branch_access(current_user, sucursal_id)
     return get_branch_or_404(sucursal_id, db)

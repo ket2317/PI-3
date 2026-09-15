@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios</title>
+  <link rel="stylesheet" href="/static/css/crud.css">
+</head>
+<body>
+  <main class="crud-page">
+    <h1>Usuarios</h1>
+    <a href="/dashboard">Volver al panel</a>
+
+    <p id="page-success" role="status" hidden></p>
+    <p id="page-error" class="page-error" role="alert" hidden></p>
+
+    <form id="user-form">
+      <input id="user-id" type="hidden">
+
+      <label for="user-name">Nombre</label>
+      <input id="user-name" type="text" required>
+
+      <label for="user-email">Correo</label>
+      <input id="user-email" type="email" required>
+
+      <label for="user-password">Contraseña</label>
+      <input id="user-password" type="password">
+
+      <label for="user-role-id">Rol</label>
+      <select id="user-role-id" required></select>
+
+      <label for="user-branch-id">Sucursal</label>
+      <select id="user-branch-id"></select>
+
+      <button type="submit" id="user-submit">Guardar usuario</button>
+      <button type="button" id="user-cancel" hidden>Cancelar edición</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Correo</th>
+          <th>Rol</th>
+          <th>Sucursal</th>
+          <th>Activo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="users-body"></tbody>
+    </table>
+  </main>
+
+  <script src="/static/js/users.js"></script>
+</body>
+</html>

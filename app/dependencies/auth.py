@@ -92,7 +92,7 @@ def ensure_branch_access(
     if role_name == "ADMIN":
         return requested_branch_id
 
-    if role_name != "GERENTE":
+    if role_name not in ("GERENTE", "CAJERO"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes permiso para esta operación",
