@@ -1,5 +1,6 @@
 let currentUser = null;
 let managers = [];
+let branches = [];
 
 function showError(message) {
   const el = document.querySelector("#page-error");
@@ -46,6 +47,7 @@ function resetForm() {
   document.querySelector("#branch-cancel").hidden = true;
   document.querySelector("#branch-active").hidden = true;
   document.querySelector("#branch-active-label").hidden = true;
+  renderManagerOptions(null);
   clearError();
 }
 
@@ -62,15 +64,29 @@ async function loadManagers() {
   }
   const users = await apiRequest("/usuarios/");
   managers = users.filter((u) => u.rol_id === 2 && u.activo);
+}
 
+function renderManagerOptions(editingBranchId) {
   const select = document.querySelector("#branch-manager-id");
+  const previousValue = select.value;
+
+  const takenByOtherBranch = new Set(
+    branches
+      .filter((b) => b.gerente_id && b.id !== editingBranchId)
+      .map((b) => b.gerente_id),
+  );
+
   select.innerHTML = `<option value="">Sin asignar</option>`;
-  managers.forEach((manager) => {
-    const option = document.createElement("option");
-    option.value = manager.id;
-    option.textContent = manager.nombre;
-    select.appendChild(option);
-  });
+  managers
+    .filter((manager) => !takenByOtherBranch.has(manager.id))
+    .forEach((manager) => {
+      const option = document.createElement("option");
+      option.value = manager.id;
+      option.textContent = manager.nombre;
+      select.appendChild(option);
+    });
+
+  select.value = previousValue;
 }
 
 function editBranch(branch) {
@@ -79,6 +95,7 @@ function editBranch(branch) {
   document.querySelector("#branch-address").value = branch.direccion;
   document.querySelector("#branch-phone").value = branch.telefono;
   document.querySelector("#branch-contact").value = branch.contacto || "";
+  renderManagerOptions(branch.id);
   document.querySelector("#branch-manager-id").value = branch.gerente_id || "";
 
   const activeField = document.querySelector("#branch-active");
@@ -108,7 +125,9 @@ async function deactivateBranch(branch) {
 }
 
 async function loadBranches() {
-  const branches = await apiRequest("/sucursales/");
+  branches = await apiRequest("/sucursales/");
+  renderManagerOptions(document.querySelector("#branch-id").value ? Number(document.querySelector("#branch-id").value) : null);
+
   const body = document.querySelector("#branches-body");
   body.innerHTML = "";
 
