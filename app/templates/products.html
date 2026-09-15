@@ -8,9 +8,9 @@
   </head>
   <body>
     <main class="crud-page">
-      <h1>Productos</h1>
-
-      <a href="/dashboard">Volver al panel</a>
+      <h1 data-i18n="products.title">Productos</h1>
+      <a href="/dashboard" data-i18n="products.back">Volver al panel</a>
+      <button type="button" data-lang-toggle>EN</button>
 
       <p id="page-success" role="status" hidden></p>
       <p id="page-error" class="page-error" role="alert" hidden></p>
@@ -73,6 +73,7 @@
         </table>
     </main>
 
+    <script src="/static/js/i18n.js"></script>
     <script src="/static/js/products.js"></script>
   </body>
 </html>

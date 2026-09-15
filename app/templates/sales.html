@@ -8,7 +8,9 @@
 </head>
 <body>
   <main class="crud-page">
-    <h1>Punto de venta</h1>
+    <h1 data-i18n="sales.title">Punto de venta</h1>
+    <button type="button" data-lang-toggle>EN</button>
+
     <a href="/dashboard">Volver al panel</a>
 
     <p id="page-success" role="status" hidden></p>
@@ -50,7 +52,7 @@
     <label for="payment-method-id">Método de pago</label>
     <select id="payment-method-id" required></select>
 
-    <button type="button" id="confirm-sale">Confirmar venta</button>
+   <button type="button" id="confirm-sale" data-i18n="sales.confirm">Confirmar venta</button>
 
     <section id="receipt" hidden>
       <h2>Comprobante</h2>
@@ -58,6 +60,7 @@
     </section>
   </main>
 
+  <script src="/static/js/i18n.js"></script>
   <script src="/static/js/sales.js"></script>
 </body>
 </html>
