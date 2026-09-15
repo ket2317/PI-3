@@ -9,19 +9,37 @@
 <body>
   <nav>
     <strong>Punto de Venta</strong>
-    <a class="admin-only" href="/sucursales-ui">Sucursales</a>
-    <a class="authenticated" href="/productos-ui">Productos</a>
-    <a class="admin-manager" href="/inventario-ui">Inventario</a>
-    <button id="logout-button" type="button">Cerrar sesión</button>
+
+    <a class="admin-only" href="/sucursales-ui">
+      Sucursales
+    </a>
+
+    <a class="authenticated" href="/productos-ui">
+      Productos
+    </a>
+
+    <a class="admin-manager" href="/inventario-ui">
+      Inventario
+    </a>
+
+    <button id="logout-button" type="button">
+      Cerrar sesión
+    </button>
   </nav>
+
   <main>
     <h1>Panel principal</h1>
-    <div id="current-user">
-      <p>Nombre: <span id="user-name">cargando...</span></p>
-      <p>Rol: <span id="user-role">cargando...</span></p>
-      <p>Sucursal: <span id="user-branch">cargando...</span></p>
-    </div>
+
+    <section class="user-context">
+      <h2>Sesión actual</h2>
+      <p id="current-user">Cargando usuario...</p>
+      <p id="current-role"></p>
+      <p id="current-branch"></p>
+    </section>
+
+    <p id="dashboard-error" role="alert" hidden></p>
   </main>
+
   <script src="/static/js/dashboard.js"></script>
 </body>
 </html>

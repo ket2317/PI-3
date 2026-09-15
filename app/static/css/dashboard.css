@@ -6,5 +6,23 @@ nav a { padding: 11px 12px; border-radius: 8px; color: white; text-decoration: n
 nav a:hover { background: #ffffff1f; }
 #logout-button { margin-top: auto; min-height: 42px; border: 1px solid #ffffff66; border-radius: 8px; background: transparent; color: white; cursor: pointer; }
 main { margin-left: 230px; padding: 48px; }
-#current-user { max-width: 520px; padding: 20px; border-radius: 12px; background: white; box-shadow: 0 4px 18px #00000012; }
 @media (max-width: 700px) { nav { position: static; width: 100%; min-height: auto; } main { margin-left: 0; padding: 28px; } }
+
+.user-context {
+  max-width: 640px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.user-context h2 {
+  margin-top: 0;
+}
+
+#dashboard-error {
+  color: #b91c1c;
+  margin: 1rem auto;
+  max-width: 640px;
+}

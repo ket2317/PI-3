@@ -1,31 +1,79 @@
-async function loadCurrentUser() {
-  const response = await fetch("/auth/me", { credentials: "same-origin" });
-  if (response.status === 401) {
-    window.location.href = "/login";
-    return;
-  }
-  if (!response.ok) {
-    document.querySelector("#current-user").textContent = "No fue posible cargar el usuario";
-    return;
-  }
+function showError(message) {
+  const element = document.querySelector("#dashboard-error");
+  element.textContent = message;
+  element.hidden = false;
+}
 
-  const user = await response.json();
-  
-  document.querySelector("#user-name").textContent = user.nombre;
-  document.querySelector("#user-role").textContent = user.rol;
-  document.querySelector("#user-branch").textContent = user.sucursal_id ?? "sin sucursal";
-
-  document.querySelectorAll(".admin-only").forEach((element) => {
-    element.hidden = user.rol !== "ADMIN";
-  });
-  document.querySelectorAll(".admin-manager").forEach((element) => {
-    element.hidden = !["ADMIN", "GERENTE"].includes(user.rol);
+function hideElements(selector) {
+  document.querySelectorAll(selector).forEach((element) => {
+    element.hidden = true;
   });
 }
 
-document.querySelector("#logout-button").addEventListener("click", async () => {
-  await fetch("/auth/logout", { method: "POST", credentials: "same-origin" });
-  window.location.href = "/login";
-});
+async function apiRequest(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    ...options,
+  });
 
-loadCurrentUser();
+  const data = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    window.location.href = "/login";
+    throw new Error("Debes iniciar sesión");
+  }
+
+  if (!response.ok) {
+    throw new Error(data.detail || "No fue posible completar la operación");
+  }
+
+  return data;
+}
+
+function renderUser(user) {
+  document.querySelector("#current-user").textContent =
+    `Usuario: ${user.nombre}`;
+
+  document.querySelector("#current-role").textContent =
+    `Rol: ${user.rol}`;
+
+  const branchElement = document.querySelector("#current-branch");
+
+  if (user.sucursal_id) {
+    branchElement.textContent =
+      `Sucursal asignada: ${user.sucursal_id}`;
+  } else {
+    branchElement.textContent =
+      "Sucursal asignada: Administración general";
+  }
+
+  if (user.rol !== "ADMIN") {
+    hideElements(".admin-only");
+  }
+
+  if (user.rol !== "ADMIN" && user.rol !== "GERENTE") {
+    hideElements(".admin-manager");
+  }
+}
+
+document.querySelector("#logout-button")
+  .addEventListener("click", async () => {
+    try {
+      await apiRequest("/auth/logout", {
+        method: "POST",
+      });
+
+      window.location.href = "/login";
+    } catch (error) {
+      showError(error.message);
+    }
+  });
+
+(async () => {
+  try {
+    const user = await apiRequest("/auth/me");
+    renderUser(user);
+  } catch (error) {
+    showError(error.message);
+  }
+})();
