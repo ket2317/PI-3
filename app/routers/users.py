@@ -5,13 +5,40 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies.auth import require_admin
+from app.dependencies.auth import (
+    ensure_branch_access,
+    get_role_name,
+    require_admin,
+    require_admin_or_manager,
+)
 from app.models.branch import Sucursal
 from app.models.user import Role, User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
+
+
+def ensure_cashier_scope(
+    current_user: User,
+    rol_id: int,
+    sucursal_id: int | None,
+    db: Session,
+) -> None:
+    role_name = get_role_name(current_user, db)
+
+    if role_name == "ADMIN":
+        return
+
+    cajero_role = db.query(Role).filter(Role.nombre == "CAJERO").first()
+
+    if cajero_role is None or rol_id != cajero_role.id:
+        raise HTTPException(
+            status_code=403,
+            detail="El gerente solo puede administrar cajeros",
+        )
+
+    ensure_branch_access(current_user, sucursal_id, db)
 
 
 def validate_role_and_branch(
@@ -63,16 +90,27 @@ def validate_role_and_branch(
 @router.get("/", response_model=list[UserResponse])
 def obtener_usuarios(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(require_admin_or_manager),
 ):
-    return db.query(User).all()
+    role_name = get_role_name(current_user, db)
+
+    query = db.query(User)
+
+    if role_name == "GERENTE":
+        cajero_role = db.query(Role).filter(Role.nombre == "CAJERO").first()
+        query = query.filter(
+            User.sucursal_id == current_user.sucursal_id,
+            User.rol_id == (cajero_role.id if cajero_role else -1),
+        )
+
+    return query.all()
 
 
 @router.get("/{usuario_id}", response_model=UserResponse)
 def obtener_usuario(
     usuario_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(require_admin_or_manager),
 ):
     user = (
         db.query(User)
@@ -86,6 +124,8 @@ def obtener_usuario(
             detail="Usuario no encontrado",
         )
 
+    ensure_cashier_scope(current_user, user.rol_id, user.sucursal_id, db)
+
     return user
 
 
@@ -93,9 +133,16 @@ def obtener_usuario(
 def crear_usuario(
     usuario: UserCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(require_admin_or_manager),
 ):
     validate_role_and_branch(
+        usuario.rol_id,
+        usuario.sucursal_id,
+        db,
+    )
+
+    ensure_cashier_scope(
+        current_user,
         usuario.rol_id,
         usuario.sucursal_id,
         db,
@@ -146,7 +193,7 @@ def actualizar_usuario(
     usuario_id: int,
     usuario: UserUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(require_admin_or_manager),
 ):
     usuario_db = (
         db.query(User)
@@ -160,7 +207,21 @@ def actualizar_usuario(
             detail="Usuario no encontrado",
         )
 
+    ensure_cashier_scope(
+        current_user,
+        usuario_db.rol_id,
+        usuario_db.sucursal_id,
+        db,
+    )
+
     validate_role_and_branch(
+        usuario.rol_id,
+        usuario.sucursal_id,
+        db,
+    )
+
+    ensure_cashier_scope(
+        current_user,
         usuario.rol_id,
         usuario.sucursal_id,
         db,
@@ -212,7 +273,7 @@ def actualizar_usuario(
 def desactivar_usuario(
     usuario_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(require_admin_or_manager),
 ):
     usuario_db = (
         db.query(User)
@@ -225,6 +286,13 @@ def desactivar_usuario(
             status_code=404,
             detail="Usuario no encontrado",
         )
+
+    ensure_cashier_scope(
+        current_user,
+        usuario_db.rol_id,
+        usuario_db.sucursal_id,
+        db,
+    )
 
     usuario_db.activo = False
 

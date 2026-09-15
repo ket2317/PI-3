@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto de venta</title>
+  <link rel="stylesheet" href="/static/css/crud.css">
+</head>
+<body>
+  <main class="crud-page">
+    <h1>Punto de venta</h1>
+    <a href="/dashboard">Volver al panel</a>
+
+    <p id="page-success" role="status" hidden></p>
+    <p id="page-error" class="page-error" role="alert" hidden></p>
+
+    <label for="sale-branch-id">Sucursal</label>
+    <select id="sale-branch-id" required></select>
+
+    <form id="add-item-form">
+      <label for="item-product-id">Producto</label>
+      <select id="item-product-id" required></select>
+
+      <label for="item-quantity">Cantidad</label>
+      <input id="item-quantity" type="number" min="1" step="1" value="1" required>
+
+      <button type="submit">Agregar al carrito</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio unitario</th>
+          <th>Subtotal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="cart-body"></tbody>
+    </table>
+
+    <p id="cart-subtotal">Subtotal: $0.00</p>
+    <p id="cart-iva">IVA: $0.00</p>
+    <p id="cart-total">Total: $0.00</p>
+
+    <label for="payment-method-id">Método de pago</label>
+    <select id="payment-method-id" required></select>
+
+    <button type="button" id="confirm-sale">Confirmar venta</button>
+
+    <section id="receipt" hidden>
+      <h2>Comprobante</h2>
+      <pre id="receipt-content"></pre>
+    </section>
+  </main>
+
+  <script src="/static/js/sales.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes</title>
+  <link rel="stylesheet" href="/static/css/crud.css">
+</head>
+<body>
+  <main class="crud-page">
+    <h1>Reportes</h1>
+    <a href="/dashboard">Volver al panel</a>
+
+    <p id="page-error" class="page-error" role="alert" hidden></p>
+
+    <section id="summary-section" hidden>
+      <h2>Resumen general</h2>
+      <p id="summary-branches"></p>
+      <p id="summary-products"></p>
+      <p id="summary-sales"></p>
+      <p id="summary-total"></p>
+    </section>
+
+    <h2>Historial de ventas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Sucursal</th>
+          <th>Subtotal</th>
+          <th>IVA</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="sales-body"></tbody>
+    </table>
+  </main>
+
+  <script src="/static/js/reports.js"></script>
+</body>
+</html>

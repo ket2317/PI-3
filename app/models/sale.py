@@ -1,5 +1,6 @@
 from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Numeric
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 
 from app.database import Base
 
@@ -35,3 +36,8 @@ class Sale(Base):
     subtotal = Column(Numeric(10, 2), nullable=False)
     iva = Column(Numeric(10, 2), nullable=False)
     total = Column(Numeric(10, 2), nullable=False)
+
+    detalles = relationship(
+        "SaleDetail",
+        cascade="all, delete-orphan",
+    )
