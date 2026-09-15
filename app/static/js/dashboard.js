@@ -68,12 +68,33 @@ document.querySelector("#logout-button")
       showError(error.message);
     }
   });
+  async function loadMyBranch(user) {
+    if (user.rol !== "GERENTE" || !user.sucursal_id) {
+        return;
+    }
 
+    const branch = await apiRequest(`/sucursales/${user.sucursal_id}`);
+
+    document.querySelector("#my-branch-section").hidden = false;
+
+    document.querySelector("#branch-name").textContent =
+        `Nombre: ${branch.nombre}`;
+
+    document.querySelector("#branch-address").textContent =
+        `Dirección: ${branch.direccion}`;
+
+    document.querySelector("#branch-phone").textContent =
+        `Teléfono: ${branch.telefono || "Sin registrar"}`;
+
+    document.querySelector("#branch-contact").textContent =
+        `Contacto: ${branch.contacto || "Sin registrar"}`;
+}
 (async () => {
-  try {
-    const user = await apiRequest("/auth/me");
-    renderUser(user);
-  } catch (error) {
-    showError(error.message);
-  }
+    try {
+        const user = await apiRequest("/auth/me");
+        renderUser(user);
+        await loadMyBranch(user);
+    } catch (error) {
+        showError(error.message);
+    }
 })();
