@@ -55,19 +55,44 @@ async function loadBranches() {
   await loadProductsForBranch();
 }
 
-async function loadProductsForBranch() {
-  const branchId = Number(document.querySelector("#sale-branch-id").value);
-  branchProducts = await apiRequest(`/productos/?sucursal_id=${branchId}`);
-
+function renderProductOptions(products) {
   const select = document.querySelector("#item-product-id");
   select.innerHTML = "";
-  branchProducts.forEach((p) => {
+
+  if (products.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Sin resultados";
+    select.appendChild(option);
+    return;
+  }
+
+  products.forEach((p) => {
     const option = document.createElement("option");
     option.value = p.id;
     option.textContent = `${p.codigo} — ${p.nombre} ($${p.precio})`;
     select.appendChild(option);
   });
 }
+
+async function loadProductsForBranch() {
+  const branchId = Number(document.querySelector("#sale-branch-id").value);
+  branchProducts = await apiRequest(`/productos/?sucursal_id=${branchId}`);
+  document.querySelector("#item-search").value = "";
+  renderProductOptions(branchProducts);
+}
+
+document.querySelector("#item-search").addEventListener("input", (event) => {
+  const term = event.target.value.trim().toLowerCase();
+  const filtered = term
+    ? branchProducts.filter(
+        (p) =>
+          p.codigo.toLowerCase().includes(term) ||
+          p.nombre.toLowerCase().includes(term),
+      )
+    : branchProducts;
+  renderProductOptions(filtered);
+});
 
 async function loadPaymentMethods() {
   const methods = await apiRequest("/metodos-pago/");
