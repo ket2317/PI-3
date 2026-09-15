@@ -188,3 +188,4 @@ document.querySelector("#inventory-form").addEventListener("submit", async (even
     showError(error.message);
   }
 })();
+
