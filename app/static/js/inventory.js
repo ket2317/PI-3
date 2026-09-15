@@ -188,3 +188,35 @@ document.querySelector("#inventory-form").addEventListener("submit", async (even
     showError(error.message);
   }
 })();
+
+document.querySelector("#low-stock-button").addEventListener("click", async () => {
+  try {
+    clearError();
+    const branchId = Number(document.querySelector("#inventory-branch-id").value);
+    const lowStock = await apiRequest(`/inventario/bajo-stock?sucursal_id=${branchId}`);
+
+    const table = document.querySelector("#low-stock-table");
+    const body = document.querySelector("#low-stock-body");
+    body.innerHTML = "";
+
+    lowStock.forEach((item) => {
+      const product = branchProducts.find((p) => p.id === item.producto_id);
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${product ? product.codigo : item.producto_id}</td>
+        <td>${product ? product.nombre : "—"}</td>
+        <td>${item.existencia}</td>
+        <td>${item.stock_minimo}</td>
+      `;
+      body.appendChild(row);
+    });
+
+    table.hidden = false;
+
+    if (lowStock.length === 0) {
+      showSuccess("No hay productos con bajo inventario en esta sucursal");
+    }
+  } catch (error) {
+    showError(error.message);
+  }
+});
