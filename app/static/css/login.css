@@ -1,0 +1,215 @@
+:root {
+  --bg-main: #EFECE6;
+  --box-info-bg: #8A9EA7;       /* Azul grisáceo elegante */
+  --box-form-bg: #FFFFFF;       /* Blanco para el formulario */
+  --text-primary: #1C1917;
+  --text-secondary: #78716C;
+  --accent-burgundy: #7A2E3B;   /* Vino / Tinto */
+  --accent-burgundy-hover: #63232F;
+  --border-color: #E2DDD5;
+  --input-bg: #FAFAFA;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--bg-main);
+
+
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-wrapper {
+  width: 100%;
+  max-width: 1000px; /* Aumentado de 850px a 1000px */
+}
+
+.login-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background-color: var(--box-form-bg);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px var(--shadow-color);
+  border: 1px solid var(--border-color);
+  min-height: 520px; /* Altura mínima mayor para amplitud */
+}
+
+/* RECUADRO IZQUIERDO: INFORMACIÓN */
+.info-box {
+  background:
+    linear-gradient(rgba(30, 40, 45, 0.55), rgba(30, 40, 45, 0.55)),
+    url("../images/login2.jpeg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  color: #FFFFFF;
+  padding: 60px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.system-title {
+  font-size: 2.8rem; /* Título más grande */
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  color: #FFFFFF;
+}
+
+.session-label h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* ETIQUETA DE SEGURIDAD ABAJO DE INICIO DE SESIÓN */
+.security-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+/* RECUADRO DERECHO: FORMULARIO */
+.form-box {
+  padding: 60px 48px; /* Padding incrementado */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.input-group {
+  margin-bottom: 22px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 14px 16px 14px 48px; /* Inputs más amplios */
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper input:focus {
+  border-color: var(--accent-burgundy);
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(122, 46, 59, 0.12);
+}
+
+/* OPCIONES DEL FORMULARIO */
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  font-size: 0.88rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.remember-me input {
+  accent-color: var(--accent-burgundy);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.forgot-link {
+  color: var(--accent-burgundy);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* BOTÓN DE ACCESO */
+.btn-submit {
+  width: 100%;
+  padding: 15px;
+  background-color: var(--accent-burgundy);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-submit:hover {
+  background-color: var(--accent-burgundy-hover);
+}
+
+.btn-submit:active {
+  transform: scale(0.99);
+}
+
+/* RESPONSIVO EN PANTALLAS PEQUEÑAS */
+@media (max-width: 768px) {
+  .login-container {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .info-box, .form-box {
+    padding: 40px 28px;
+  }
+}
