@@ -1,29 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="/static/css/crud.css">
-</head>
-<body>
-  <main class="crud-page">
-  <h1>Productos</h1>
-  <div id="page-error" class="page-error" role="alert" hidden></div>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos</title>
+    <link rel="stylesheet" href="/static/css/crud.css">
+  </head>
+  <body>
+    <main class="crud-page">
+      <h1>Productos</h1>
 
-  <form id="product-form">
-    <label>Código <input type="text" id="product-code" required></label>
-    <label>Nombre <input type="text" id="product-name" required></label>
-    <label>Precio <input type="number" id="product-price" min="0.01" step="0.01" required></label>
-    <label>IVA <input type="number" id="product-tax" min="0" max="1" step="0.0001" required></label>
-    <label>Categoría <input type="number" id="product-category-id" min="1"></label>
-    <button type="submit">Guardar producto</button>
-  </form>
+      <a href="/dashboard">Volver al panel</a>
 
-  <table>
-    <thead><tr><th>ID</th><th>Código</th><th>Nombre</th><th>Precio</th><th>IVA</th></tr></thead>
-    <tbody id="products-body"></tbody>
-  </table>
-  </main>
+      <p id="page-success" role="status" hidden></p>
+      <p id="page-error" class="page-error" role="alert" hidden></p>
 
-  <script src="/static/js/products.js"></script>
-</body>
+      <form id="product-form">
+        <input id="product-id" type="hidden">
+
+        <label for="product-branch-id">
+          Sucursal
+        </label>
+        <select id="product-branch-id" required></select>
+
+        <label for="product-category-id">
+          Categoría
+        </label>
+        <select id="product-category-id">
+          <option value="">Sin categoría</option>
+        </select>
+
+        <label for="product-code">
+          Código
+        </label>
+
+        <input id="product-code" type="text" required>
+
+        <label for="product-name">
+          Nombre
+        </label>
+        <input id="product-name" type="text" required>
+
+        <label for="product-price">
+          Precio
+        </label>
+        <input id="product-price" type="number" min="0.01" step="0.01" required>
+
+        <label for="product-tax">
+          IVA
+        </label>
+        <input id="product-tax" type="number" min="0" max="1" step="0.0001" value="0.16" required>
+
+        <button type="submit" id="product-submit">
+          Guardar producto
+        </button>
+        
+        <button type="button" id="product-cancel" hidden>
+          Cancelar edición
+        </button>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Sucursal</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>IVA</th>
+            <th>Acciones</th>
+          </tr> </thead> <tbody id="products-body"></tbody>
+        </table>
+    </main>
+
+    <script src="/static/js/products.js"></script>
+  </body>
 </html>
