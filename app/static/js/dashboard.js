@@ -10,7 +10,11 @@ async function loadCurrentUser() {
   }
 
   const user = await response.json();
-  document.querySelector("#current-user").textContent = `${user.nombre} — ${user.rol}`;
+  
+  document.querySelector("#user-name").textContent = user.nombre;
+  document.querySelector("#user-role").textContent = user.rol;
+  document.querySelector("#user-branch").textContent = user.sucursal_id ?? "sin sucursal";
+
   document.querySelectorAll(".admin-only").forEach((element) => {
     element.hidden = user.rol !== "ADMIN";
   });
