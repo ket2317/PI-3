@@ -2,26 +2,63 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sucursales</title>
   <link rel="stylesheet" href="/static/css/crud.css">
 </head>
 <body>
   <main class="crud-page">
-  <h1>Sucursales</h1>
-  <div id="page-error" class="page-error" role="alert" hidden></div>
+    <h1>Sucursales</h1>
+    <a href="/dashboard">Volver al panel</a>
 
-  <form id="branch-form">
-    <input type="text" id="branch-name">
-    <input type="text" id="branch-address">
-    <input type="text" id="branch-phone">
-    <input type="text" id="branch-contact">
-    <input type="number" id="branch-manager-id">
-    <button type="submit">Guardar</button>
-  </form>
+    <p id="page-success" role="status" hidden></p>
+    <p id="page-error" class="page-error" role="alert" hidden></p>
 
-  <table>
-    <thead><tr><th>ID</th><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Contacto</th><th>Gerente</th></tr></thead>
-    <tbody id="branches-body"></tbody>
-  </table>
+    <form id="branch-form">
+      <input id="branch-id" type="hidden">
+
+      <label for="branch-name">Nombre</label>
+      <input id="branch-name" type="text" required>
+
+      <label for="branch-address">Dirección</label>
+      <input id="branch-address" type="text" required>
+
+      <label for="branch-phone">Teléfono</label>
+      <input id="branch-phone" type="text">
+
+      <label for="branch-contact">Información de contacto</label>
+      <input id="branch-contact" type="text">
+
+      <label for="branch-manager-id">Gerente responsable</label>
+      <select id="branch-manager-id">
+        <option value="">Sin asignar</option>
+      </select>
+
+      <label for="branch-active" id="branch-active-label" hidden>Estado</label>
+      <select id="branch-active" hidden>
+        <option value="true">Activa</option>
+        <option value="false">Inactiva</option>
+      </select>
+
+      <button type="submit" id="branch-submit">Guardar sucursal</button>
+      <button type="button" id="branch-cancel" hidden>Cancelar edición</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Dirección</th>
+          <th>Teléfono</th>
+          <th>Contacto</th>
+          <th>Gerente</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="branches-body"></tbody>
+    </table>
   </main>
 
   <script src="/static/js/branches.js"></script>
