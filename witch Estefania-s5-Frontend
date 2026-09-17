@@ -13,9 +13,6 @@ const translations = {
     "sales.confirm": "Confirmar venta",
     "inventory.title": "Inventario",
     "inventory.low_stock": "Ver bajo inventario",
-    "users.title": "Usuarios",
-    "reports.title": "Reportes",
-    "branches.title": "Sucursales",
   },
   en: {
     "nav.branches": "Branches",
@@ -31,9 +28,6 @@ const translations = {
     "sales.confirm": "Confirm sale",
     "inventory.title": "Inventory",
     "inventory.low_stock": "View low stock",
-    "users.title": "Users",
-    "reports.title": "Reports",
-    "branches.title": "Branches",
   },
 };
 
@@ -59,10 +53,8 @@ function applyTranslations() {
   });
 
   document.querySelectorAll("[data-lang-toggle]").forEach((button) => {
-    button.textContent = lang === "es"
-        ? "Cambiar idioma: EN"
-        : "Change language: ES";
-      });
+    button.textContent = lang === "es" ? "EN" : "ES";
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
