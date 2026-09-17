@@ -9,34 +9,35 @@
 <body>
   <nav>
     <strong>Punto de Venta</strong>
-
-    <a class="admin-only" href="/sucursales-ui">
+    
+    <a class="admin-only" href="/sucursales-ui" data-i18n="nav.branches">
       Sucursales
     </a>
 
-    <a class="authenticated" href="/productos-ui">
+    <a class="authenticated" href="/productos-ui" data-i18n="nav.products">
       Productos
     </a>
-
-    <a class="admin-manager" href="/inventario-ui">
+    
+    <a class="admin-manager" href="/inventario-ui" data-i18n="nav.inventory">
       Inventario
     </a>
-
-    <a class="authenticated" href="/ventas-ui">
-      Ventas
+    
+    <a class="authenticated" href="/ventas-ui" data-i18n="nav.sales">
+       Ventas
     </a>
-
-    <a class="admin-manager" href="/usuarios-ui">
+    
+    <a class="admin-manager" href="/usuarios-ui" data-i18n="nav.users">
       Usuarios
     </a>
-
-    <a class="admin-manager" href="/reportes-ui">
+    
+    <a class="admin-manager" href="/reportes-ui" data-i18n="nav.reports">
       Reportes
     </a>
 
-    <button id="logout-button" type="button">
+    <button id="logout-button" type="button" data-i18n="nav.logout">
       Cerrar sesión
     </button>
+    <button type="button" data-lang-toggle>EN</button>
   </nav>
 
   <main>
@@ -59,6 +60,7 @@
     <p id="dashboard-error" role="alert" hidden></p>
   </main>
 
-  <script src="/static/js/dashboard.js"></script>
+<script src="/static/js/i18n.js"></script>
+<script src="/static/js/dashboard.js"></script>
 </body>
 </html> 
