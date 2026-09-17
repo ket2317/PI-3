@@ -1,0 +1,20 @@
+:root {
+  --color-bg: #f4f6f8;
+  --color-surface: #ffffff;
+  --color-primary: #172554;
+  --color-primary-contrast: #ffffff;
+  --color-accent: #2563eb;
+  --color-border: #d1d5db;
+  --color-text: #1f2937;
+  --color-error: #b91c1c;
+  --color-success: #166534;
+  --radius: 0.5rem;
+  --spacing: 1rem;
+  --font-base: Arial, sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-base);
+}
