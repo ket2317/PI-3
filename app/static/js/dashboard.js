@@ -1,7 +1,5 @@
 function showError(message) {
-  const element = document.querySelector("#dashboard-error");
-  element.textContent = message;
-  element.hidden = false;
+  showToast(message, "error");
 }
 
 function hideElements(selector) {
@@ -56,20 +54,7 @@ function renderUser(user) {
   }
 }
 
-document.querySelector("#logout-button")
-  .addEventListener("click", async () => {
-    try {
-      await apiRequest("/auth/logout", {
-        method: "POST",
-      });
-
-      window.location.href = "/login";
-    } catch (error) {
-      showError(error.message);
-    }
-  });
-  
-  async function loadMyBranch(user) {
+async function loadMyBranch(user) {
     if (user.rol !== "GERENTE" || !user.sucursal_id) {
         return;
     }

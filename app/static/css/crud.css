@@ -1,17 +1,156 @@
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-body { margin: 0; background: #f4f6f8; color: #1f2937; font-family: Arial, sans-serif; }
-.crud-page { width: min(1050px, 92%); margin: 40px auto; }
-h1 { margin-bottom: 24px; }
-form { display: flex; flex-direction: column; gap: 12px; max-width: 480px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 18px #00000012; }
-label { display: block; font-weight: 600; margin: 16px 0 6px; }
-input, select { min-height: 40px; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 7px; width: 100%; max-width: 480px; font: inherit; }
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 1.05rem;
+  margin: 0 0 14px;
+}
+
+.section-title .icon { color: var(--color-primary); }
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 520px;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: var(--color-text-muted);
+  margin: 14px 0 6px;
+}
+
+form label:first-of-type { margin-top: 0; }
+
+label .icon { color: var(--color-accent-blue); }
+
+input, select {
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  max-width: 480px;
+  font: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
 form label:first-child { margin-top: 0; }
-button { align-self: flex-start; min-height: 40px; padding: 8px 20px; margin-top: 8px; border: 0; border-radius: 7px; background: #1d4ed8; color: white; cursor: pointer; }
+
+button {
+  align-self: flex-start;
+  min-height: 42px;
+  padding: 9px 22px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+button:hover { filter: brightness(1.08); }
+button:active { transform: translateY(1px); }
+
+button.btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
 button[hidden] { display: none; }
-.page-success { margin-bottom: 16px; padding: 12px; border-radius: 7px; background: #dcfce7; color: #166534; }
-table { width: 100%; margin-top: 24px; border-collapse: collapse; background: white; }
-th, td { padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-th { background: #e8eefc; }
-.page-error { margin-bottom: 16px; padding: 12px; border-radius: 7px; background: #fee2e2; color: #991b1b; }
-@media (max-width: 640px) { .crud-page { width: 96%; } table { display: block; overflow-x: auto; } }
+
+.panel:has(table) {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+th, td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--color-surface-muted); }
+
+th {
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+td button {
+  min-height: 32px;
+  padding: 5px 14px;
+  margin: 0 4px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+td button[data-action="delete"] {
+  background: var(--color-error-soft);
+  color: var(--color-error);
+}
+
+td button[data-action="edit"] {
+  background: var(--color-accent-blue-soft);
+  color: var(--color-accent-blue);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.badge-success { background: var(--color-success-soft); color: var(--color-success); }
+.badge-muted { background: var(--color-surface-muted); color: var(--color-text-muted); }
+
+@media (max-width: 640px) {
+  table { display: block; overflow-x: auto; }
+}

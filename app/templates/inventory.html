@@ -4,65 +4,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inventario</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/crud.css">
 </head>
 <body>
-  <main class="crud-page">
-    <h1>Inventario</h1>
-    <a href="/dashboard">Volver al panel</a>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Inventario" %}
+      {% set page_title_key = "inventory.title" %}
+      {% set page_subtitle = "Existencias por sucursal" %}
+      {% set page_subtitle_key = "inventory.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <p id="page-success" role="status" hidden></p>
-    <p id="page-error" class="page-error" role="alert" hidden></p>
+      <main class="app-content">
+        <section class="panel">
+          <label for="inventory-branch-id">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+            Sucursal
+          </label>
+          <select id="inventory-branch-id" style="max-width:320px"></select>
+        </section>
 
-    <label for="inventory-branch-id">Sucursal</label>
-    <select id="inventory-branch-id"></select>
+        <section class="panel">
+          <h2 class="section-title" data-i18n="inventory.form_title">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Actualizar existencia
+          </h2>
 
-    <form id="inventory-form">
-      <input id="inventory-product-id" type="hidden">
+          <form id="inventory-form">
+            <input id="inventory-product-id" type="hidden">
 
-      <label for="inventory-search">Buscar producto por código o nombre</label>
-      <input id="inventory-search" type="text" placeholder="Ej. 34346 o awa" autocomplete="off">
+            <label for="inventory-search">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              Buscar producto por código o nombre
+            </label>
+            <input id="inventory-search" type="text" placeholder="Ej. 34346 o awa" autocomplete="off">
 
-      <label for="inventory-product-select">Producto</label>
-      <select id="inventory-product-select" required></select>
+            <label for="inventory-product-select">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+              Producto
+            </label>
+            <select id="inventory-product-select" required></select>
 
-      <label for="inventory-quantity">Existencia</label>
-      <input id="inventory-quantity" type="number" min="0" required>
+            <label for="inventory-quantity">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+              Existencia
+            </label>
+            <input id="inventory-quantity" type="number" min="0" required>
 
-      <label for="inventory-minimum">Stock mínimo</label>
-      <input id="inventory-minimum" type="number" min="0" value="5" required>
+            <label for="inventory-minimum">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+              Stock mínimo
+            </label>
+            <input id="inventory-minimum" type="number" min="0" value="5" required>
 
-      <button type="submit">Actualizar inventario</button>
-    </form>
+            <button type="submit">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/></svg>
+              Actualizar inventario
+            </button>
+          </form>
+        </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Producto</th>
-          <th>Existencia</th>
-          <th>Stock mínimo</th>
-        </tr>
-      </thead>
-      <tbody id="inventory-body"></tbody>
-    </table>
+        <section class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Existencia</th>
+                <th>Stock mínimo</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-body"></tbody>
+          </table>
+        </section>
 
-    <button type="button" id="low-stock-button">Ver productos con bajo inventario</button>
+        <section class="panel">
+          <button type="button" id="low-stock-button" class="btn-ghost">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L14.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <span data-i18n="inventory.low_stock">Ver productos con bajo inventario</span>
+          </button>
 
-    <table id="low-stock-table" hidden>
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Producto</th>
-          <th>Existencia</th>
-          <th>Stock mínimo</th>
-        </tr>
-      </thead>
-      <tbody id="low-stock-body"></tbody>
-    </table>
+          <table id="low-stock-table" hidden style="margin-top:16px">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Existencia</th>
+                <th>Stock mínimo</th>
+              </tr>
+            </thead>
+            <tbody id="low-stock-body"></tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
 
-  </main>
-
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
   <script src="/static/js/inventory.js"></script>
 </body>
 </html>

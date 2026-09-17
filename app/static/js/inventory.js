@@ -3,21 +3,13 @@ let branchProducts = [];
 let currentInventory = [];
 
 function showError(message) {
-  const el = document.querySelector("#page-error");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "error");
 }
 
-function clearError() {
-  const el = document.querySelector("#page-error");
-  el.hidden = true;
-  el.textContent = "";
-}
+function clearError() {}
 
 function showSuccess(message) {
-  const el = document.querySelector("#page-success");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "success");
 }
 
 async function apiRequest(url, options = {}) {

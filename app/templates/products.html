@@ -1,79 +1,102 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos</title>
-    <link rel="stylesheet" href="/static/css/crud.css">
-  </head>
-  <body>
-    <main class="crud-page">
-      <h1 data-i18n="products.title">Productos</h1>
-      <a href="/dashboard" data-i18n="products.back">Volver al panel</a>
-      <button type="button" data-lang-toggle>EN</button>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productos</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
+  <link rel="stylesheet" href="/static/css/crud.css">
+</head>
+<body>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Productos" %}
+      {% set page_title_key = "products.title" %}
+      {% set page_subtitle = "Catálogo de productos por sucursal" %}
+      {% set page_subtitle_key = "products.subtitle" %}
+      {% include "_topbar.html" %}
 
-      <p id="page-success" role="status" hidden></p>
-      <p id="page-error" class="page-error" role="alert" hidden></p>
+      <main class="app-content">
+        <section class="panel">
+          <h2 class="section-title" data-i18n="products.add_title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Añadir producto
+          </h2>
 
-      <form id="product-form">
-        <input id="product-id" type="hidden">
+          <form id="product-form">
+            <input id="product-id" type="hidden">
 
-        <label for="product-branch-id">
-          Sucursal
-        </label>
-        <select id="product-branch-id" required></select>
+            <label for="product-branch-id">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+              Sucursal
+            </label>
+            <select id="product-branch-id" required></select>
 
-        <label for="product-category-id">
-          Categoría
-        </label>
-        <select id="product-category-id">
-          <option value="">Sin categoría</option>
-        </select>
+            <label for="product-category-id">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3Z"/></svg>
+              Categoría
+            </label>
+            <select id="product-category-id">
+              <option value="">Sin categoría</option>
+            </select>
 
-        <label for="product-code">
-          Código
-        </label>
+            <label for="product-code">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="m20.6 13.4-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+              Código
+            </label>
+            <input id="product-code" type="text" required>
 
-        <input id="product-code" type="text" required>
+            <label for="product-name">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+              Nombre
+            </label>
+            <input id="product-name" type="text" required>
 
-        <label for="product-name">
-          Nombre
-        </label>
-        <input id="product-name" type="text" required>
+            <label for="product-price">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.4-5 3.2c0 4 10 2 10 6C17 8 7 6 7 10s2.2 3.2 5 3.2 5-1.4 5-3.2"/></svg>
+              Precio
+            </label>
+            <input id="product-price" type="number" min="0.01" step="0.01" required>
 
-        <label for="product-price">
-          Precio
-        </label>
-        <input id="product-price" type="number" min="0.01" step="0.01" required>
+            <label for="product-tax">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.2"/><circle cx="17.5" cy="17.5" r="2.2"/></svg>
+              IVA
+            </label>
+            <input id="product-tax" type="number" min="0" max="1" step="0.0001" value="0.16" required>
 
-        <label for="product-tax">
-          IVA
-        </label>
-        <input id="product-tax" type="number" min="0" max="1" step="0.0001" value="0.16" required>
+            <button type="submit" id="product-submit">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+              Guardar producto
+            </button>
+            <button type="button" id="product-cancel" class="btn-ghost" hidden>
+              Cancelar edición
+            </button>
+          </form>
+        </section>
 
-        <button type="submit" id="product-submit">
-          Guardar producto
-        </button>
-        
-        <button type="button" id="product-cancel" hidden>
-          Cancelar edición
-        </button>
-      </form>
+        <section class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Sucursal</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>IVA</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="products-body"></tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Sucursal</th>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>IVA</th>
-            <th>Acciones</th>
-          </tr> </thead> <tbody id="products-body"></tbody>
-        </table>
-    </main>
-
-    <script src="/static/js/i18n.js"></script>
-    <script src="/static/js/products.js"></script>
-  </body>
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/products.js"></script>
+</body>
 </html>

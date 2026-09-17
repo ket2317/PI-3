@@ -2,28 +2,16 @@ let currentUser = null;
 let branches = [];
 
 function showError(message) {
-  const element = document.querySelector("#page-error");
-  element.textContent = message;
-  element.hidden = false;
+  showToast(message, "error");
 }
 
-function clearError() {
-  const element = document.querySelector("#page-error");
-  element.hidden = true;
-  element.textContent = "";
-}
+function clearError() {}
 
 function showSuccess(message) {
-  const element = document.querySelector("#page-success");
-  element.textContent = message;
-  element.hidden = false;
+  showToast(message, "success");
 }
 
-function clearSuccess() {
-  const element = document.querySelector("#page-success");
-  element.hidden = true;
-  element.textContent = "";
-}
+function clearSuccess() {}
 
 async function apiRequest(url, options = {}) {
   const response = await fetch(url, {

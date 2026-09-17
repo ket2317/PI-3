@@ -4,39 +4,76 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reportes</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/crud.css">
 </head>
 <body>
-  <main class="crud-page">
-    <h1 data-i18n="reports.title">Reportes</h1>
-    <a href="/dashboard">Volver al panel</a>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Reportes" %}
+      {% set page_title_key = "reports.title" %}
+      {% set page_subtitle = "Historial de ventas y resumen general" %}
+      {% set page_subtitle_key = "reports.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <p id="page-error" class="page-error" role="alert" hidden></p>
+      <main class="app-content">
+        <section id="summary-section" class="stat-grid" hidden>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-a">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+            </div>
+            <div class="stat-value" id="summary-branches">0</div>
+            <div class="stat-label">Sucursales activas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-b">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+            </div>
+            <div class="stat-value" id="summary-products">0</div>
+            <div class="stat-label">Productos activos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-c">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.5l2.8 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21.5 7H6"/></svg>
+            </div>
+            <div class="stat-value" id="summary-sales">0</div>
+            <div class="stat-label">Ventas totales</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-d">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.4-5 3.2c0 4 10 2 10 6C17 8 7 6 7 10s2.2 3.2 5 3.2 5-1.4 5-3.2"/></svg>
+            </div>
+            <div class="stat-value" id="summary-total">$0</div>
+            <div class="stat-label">Monto total vendido</div>
+          </div>
+        </section>
 
-    <section id="summary-section" hidden>
-      <h2>Resumen general</h2>
-      <p id="summary-branches"></p>
-      <p id="summary-products"></p>
-      <p id="summary-sales"></p>
-      <p id="summary-total"></p>
-    </section>
+        <section class="panel">
+          <h2 class="section-title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+            Historial de ventas
+          </h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Sucursal</th>
+                <th>Subtotal</th>
+                <th>IVA</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="sales-body"></tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
 
-    <h2>Historial de ventas</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Sucursal</th>
-          <th>Subtotal</th>
-          <th>IVA</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="sales-body"></tbody>
-    </table>
-  </main>
-  
   <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
   <script src="/static/js/reports.js"></script>
 </body>
 </html>

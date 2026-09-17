@@ -1,28 +1,52 @@
-* { box-sizing: border-box; }
-body { margin: 0; min-height: 100vh; background: #f4f6f8; color: #1f2937; font-family: Arial, sans-serif; }
-nav { position: fixed; inset: 0 auto 0 0; width: 230px; display: flex; flex-direction: column; gap: 8px; padding: 24px 18px; background: #172554; color: white; }
-nav strong { margin-bottom: 20px; font-size: 1.2rem; }
-nav a { padding: 11px 12px; border-radius: 8px; color: white; text-decoration: none; }
-nav a:hover { background: #ffffff1f; }
-#logout-button { margin-top: auto; min-height: 42px; border: 1px solid #ffffff66; border-radius: 8px; background: transparent; color: white; cursor: pointer; }
-main { margin-left: 230px; padding: 48px; }
-@media (max-width: 700px) { nav { position: static; width: 100%; min-height: auto; } main { margin-left: 0; padding: 28px; } }
-
-.user-context {
-  max-width: 640px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  background: #ffffff;
+.session-card {
+  max-width: 720px;
+  margin: 0 0 20px;
+  padding: 24px 26px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
-.user-context h2 {
-  margin-top: 0;
+.session-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
-#dashboard-error {
-  color: #b91c1c;
-  margin: 1rem auto;
-  max-width: 640px;
+.session-card-header .icon {
+  color: var(--color-primary);
+  margin-top: 2px;
+}
+
+.session-card-header h2 {
+  font-size: 1.05rem;
+  margin-bottom: 2px;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.session-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.session-fact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+}
+
+.session-fact .icon {
+  color: var(--color-accent-blue);
 }

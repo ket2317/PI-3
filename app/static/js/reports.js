@@ -12,9 +12,7 @@ async function apiRequest(url) {
 }
 
 function showError(message) {
-  const el = document.querySelector("#page-error");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "error");
 }
 
 async function loadSummaryIfAdmin(user) {
@@ -22,14 +20,10 @@ async function loadSummaryIfAdmin(user) {
   try {
     const summary = await apiRequest("/reportes/resumen");
     document.querySelector("#summary-section").hidden = false;
-    document.querySelector("#summary-branches").textContent =
-      `Sucursales activas: ${summary.sucursales_activas}`;
-    document.querySelector("#summary-products").textContent =
-      `Productos activos: ${summary.productos_activos}`;
-    document.querySelector("#summary-sales").textContent =
-      `Ventas totales: ${summary.ventas_totales}`;
-    document.querySelector("#summary-total").textContent =
-      `Monto total vendido: $${summary.monto_total_vendido}`;
+    document.querySelector("#summary-branches").textContent = summary.sucursales_activas;
+    document.querySelector("#summary-products").textContent = summary.productos_activos;
+    document.querySelector("#summary-sales").textContent = summary.ventas_totales;
+    document.querySelector("#summary-total").textContent = `$${summary.monto_total_vendido}`;
   } catch (error) {
     showError(error.message);
   }

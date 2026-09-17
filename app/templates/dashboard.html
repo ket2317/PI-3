@@ -4,63 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel principal</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
 <body>
-  <nav>
-    <strong>Punto de Venta</strong>
-    
-    <a class="admin-only" href="/sucursales-ui" data-i18n="nav.branches">
-      Sucursales
-    </a>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Panel principal" %}
+      {% set page_title_key = "dashboard.title" %}
+      {% set page_subtitle = "Resumen general de tu sesión" %}
+      {% set page_subtitle_key = "dashboard.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <a class="authenticated" href="/productos-ui" data-i18n="nav.products">
-      Productos
-    </a>
-    
-    <a class="admin-manager" href="/inventario-ui" data-i18n="nav.inventory">
-      Inventario
-    </a>
-    
-    <a class="authenticated" href="/ventas-ui" data-i18n="nav.sales">
-       Ventas
-    </a>
-    
-    <a class="admin-manager" href="/usuarios-ui" data-i18n="nav.users">
-      Usuarios
-    </a>
-    
-    <a class="admin-manager" href="/reportes-ui" data-i18n="nav.reports">
-      Reportes
-    </a>
+      <main class="app-content">
+        <section class="session-card">
+          <div class="session-card-header">
+            <svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+            <div>
+              <h2 data-i18n="dashboard.session_title">Sesión actual</h2>
+              <p id="current-user" class="muted">Cargando usuario...</p>
+            </div>
+          </div>
+          <div class="session-card-grid">
+            <div class="session-fact">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 3 3 8v13h18V8Z"/><path d="M9 21v-6h6v6"/></svg>
+              <span id="current-role"></span>
+            </div>
+            <div class="session-fact">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+              <span id="current-branch"></span>
+            </div>
+          </div>
+        </section>
 
-    <button id="logout-button" type="button" data-i18n="nav.logout">
-      Cerrar sesión
-    </button>
-    <button type="button" data-lang-toggle>EN</button>
-  </nav>
+        <section class="session-card" id="my-branch-section" hidden>
+          <div class="session-card-header">
+            <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+            <div>
+              <h2 data-i18n="dashboard.my_branch_title">Mi sucursal</h2>
+            </div>
+          </div>
+          <div class="session-card-grid">
+            <div class="session-fact">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/></svg>
+              <span id="branch-name"></span>
+            </div>
+            <div class="session-fact">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+              <span id="branch-address"></span>
+            </div>
+            <div class="session-fact">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a2 2 0 0 1-2 2C9.5 22 2 14.5 2 6a2 2 0 0 1 2-2Z"/></svg>
+              <span id="branch-phone"></span>
+            </div>
+            <div class="session-fact">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4Z"/><path d="m4 6 8 6 8-6"/></svg>
+              <span id="branch-contact"></span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
 
-  <main>
-    <h1>Panel principal</h1>
-
-    <section class="user-context">
-      <section class="user-context" id="my-branch-section" hidden>
-       <h2>Mi sucursal</h2>
-       <p id="branch-name"></p>
-       <p id="branch-address"></p>
-       <p id="branch-phone"></p>
-       <p id="branch-contact"></p>
-     </section>
-      <h2>Sesión actual</h2>
-      <p id="current-user">Cargando usuario...</p>
-      <p id="current-role"></p>
-      <p id="current-branch"></p>
-    </section>
-
-    <p id="dashboard-error" role="alert" hidden></p>
-  </main>
-
-<script src="/static/js/i18n.js"></script>
-<script src="/static/js/dashboard.js"></script>
+  <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/dashboard.js"></script>
 </body>
-</html> 
+</html>

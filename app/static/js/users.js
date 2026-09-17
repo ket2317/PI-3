@@ -7,17 +7,11 @@ let roles = [
 let branches = [];
 
 function showError(message) {
-  const el = document.querySelector("#page-error");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "error");
 }
-function clearError() {
-  document.querySelector("#page-error").hidden = true;
-}
+function clearError() {}
 function showSuccess(message) {
-  const el = document.querySelector("#page-success");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "success");
 }
 
 async function apiRequest(url, options = {}) {
@@ -97,7 +91,7 @@ async function loadUsers() {
       <td>${user.correo}</td>
       <td>${roleName(user.rol_id)}</td>
       <td>${branch ? branch.nombre : "—"}</td>
-      <td>${user.activo ? "Sí" : "No"}</td>
+      <td><span class="badge ${user.activo ? "badge-success" : "badge-muted"}">${user.activo ? "Activo" : "Inactivo"}</span></td>
       <td>
         <button type="button" data-action="edit">Editar</button>
         <button type="button" data-action="delete">Desactivar</button>

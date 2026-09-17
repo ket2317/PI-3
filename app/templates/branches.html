@@ -4,64 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sucursales</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/crud.css">
 </head>
 <body>
-  <main class="crud-page">
-    <h1 data-i18n="branches.title">Sucursales</h1>
-    <a href="/dashboard">Volver al panel</a>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Sucursales" %}
+      {% set page_title_key = "branches.title" %}
+      {% set page_subtitle = "Sedes de la empresa" %}
+      {% set page_subtitle_key = "branches.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <p id="page-success" role="status" hidden></p>
-    <p id="page-error" class="page-error" role="alert" hidden></p>
+      <main class="app-content">
+        <section class="panel">
+          <h2 class="section-title" data-i18n="branches.add_title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Añadir sucursal
+          </h2>
 
-    <form id="branch-form">
-      <input id="branch-id" type="hidden">
+          <form id="branch-form">
+            <input id="branch-id" type="hidden">
 
-      <label for="branch-name">Nombre</label>
-      <input id="branch-name" type="text" required>
+            <label for="branch-name">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+              Nombre
+            </label>
+            <input id="branch-name" type="text" required>
 
-      <label for="branch-address">Dirección</label>
-      <input id="branch-address" type="text" required>
+            <label for="branch-address">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+              Dirección
+            </label>
+            <input id="branch-address" type="text" required>
 
-      <label for="branch-phone">Teléfono</label>
-      <input id="branch-phone" type="text">
+            <label for="branch-phone">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a2 2 0 0 1-2 2C9.5 22 2 14.5 2 6a2 2 0 0 1 2-2Z"/></svg>
+              Teléfono
+            </label>
+            <input id="branch-phone" type="text">
 
-      <label for="branch-contact">Información de contacto</label>
-      <input id="branch-contact" type="text">
+            <label for="branch-contact">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 6 8 6 8-6"/></svg>
+              Información de contacto
+            </label>
+            <input id="branch-contact" type="text">
 
-      <label for="branch-manager-id">Gerente responsable</label>
-      <select id="branch-manager-id">
-        <option value="">Sin asignar</option>
-      </select>
+            <label for="branch-manager-id">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+              Gerente responsable
+            </label>
+            <select id="branch-manager-id">
+              <option value="">Sin asignar</option>
+            </select>
 
-      <label for="branch-active" id="branch-active-label" hidden>Estado</label>
-      <select id="branch-active" hidden>
-        <option value="true">Activa</option>
-        <option value="false">Inactiva</option>
-      </select>
+            <label for="branch-active" id="branch-active-label" hidden>
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+              Estado
+            </label>
+            <select id="branch-active" hidden>
+              <option value="true">Activa</option>
+              <option value="false">Inactiva</option>
+            </select>
 
-      <button type="submit" id="branch-submit">Guardar sucursal</button>
-      <button type="button" id="branch-cancel" hidden>Cancelar edición</button>
-    </form>
+            <button type="submit" id="branch-submit">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/></svg>
+              Guardar sucursal
+            </button>
+            <button type="button" id="branch-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+          </form>
+        </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Dirección</th>
-          <th>Teléfono</th>
-          <th>Contacto</th>
-          <th>Gerente</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="branches-body"></tbody>
-    </table>
-  </main>
-  
+        <section class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th>Contacto</th>
+                <th>Gerente</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="branches-body"></tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+
   <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
   <script src="/static/js/branches.js"></script>
 </body>
 </html>

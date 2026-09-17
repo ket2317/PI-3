@@ -4,63 +4,86 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Punto de venta</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/crud.css">
+  <link rel="stylesheet" href="/static/css/pos.css">
 </head>
 <body>
-  <main class="crud-page">
-    <h1 data-i18n="sales.title">Punto de venta</h1>
-    <button type="button" data-lang-toggle>EN</button>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Punto de venta" %}
+      {% set page_title_key = "sales.title" %}
+      {% set page_subtitle = "Cobra productos y genera el comprobante" %}
+      {% set page_subtitle_key = "sales.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <a href="/dashboard">Volver al panel</a>
+      <main class="app-content pos-grid">
+        <section class="pos-catalog panel">
+          <div class="pos-catalog-toolbar">
+            <label for="sale-branch-id" class="pos-branch-field">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+              <select id="sale-branch-id" required></select>
+            </label>
 
-    <p id="page-success" role="status" hidden></p>
-    <p id="page-error" class="page-error" role="alert" hidden></p>
+            <label class="app-search pos-search">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input id="item-search" type="text" placeholder="Buscar producto por código o nombre" autocomplete="off">
+            </label>
+          </div>
 
-    <label for="sale-branch-id">Sucursal</label>
-    <select id="sale-branch-id" required></select>
+          <h2 class="section-title" data-i18n="sales.search_title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+            Productos
+          </h2>
 
-    <form id="add-item-form">
-      <label for="item-search">Buscar producto por código o nombre</label>
-      <input id="item-search" type="text" placeholder="Ej. 34346 o awa" autocomplete="off">
+          <div id="product-grid" class="product-grid"></div>
+        </section>
 
-      <label for="item-product-id">Producto</label>
-      <select id="item-product-id" required></select>
+        <aside class="pos-cart panel">
+          <h2 class="section-title" data-i18n="sales.cart_title">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3h2.5l2.8 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21.5 7H6"/></svg>
+            Ticket actual
+          </h2>
 
-      <label for="item-quantity">Cantidad</label>
-      <input id="item-quantity" type="number" min="1" step="1" value="1" required>
+          <div id="cart-items" class="cart-items"></div>
+          <p id="cart-empty" class="cart-empty">El ticket está vacío. Toca un producto para agregarlo.</p>
 
-      <button type="submit">Agregar al carrito</button>
-    </form>
+          <div class="pos-totals">
+            <div class="pos-total-row"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+            <div class="pos-total-row"><span>IVA</span><span id="cart-iva">$0.00</span></div>
+            <div class="pos-total-row pos-total-grand"><span>Total</span><span id="cart-total">$0.00</span></div>
+          </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio unitario</th>
-          <th>Subtotal</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="cart-body"></tbody>
-    </table>
+          <label for="payment-method-id">
+            <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            Método de pago
+          </label>
+          <select id="payment-method-id" required></select>
 
-    <p id="cart-subtotal">Subtotal: $0.00</p>
-    <p id="cart-iva">IVA: $0.00</p>
-    <p id="cart-total">Total: $0.00</p>
+          <button type="button" id="confirm-sale" class="pos-checkout-btn" data-i18n="sales.confirm">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+            Confirmar venta
+          </button>
+        </aside>
+      </main>
+    </div>
+  </div>
 
-    <label for="payment-method-id">Método de pago</label>
-    <select id="payment-method-id" required></select>
-
-   <button type="button" id="confirm-sale" data-i18n="sales.confirm">Confirmar venta</button>
-
-    <section id="receipt" hidden>
-      <h2>Comprobante</h2>
-      <pre id="receipt-content"></pre>
-    </section>
-  </main>
+  <div id="receipt-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <div class="modal-card-header">
+        <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        <h2>Comprobante</h2>
+      </div>
+      <div id="receipt-content" class="receipt"></div>
+      <button type="button" id="receipt-close" class="btn-ghost">Cerrar</button>
+    </div>
+  </div>
 
   <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
   <script src="/static/js/sales.js"></script>
 </body>
 </html>

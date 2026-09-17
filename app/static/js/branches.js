@@ -3,28 +3,16 @@ let managers = [];
 let branches = [];
 
 function showError(message) {
-  const el = document.querySelector("#page-error");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "error");
 }
 
-function clearError() {
-  const el = document.querySelector("#page-error");
-  el.hidden = true;
-  el.textContent = "";
-}
+function clearError() {}
 
 function showSuccess(message) {
-  const el = document.querySelector("#page-success");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "success");
 }
 
-function clearSuccess() {
-  const el = document.querySelector("#page-success");
-  el.hidden = true;
-  el.textContent = "";
-}
+function clearSuccess() {}
 
 async function apiRequest(url, options = {}) {
   const response = await fetch(url, { credentials: "same-origin", ...options });
@@ -141,7 +129,7 @@ async function loadBranches() {
       <td>${branch.telefono}</td>
       <td>${branch.contacto || "—"}</td>
       <td>${manager ? manager.nombre : "Sin asignar"}</td>
-      <td>${branch.activo ? "Activa" : "Inactiva"}</td>
+      <td><span class="badge ${branch.activo ? "badge-success" : "badge-muted"}">${branch.activo ? "Activa" : "Inactiva"}</span></td>
       <td></td>
     `;
 

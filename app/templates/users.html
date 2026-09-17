@@ -3,54 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <h1 data-i18n="users.title">Usuarios</h1>
+  <title>Usuarios</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/crud.css">
 </head>
 <body>
-  <main class="crud-page">
-    <h1>Usuarios</h1>
-    <a href="/dashboard">Volver al panel</a>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Usuarios" %}
+      {% set page_title_key = "users.title" %}
+      {% set page_subtitle = "Gerentes y cajeros del sistema" %}
+      {% set page_subtitle_key = "users.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <p id="page-success" role="status" hidden></p>
-    <p id="page-error" class="page-error" role="alert" hidden></p>
+      <main class="app-content">
+        <section class="panel">
+          <h2 class="section-title" data-i18n="users.add_title">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Añadir usuario
+          </h2>
 
-    <form id="user-form">
-      <input id="user-id" type="hidden">
+          <form id="user-form">
+            <input id="user-id" type="hidden">
 
-      <label for="user-name">Nombre</label>
-      <input id="user-name" type="text" required>
+            <label for="user-name">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+              Nombre
+            </label>
+            <input id="user-name" type="text" required>
 
-      <label for="user-email">Correo</label>
-      <input id="user-email" type="email" required>
+            <label for="user-email">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 6 8 6 8-6"/></svg>
+              Correo
+            </label>
+            <input id="user-email" type="email" required>
 
-      <label for="user-password">Contraseña</label>
-      <input id="user-password" type="password">
+            <label for="user-password">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              Contraseña
+            </label>
+            <input id="user-password" type="password">
 
-      <label for="user-role-id">Rol</label>
-      <select id="user-role-id" required></select>
+            <label for="user-role-id">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.4 3.4 7.6 8 9 4.6-1.4 8-4.6 8-9V6Z"/></svg>
+              Rol
+            </label>
+            <select id="user-role-id" required></select>
 
-      <label for="user-branch-id">Sucursal</label>
-      <select id="user-branch-id"></select>
+            <label for="user-branch-id">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+              Sucursal
+            </label>
+            <select id="user-branch-id"></select>
 
-      <button type="submit" id="user-submit">Guardar usuario</button>
-      <button type="button" id="user-cancel" hidden>Cancelar edición</button>
-    </form>
+            <button type="submit" id="user-submit">
+              <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/></svg>
+              Guardar usuario
+            </button>
+            <button type="button" id="user-cancel" class="btn-ghost" hidden>Cancelar edición</button>
+          </form>
+        </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Correo</th>
-          <th>Rol</th>
-          <th>Sucursal</th>
-          <th>Activo</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="users-body"></tbody>
-    </table>
-  </main>
+        <section class="panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Sucursal</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+  </div>
+
   <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
   <script src="/static/js/users.js"></script>
 </body>
 </html>
