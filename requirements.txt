@@ -20,3 +20,5 @@ typing_extensions==4.16.0
 uvicorn==0.52.4
 alembic==1.16.5
 itsdangerous==2.2.0
+pytest
+httpx

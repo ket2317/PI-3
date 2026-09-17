@@ -68,6 +68,7 @@ document.querySelector("#logout-button")
       showError(error.message);
     }
   });
+  
   async function loadMyBranch(user) {
     if (user.rol !== "GERENTE" || !user.sucursal_id) {
         return;
@@ -89,6 +90,7 @@ document.querySelector("#logout-button")
     document.querySelector("#branch-contact").textContent =
         `Contacto: ${branch.contacto || "Sin registrar"}`;
 }
+
 (async () => {
     try {
         const user = await apiRequest("/auth/me");
