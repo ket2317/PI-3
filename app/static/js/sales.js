@@ -191,7 +191,15 @@ document.querySelector("#confirm-sale").addEventListener("click", async () => {
 
     const receipt = document.querySelector("#receipt");
     receipt.hidden = false;
-    document.querySelector("#receipt-content").textContent = JSON.stringify(venta, null, 2);
+    document.querySelector("#receipt-content").innerHTML = `
+      <p>Venta #${venta.id} — ${new Date(venta.created_at).toLocaleString()}</p>
+      <ul>
+        ${venta.detalles.map((d) => `<li>${d.cantidad} x producto ${d.producto_id} — $${d.subtotal}</li>`).join("")}
+      </ul>
+      <p>Subtotal: $${venta.subtotal}</p>
+      <p>IVA: $${venta.iva}</p>
+      <p><strong>Total: $${venta.total}</strong></p>
+    `;
 
     cart = [];
     renderCart();
