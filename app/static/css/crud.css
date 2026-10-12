@@ -38,7 +38,12 @@ form label:first-of-type { margin-top: 0; }
 
 label .icon { color: var(--color-accent-blue); }
 
-input, select {
+form input,
+form select,
+#inventory-branch-id,
+#inventory-form input,
+#inventory-form select,
+#payment-method-id  {
   min-height: 42px;
   padding: 8px 12px;
   border: 1px solid var(--color-border);
@@ -50,7 +55,9 @@ input, select {
   color: var(--color-text);
 }
 
-input:focus, select:focus {
+form input:focus,
+form select:focus,
+#inventory-branch-id:focus   {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-soft);
@@ -58,7 +65,10 @@ input:focus, select:focus {
 
 form label:first-child { margin-top: 0; }
 
-button {
+form button,
+td button,
+#low-stock-button,
+.pos-checkout-btn  {
   align-self: flex-start;
   min-height: 42px;
   padding: 9px 22px;
@@ -75,16 +85,22 @@ button {
   gap: 8px;
   transition: filter 0.15s ease, transform 0.1s ease;
 }
-button:hover { filter: brightness(1.08); }
-button:active { transform: translateY(1px); }
+form button:hover,
+td button:hover,
+#low-stock-button:hover { filter: brightness(1.08); }
 
-button.btn-ghost {
+form button:active,
+td button:active,
+#low-stock-button:active { transform: translateY(1px); }
+
+
+form button.btn-ghost {
   background: transparent;
   color: var(--color-text-muted);
   border: 1px solid var(--color-border);
 }
-
-button[hidden] { display: none; }
+form button[hidden],
+td button[hidden] { display: none; }
 
 .panel:has(table) {
   overflow-x: auto;
@@ -153,4 +169,13 @@ td button[data-action="edit"] {
 
 @media (max-width: 640px) {
   table { display: block; overflow-x: auto; }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
+  caret-color: var(--color-text);
+  transition: background-color 9999s ease-out;
 }

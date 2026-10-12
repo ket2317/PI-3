@@ -78,11 +78,49 @@ function initLogoutButton() {
   });
 }
 
+
+function initSidebarToggle() {
+  const sidebar = document.querySelector("#app-sidebar");
+  const toggle = document.querySelector("#sidebar-toggle");
+  const shell = document.querySelector(".app-shell");
+
+  if (!sidebar || !toggle || !shell) return;
+
+  const storageKey = "vendora-sidebar-collapsed";
+
+  function updateSidebar(collapsed) {
+    shell.classList.toggle("sidebar-collapsed", collapsed);
+
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    toggle.setAttribute(
+      "aria-label",
+      collapsed ? "Expandir menú" : "Contraer menú"
+    );
+    toggle.title = collapsed ? "Expandir menú" : "Contraer menú";
+  }
+
+  // Recuperar el estado guardado al cambiar de página
+  const savedState = localStorage.getItem(storageKey);
+  updateSidebar(savedState === "true");
+
+  // Expandir o contraer al presionar la flecha
+  toggle.addEventListener("click", () => {
+    const collapsed = !shell.classList.contains("sidebar-collapsed");
+
+    updateSidebar(collapsed);
+    localStorage.setItem(storageKey, String(collapsed));
+  });
+}
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   applyColorMode();
   markActiveNavLink();
   initSidebarUser();
   initLogoutButton();
+  initSidebarToggle();
+  
   document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
     button.addEventListener("click", () => {
       setColorMode(getColorMode() === "dark" ? "light" : "dark");

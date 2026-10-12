@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script>
+        const savedTheme = localStorage.getItem("colorMode") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Sistema POS</title>
@@ -10,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="/static/css/theme.css">
     <link rel="stylesheet" href="/static/css/login.css">
 </head>
 
@@ -22,7 +28,7 @@
             <div class="info-box">
                 <div class="info-content">
 
-                    <h1 class="system-title">Sistema POS</h1>
+                    <h1 class="system-title">Vendora</h1>
 
                     <div class="session-label">
                         <h2>Inicio de Sesión</h2>
@@ -54,7 +60,7 @@
             <!-- RECUADRO DERECHO -->
             <div class="form-box">
 
-                <form id="login-form" class="login-form">
+                <form id="login-form" class="login-form" autocomplete="off">
 
                     <!-- CORREO -->
                     <div class="input-group">
@@ -86,7 +92,7 @@
                             <input
                                 type="email"
                                 id="email"
-                                autocomplete="username"
+                                autocomplete="off"
                                 placeholder="usuario@correo.com"
                                 required
                             >
@@ -126,7 +132,7 @@
                             <input
                                 type="password"
                                 id="password"
-                                autocomplete="current-password"
+                                autocomplete="off"
                                 placeholder="••••••••"
                                 required
                             >

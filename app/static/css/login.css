@@ -1,13 +1,13 @@
 :root {
-  --bg-main: #EFECE6;
-  --box-info-bg: #8A9EA7;       /* Azul grisáceo elegante */
-  --box-form-bg: #FFFFFF;       /* Blanco para el formulario */
-  --text-primary: #1C1917;
-  --text-secondary: #78716C;
-  --accent-burgundy: #7A2E3B;   /* Vino / Tinto */
-  --accent-burgundy-hover: #63232F;
-  --border-color: #E2DDD5;
-  --input-bg: #FAFAFA;
+  --bg-main: var(--color-bg);
+  --box-info-bg: #8A9EA7;
+  --box-form-bg: var(--color-surface);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-text-muted);
+  --accent-burgundy: var(--color-primary);
+  --accent-burgundy-hover: var(--vendora-accent-hover);
+  --border-color: var(--color-border);
+  --input-bg: var(--color-surface-muted);
   --shadow-color: rgba(0, 0, 0, 0.08);
 }
 
@@ -139,7 +139,7 @@ body {
 
 .input-wrapper input:focus {
   border-color: var(--accent-burgundy);
-  background-color: #FFFFFF;
+  background-color: var(--box-form-bg);
   box-shadow: 0 0 0 4px rgba(122, 46, 59, 0.12);
 }
 
@@ -212,4 +212,14 @@ body {
   .info-box, .form-box {
     padding: 40px 28px;
   }
+}
+
+.input-wrapper input:-webkit-autofill,
+.input-wrapper input:-webkit-autofill:hover,
+.input-wrapper input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  caret-color: var(--text-primary);
+  border-radius: 12px;
+  background-clip: padding-box;
 }
