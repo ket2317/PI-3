@@ -85,35 +85,49 @@ function roleName(rolId) {
 
 async function loadUsers() {
   const users = await apiRequest("/usuarios/");
-  const body = document.querySelector("#users-body");
-  body.innerHTML = "";
+  const grid = document.querySelector("#users-grid");
+  grid.innerHTML = "";
   document.querySelector("#users-count").textContent = users.length;
 
   if (users.length === 0) {
-    body.innerHTML = `
-      <tr><td colspan="5" class="empty-state">Aún no hay usuarios registrados.</td></tr>
-    `;
+    grid.innerHTML = `<p class="empty-card" data-empty-state>Aún no hay usuarios registrados.</p>`;
   }
 
   users.forEach((user) => {
     const branch = branches.find((b) => b.id === user.sucursal_id);
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="cell-strong">
-        ${user.nombre}
-        <span class="cell-sub">${user.correo}</span>
-      </td>
-      <td>${roleName(user.rol_id)}</td>
-      <td>${branch ? branch.nombre : "—"}</td>
-      <td><span class="badge ${user.activo ? "badge-success" : "badge-muted"}">${user.activo ? "Activo" : "Inactivo"}</span></td>
-      <td class="cell-actions">
-        <button type="button" data-action="edit">Editar</button>
-        <button type="button" data-action="delete">Desactivar</button>
-      </td>
+    const role = roleName(user.rol_id);
+    const card = document.createElement("article");
+    card.className = `entity-card${user.activo ? "" : " is-inactive"}`;
+    card.innerHTML = `
+      <div class="entity-head">
+        <div class="entity-avatar badge-role-${String(role).toLowerCase()}">${initials(user.nombre)}</div>
+        <div>
+          <p class="entity-name">${user.nombre}</p>
+          <p class="entity-sub">${user.correo}</p>
+        </div>
+      </div>
+      <div class="entity-tags">
+        <span class="badge badge-role-${String(role).toLowerCase()}">${role}</span>
+        <span class="badge badge-muted">${branch ? branch.nombre : role === "ADMIN" ? "Todas las sucursales" : "Sin sucursal"}</span>
+      </div>
+      <div class="entity-foot">
+        <span class="badge ${user.activo ? "badge-success" : "badge-muted"}">${user.activo ? "Activo" : "Inactivo"}</span>
+        <div class="entity-actions"></div>
+      </div>
     `;
-    row.querySelector('[data-action="edit"]').addEventListener("click", () => editUser(user));
-    row.querySelector('[data-action="delete"]').addEventListener("click", () => deactivateUser(user));
-    body.appendChild(row);
+
+    const actions = card.querySelector(".entity-actions");
+    const editButton = iconButton("edit", "edit", "Editar");
+    editButton.addEventListener("click", () => editUser(user));
+    actions.appendChild(editButton);
+
+    if (user.activo) {
+      const deleteButton = iconButton("delete", "disable", "Desactivar");
+      deleteButton.addEventListener("click", () => deactivateUser(user));
+      actions.appendChild(deleteButton);
+    }
+
+    grid.appendChild(card);
   });
 }
 

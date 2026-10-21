@@ -103,9 +103,19 @@ function isLowStock(item) {
   return item.existencia <= item.stock_minimo;
 }
 
+function renderSummary() {
+  const low = currentInventory.filter(isLowStock).length;
+  const units = currentInventory.reduce((total, item) => total + item.existencia, 0);
+  document.querySelector("#summary-products").textContent = currentInventory.length;
+  document.querySelector("#summary-low").textContent = low;
+  document.querySelector("#summary-units").textContent = units.toLocaleString("es-MX");
+}
+
 function renderInventoryTable() {
-  const body = document.querySelector("#inventory-body");
-  body.innerHTML = "";
+  renderSummary();
+
+  const list = document.querySelector("#inventory-body");
+  list.innerHTML = "";
 
   const items = onlyLowStock
     ? currentInventory.filter(isLowStock)
@@ -114,35 +124,45 @@ function renderInventoryTable() {
   document.querySelector("#inventory-count").textContent = items.length;
 
   if (items.length === 0) {
-    body.innerHTML = `
-      <tr><td colspan="5" class="empty-state">
+    list.innerHTML = `
+      <p class="stock-empty" data-empty-state>
         ${onlyLowStock
           ? "No hay productos con bajo inventario en esta sucursal."
           : "Aún no hay existencias registradas en esta sucursal."}
-      </td></tr>
+      </p>
     `;
   }
 
   items.forEach((item) => {
     const product = branchProducts.find((p) => p.id === item.producto_id);
     const low = isLowStock(item);
-    const row = document.createElement("tr");
+    // La barra se llena al 100% cuando hay el doble del stock mínimo
+    const target = Math.max(item.stock_minimo * 2, 1);
+    const percent = Math.min(100, Math.round((item.existencia / target) * 100));
+
+    const row = document.createElement("div");
+    row.className = `stock-row${low ? " is-low" : ""}`;
     row.innerHTML = `
-      <td class="cell-strong">
-        ${product ? product.nombre : "—"}
-        <span class="cell-sub">Código ${product ? product.codigo : item.producto_id}</span>
-      </td>
-      <td>${item.existencia}</td>
-      <td>${item.stock_minimo}</td>
-      <td><span class="badge ${low ? "badge-danger" : "badge-success"}">${low ? "Bajo" : "Suficiente"}</span></td>
-      <td class="cell-actions">
-        <button type="button" data-action="edit">Ajustar</button>
-      </td>
+      <div>
+        <p class="entity-name">${product ? product.nombre : "Producto " + item.producto_id}</p>
+        <p class="entity-sub">Código ${product ? product.codigo : item.producto_id}</p>
+      </div>
+      <div class="stock-level">
+        <div class="stock-bar"><span style="width:${percent}%"></span></div>
+        <div class="stock-meta">
+          <strong>${item.existencia} piezas</strong>
+          <span>mínimo ${item.stock_minimo}</span>
+        </div>
+      </div>
+      <div></div>
     `;
-    row.querySelector('[data-action="edit"]').addEventListener("click", () => {
+
+    const adjustButton = iconButton("edit", "adjust", "Ajustar existencia");
+    adjustButton.addEventListener("click", () => {
       openInventoryModal(item.producto_id);
     });
-    body.appendChild(row);
+    row.lastElementChild.appendChild(adjustButton);
+    list.appendChild(row);
   });
 }
 

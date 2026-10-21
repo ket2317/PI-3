@@ -25,7 +25,7 @@ const translations = {
     "sales.cart_title": "Ticket actual",
     "inventory.title": "Inventario",
     "inventory.subtitle": "Existencias por sucursal",
-    "inventory.low_stock": "Ver bajo inventario",
+    "inventory.low_stock": "Bajo inventario",
     "inventory.form_title": "Actualizar existencia",
     "users.title": "Usuarios",
     "users.subtitle": "Gerentes y cajeros del sistema",
@@ -62,7 +62,7 @@ const translations = {
     "sales.cart_title": "Current ticket",
     "inventory.title": "Inventory",
     "inventory.subtitle": "Stock by branch",
-    "inventory.low_stock": "View low stock",
+    "inventory.low_stock": "Low stock",
     "inventory.form_title": "Update stock",
     "users.title": "Users",
     "users.subtitle": "Managers and cashiers in the system",
@@ -84,6 +84,25 @@ function setLanguage(lang) {
   applyTranslations();
 }
 
+// Cambia solo el texto del elemento; los íconos SVG que contiene se conservan.
+function setTextKeepingIcons(element, text) {
+  const textNodes = [...element.childNodes].filter(
+    (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+  );
+
+  if (element.children.length === 0 || textNodes.length === 0) {
+    if (element.children.length === 0) {
+      element.textContent = text;
+    } else {
+      element.append(` ${text}`);
+    }
+    return;
+  }
+
+  textNodes[0].textContent = ` ${text} `;
+  textNodes.slice(1).forEach((node) => node.remove());
+}
+
 function applyTranslations() {
   const lang = getLanguage();
   document.documentElement.lang = lang;
@@ -92,7 +111,7 @@ function applyTranslations() {
     const key = element.getAttribute("data-i18n");
     const text = translations[lang][key];
     if (text) {
-      element.textContent = text;
+      setTextKeepingIcons(element, text);
     }
   });
 

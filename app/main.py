@@ -46,6 +46,15 @@ app.add_middleware(
     same_site = "lax",
     https_only=os.getenv("RENDER") == "true",
 )
+@app.middleware("http")
+async def revalidate_static_files(request: Request, call_next):
+    # Obliga al navegador a comprobar si hay una versión nueva de CSS/JS
+    # para que no use archivos viejos después de un despliegue.
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
 app.mount(
     "/static",
     StaticFiles(directory="app/static"),

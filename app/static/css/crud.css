@@ -257,7 +257,7 @@ td .cell-sub {
 
 td.cell-actions { text-align: right; white-space: nowrap; }
 
-td button {
+td button:not(.icon-action) {
   min-height: 32px;
   padding: 5px 14px;
   margin: 0 0 0 6px;
@@ -265,12 +265,12 @@ td button {
   font-weight: 600;
 }
 
-td button[data-action="delete"] {
+td button:not(.icon-action)[data-action="delete"] {
   background: var(--color-error-soft);
   color: var(--color-error);
 }
 
-td button[data-action="edit"] {
+td button:not(.icon-action)[data-action="edit"] {
   background: var(--color-accent-blue-soft);
   color: var(--color-accent-blue);
 }
@@ -293,3 +293,185 @@ td.empty-state {
 .badge-success { background: var(--color-success-soft); color: var(--color-success); }
 .badge-muted { background: var(--color-surface-muted); color: var(--color-text-muted); }
 .badge-danger { background: var(--color-error-soft); color: var(--color-error); }
+
+/* ---------- Botones de ícono ---------- */
+
+button.icon-action {
+  width: 34px;
+  height: 34px;
+  min-height: 0;
+  padding: 0;
+  margin: 0 0 0 4px;
+  justify-content: center;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+button.icon-action:hover { filter: none; background: var(--color-surface-muted); }
+button.icon-action[data-action="edit"]:hover { color: var(--color-accent-blue); background: var(--color-accent-blue-soft); }
+button.icon-action[data-action="delete"]:hover { color: var(--color-error); background: var(--color-error-soft); }
+
+/* ---------- Tarjetas (usuarios y sucursales) ---------- */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  padding: 20px 22px 22px;
+}
+
+.entity-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.entity-card:hover { border-color: var(--color-accent-blue); transform: translateY(-1px); }
+.entity-card.is-inactive { opacity: 0.65; }
+
+.entity-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.entity-head > div { min-width: 0; }
+
+.entity-avatar {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: var(--color-accent-blue-soft);
+  color: var(--color-accent-blue);
+}
+.entity-avatar.is-square { border-radius: var(--radius-sm); }
+
+.entity-name {
+  margin: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.entity-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entity-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.entity-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.entity-facts span { display: flex; align-items: center; gap: 8px; }
+
+.entity-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.badge-role-admin { background: var(--color-primary-soft); color: var(--color-primary); }
+.badge-role-gerente { background: var(--color-accent-tan-soft); color: var(--color-accent-tan); }
+.badge-role-cajero { background: var(--color-accent-blue-soft); color: var(--color-accent-blue); }
+
+.empty-card {
+  grid-column: 1 / -1;
+  padding: 32px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Resumen de inventario ---------- */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.summary-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  text-align: left;
+  font-weight: 400;
+}
+button.summary-tile { align-self: stretch; cursor: pointer; }
+button.summary-tile:hover { filter: none; border-color: var(--color-error); }
+.summary-tile.is-active { border-color: var(--color-error); background: var(--color-error-soft); }
+
+.summary-tile .stat-icon { margin: 0; }
+.summary-value { display: block; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
+.summary-label { display: block; font-size: 0.82rem; color: var(--color-text-muted); }
+.stat-icon-danger { background: var(--color-error-soft); color: var(--color-error); }
+
+/* ---------- Filas de inventario con barra ---------- */
+
+.stock-list { display: flex; flex-direction: column; }
+
+.stock-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 240px) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+.stock-row:last-child { border-bottom: none; }
+.stock-row:hover { background: var(--color-surface-muted); }
+
+.stock-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-surface-muted);
+  overflow: hidden;
+}
+.stock-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-success);
+}
+.stock-row.is-low .stock-bar > span { background: var(--color-error); }
+
+.stock-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+.stock-row.is-low .stock-meta strong { color: var(--color-error); }
+
+.stock-empty { padding: 40px 22px; text-align: center; color: var(--color-text-muted); }
+
+@media (max-width: 560px) {
+  .stock-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .stock-row .stock-level { grid-column: 1 / -1; grid-row: 2; }
+}

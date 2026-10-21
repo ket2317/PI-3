@@ -18,6 +18,36 @@
       {% include "_topbar.html" %}
 
       <main class="app-content">
+        <section class="summary-grid">
+          <div class="summary-tile">
+            <div class="stat-icon stat-icon-a">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+            </div>
+            <div>
+              <span class="summary-value" id="summary-products">0</span>
+              <span class="summary-label">Productos con existencia</span>
+            </div>
+          </div>
+          <button type="button" class="summary-tile" id="low-stock-button" aria-pressed="false" title="Mostrar solo los productos con bajo inventario">
+            <div class="stat-icon stat-icon-danger">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L14.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div>
+              <span class="summary-value" id="summary-low">0</span>
+              <span class="summary-label" data-i18n="inventory.low_stock">Ver bajo inventario</span>
+            </div>
+          </button>
+          <div class="summary-tile">
+            <div class="stat-icon stat-icon-c">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+            </div>
+            <div>
+              <span class="summary-value" id="summary-units">0</span>
+              <span class="summary-label">Piezas en total</span>
+            </div>
+          </div>
+        </section>
+
         <section class="panel panel-list">
           <div class="toolbar">
             <div class="toolbar-title">
@@ -29,10 +59,6 @@
             </div>
             <div class="toolbar-actions">
               <select id="inventory-branch-id" aria-label="Sucursal"></select>
-              <button type="button" id="low-stock-button" class="btn-ghost" aria-pressed="false">
-                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L14.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                <span data-i18n="inventory.low_stock">Ver bajo inventario</span>
-              </button>
               <button type="button" id="inventory-new">
                 <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 <span data-i18n="inventory.form_title">Actualizar existencia</span>
@@ -40,20 +66,7 @@
             </div>
           </div>
 
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Existencia</th>
-                  <th>Stock mínimo</th>
-                  <th>Estado</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="inventory-body"></tbody>
-            </table>
-          </div>
+          <div class="stock-list" id="inventory-body" data-searchable></div>
         </section>
       </main>
 

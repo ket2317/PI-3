@@ -114,52 +114,52 @@ async function loadBranches() {
   branches = await apiRequest("/sucursales/");
   renderManagerOptions(document.querySelector("#branch-id").value ? Number(document.querySelector("#branch-id").value) : null);
 
-  const body = document.querySelector("#branches-body");
-  body.innerHTML = "";
+  const grid = document.querySelector("#branches-grid");
+  grid.innerHTML = "";
   document.querySelector("#branches-count").textContent = branches.length;
 
   if (branches.length === 0) {
-    body.innerHTML = `
-      <tr><td colspan="6" class="empty-state">
-        Aún no hay sucursales registradas.
-      </td></tr>
-    `;
+    grid.innerHTML = `<p class="empty-card" data-empty-state>Aún no hay sucursales registradas.</p>`;
   }
 
   branches.forEach((branch) => {
     const manager = managers.find((m) => m.id === branch.gerente_id);
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="cell-strong">
-        ${branch.nombre}
-        <span class="cell-sub">${branch.direccion}</span>
-      </td>
-      <td>${branch.telefono || "—"}</td>
-      <td>${branch.contacto || "—"}</td>
-      <td>${manager ? manager.nombre : "Sin asignar"}</td>
-      <td><span class="badge ${branch.activo ? "badge-success" : "badge-muted"}">${branch.activo ? "Activa" : "Inactiva"}</span></td>
-      <td class="cell-actions"></td>
+    const card = document.createElement("article");
+    card.className = `entity-card${branch.activo ? "" : " is-inactive"}`;
+    card.innerHTML = `
+      <div class="entity-head">
+        <div class="entity-avatar is-square">${ICONS.store}</div>
+        <div>
+          <p class="entity-name">${branch.nombre}</p>
+          <p class="entity-sub">${branch.direccion}</p>
+        </div>
+      </div>
+      <div class="entity-facts">
+        <span>${ICONS.phone} ${branch.telefono || "Sin teléfono"}</span>
+        <span>${ICONS.user} ${manager ? manager.nombre : "Sin gerente asignado"}</span>
+        ${branch.contacto ? `<span>${ICONS.contact} ${branch.contacto}</span>` : ""}
+      </div>
+      <div class="entity-foot">
+        <span class="badge ${branch.activo ? "badge-success" : "badge-muted"}">${branch.activo ? "Activa" : "Inactiva"}</span>
+        <div class="entity-actions"></div>
+      </div>
     `;
 
     if (currentUser.rol === "ADMIN") {
-      const actionsCell = row.lastElementChild;
+      const actions = card.querySelector(".entity-actions");
 
-      const editButton = document.createElement("button");
-      editButton.type = "button";
-      editButton.dataset.action = "edit";
-      editButton.textContent = "Editar";
+      const editButton = iconButton("edit", "edit", "Editar");
       editButton.addEventListener("click", () => editBranch(branch));
-      actionsCell.appendChild(editButton);
+      actions.appendChild(editButton);
 
-      const deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.dataset.action = "delete";
-      deleteButton.textContent = "Desactivar";
-      deleteButton.addEventListener("click", () => deactivateBranch(branch));
-      actionsCell.appendChild(deleteButton);
+      if (branch.activo) {
+        const deleteButton = iconButton("delete", "disable", "Desactivar");
+        deleteButton.addEventListener("click", () => deactivateBranch(branch));
+        actions.appendChild(deleteButton);
+      }
     }
 
-    body.appendChild(row);
+    grid.appendChild(card);
   });
 }
 

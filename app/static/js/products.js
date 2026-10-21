@@ -118,7 +118,7 @@ async function loadProducts() {
 
   if (products.length === 0) {
     body.innerHTML = `
-      <tr><td colspan="5" class="empty-state">
+      <tr data-empty-state><td colspan="5" class="empty-state">
         Aún no hay productos. Usa “Añadir producto” para registrar el primero.
       </td></tr>
     `;
@@ -135,17 +135,16 @@ async function loadProducts() {
       <td>${getBranchName(product.sucursal_id)}</td>
       <td>$${Number(product.precio).toFixed(2)}</td>
       <td>${Math.round(Number(product.iva) * 100)}%</td>
-      <td class="cell-actions">
-        <button type="button" data-action="edit">Editar</button>
-        <button type="button" data-action="delete">Desactivar</button>
-      </td>
+      <td class="cell-actions"></td>
     `;
 
-    row.querySelector("[data-action='edit']")
-      .addEventListener("click", () => editProduct(product));
+    const editButton = iconButton("edit", "edit", "Editar");
+    editButton.addEventListener("click", () => editProduct(product));
 
-    row.querySelector("[data-action='delete']")
-      .addEventListener("click", () => deactivateProduct(product));
+    const deleteButton = iconButton("delete", "disable", "Desactivar");
+    deleteButton.addEventListener("click", () => deactivateProduct(product));
+
+    row.lastElementChild.append(editButton, deleteButton);
 
     body.appendChild(row);
   });
