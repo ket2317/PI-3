@@ -213,3 +213,20 @@ body {
     padding: 40px 28px;
   }
 }
+/* ENLACE AL AVISO DE PRIVACIDAD */
+.privacy-note {
+  margin-top: 20px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.privacy-note a {
+  color: var(--accent-burgundy);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.privacy-note a:hover {
+  text-decoration: underline;
+}

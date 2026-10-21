@@ -80,6 +80,13 @@ def login_page(request: Request):
         name = "login.html",
     )
 
+@app.get("/aviso-de-privacidad")
+def privacy_page(request: Request):
+    return templates.TemplateResponse(
+        request = request,
+        name = "privacy.html",
+    )
+
 @app.get("/dashboard")
 def dashboard_page(request: Request):
     return templates.TemplateResponse(
