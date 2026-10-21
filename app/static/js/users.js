@@ -7,17 +7,11 @@ let roles = [
 let branches = [];
 
 function showError(message) {
-  const el = document.querySelector("#page-error");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "error");
 }
-function clearError() {
-  document.querySelector("#page-error").hidden = true;
-}
+function clearError() {}
 function showSuccess(message) {
-  const el = document.querySelector("#page-success");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "success");
 }
 
 async function apiRequest(url, options = {}) {
@@ -36,8 +30,13 @@ async function apiRequest(url, options = {}) {
 function resetForm() {
   document.querySelector("#user-form").reset();
   document.querySelector("#user-id").value = "";
+  document.querySelector("#user-modal-title").textContent = "Añadir usuario";
   document.querySelector("#user-submit").textContent = "Guardar usuario";
-  document.querySelector("#user-cancel").hidden = true;
+  document.querySelector("#user-password").required = true;
+  document.querySelector("#user-password-hint").hidden = true;
+  if (currentUser && currentUser.rol === "GERENTE") {
+    document.querySelector("#user-branch-id").value = currentUser.sucursal_id;
+  }
   clearError();
 }
 
@@ -86,26 +85,49 @@ function roleName(rolId) {
 
 async function loadUsers() {
   const users = await apiRequest("/usuarios/");
-  const body = document.querySelector("#users-body");
-  body.innerHTML = "";
+  const grid = document.querySelector("#users-grid");
+  grid.innerHTML = "";
+  document.querySelector("#users-count").textContent = users.length;
+
+  if (users.length === 0) {
+    grid.innerHTML = `<p class="empty-card" data-empty-state>Aún no hay usuarios registrados.</p>`;
+  }
 
   users.forEach((user) => {
     const branch = branches.find((b) => b.id === user.sucursal_id);
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${user.nombre}</td>
-      <td>${user.correo}</td>
-      <td>${roleName(user.rol_id)}</td>
-      <td>${branch ? branch.nombre : "—"}</td>
-      <td>${user.activo ? "Sí" : "No"}</td>
-      <td>
-        <button type="button" data-action="edit">Editar</button>
-        <button type="button" data-action="delete">Desactivar</button>
-      </td>
+    const role = roleName(user.rol_id);
+    const card = document.createElement("article");
+    card.className = `entity-card${user.activo ? "" : " is-inactive"}`;
+    card.innerHTML = `
+      <div class="entity-head">
+        <div class="entity-avatar badge-role-${String(role).toLowerCase()}">${initials(user.nombre)}</div>
+        <div>
+          <p class="entity-name">${user.nombre}</p>
+          <p class="entity-sub">${user.correo}</p>
+        </div>
+      </div>
+      <div class="entity-tags">
+        <span class="badge badge-role-${String(role).toLowerCase()}">${role}</span>
+        <span class="badge badge-muted">${branch ? branch.nombre : role === "ADMIN" ? "Todas las sucursales" : "Sin sucursal"}</span>
+      </div>
+      <div class="entity-foot">
+        <span class="badge ${user.activo ? "badge-success" : "badge-muted"}">${user.activo ? "Activo" : "Inactivo"}</span>
+        <div class="entity-actions"></div>
+      </div>
     `;
-    row.querySelector('[data-action="edit"]').addEventListener("click", () => editUser(user));
-    row.querySelector('[data-action="delete"]').addEventListener("click", () => deactivateUser(user));
-    body.appendChild(row);
+
+    const actions = card.querySelector(".entity-actions");
+    const editButton = iconButton("edit", "edit", "Editar");
+    editButton.addEventListener("click", () => editUser(user));
+    actions.appendChild(editButton);
+
+    if (user.activo) {
+      const deleteButton = iconButton("delete", "disable", "Desactivar");
+      deleteButton.addEventListener("click", () => deactivateUser(user));
+      actions.appendChild(deleteButton);
+    }
+
+    grid.appendChild(card);
   });
 }
 
@@ -115,8 +137,11 @@ function editUser(user) {
   document.querySelector("#user-email").value = user.correo;
   document.querySelector("#user-role-id").value = user.rol_id;
   document.querySelector("#user-branch-id").value = user.sucursal_id || "";
+  document.querySelector("#user-modal-title").textContent = "Editar usuario";
   document.querySelector("#user-submit").textContent = "Guardar cambios";
-  document.querySelector("#user-cancel").hidden = false;
+  document.querySelector("#user-password").required = false;
+  document.querySelector("#user-password-hint").hidden = false;
+  openModal("user-modal");
 }
 
 async function deactivateUser(user) {
@@ -168,14 +193,19 @@ document.querySelector("#user-form").addEventListener("submit", async (event) =>
     });
 
     showSuccess(userId ? "Usuario actualizado correctamente" : "Usuario creado correctamente");
-    resetForm();
+    closeModal("user-modal");
     await loadUsers();
   } catch (error) {
     showError(error.message);
   }
 });
 
-document.querySelector("#user-cancel").addEventListener("click", resetForm);
+document.querySelector("#user-new").addEventListener("click", () => {
+  resetForm();
+  openModal("user-modal");
+});
+
+document.querySelector("#user-modal").addEventListener("close", resetForm);
 
 (async () => {
   try {

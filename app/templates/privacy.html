@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aviso de Privacidad - Sistema POS</title>
+  <script>
+    // Aplica el modo de color guardado antes de pintar para evitar parpadeo
+    try {
+      document.documentElement.setAttribute(
+        "data-theme",
+        localStorage.getItem("colorMode") || "light"
+      );
+    } catch (error) {}
+  </script>
+  <link rel="stylesheet" href="/static/css/theme.css">
+  <link rel="stylesheet" href="/static/css/privacy.css">
+</head>
+<body>
+  <main class="privacy-page">
+    <a class="privacy-back" href="/login">&larr; Volver al inicio de sesión</a>
+
+    <header class="privacy-header">
+      <p class="privacy-eyebrow">Sistema de Gestión de Pequeños Negocios</p>
+      <h1>Aviso de Privacidad y Políticas de Uso</h1>
+      <p class="privacy-updated">Última actualización: 21 de octubre de 2026</p>
+    </header>
+
+    <nav class="privacy-toc" aria-label="Contenido">
+      <ol>
+        <li><a href="#responsable">Responsable</a></li>
+        <li><a href="#datos">Datos que recabamos</a></li>
+        <li><a href="#finalidades">Finalidades</a></li>
+        <li><a href="#seguridad">Medidas de seguridad</a></li>
+        <li><a href="#acceso">Acceso por rol y sucursal</a></li>
+        <li><a href="#transferencias">Encargados y transferencias</a></li>
+        <li><a href="#cookies">Cookies y almacenamiento local</a></li>
+        <li><a href="#conservacion">Conservación de datos</a></li>
+        <li><a href="#arco">Derechos ARCO</a></li>
+        <li><a href="#uso">Políticas de uso</a></li>
+        <li><a href="#cambios">Cambios al aviso</a></li>
+      </ol>
+    </nav>
+
+    <section id="responsable">
+      <h2>1. Responsable del tratamiento</h2>
+      <p>
+        El <strong>Sistema de Gestión de Pequeños Negocios</strong> (en adelante, “el Sistema”)
+        es una plataforma de punto de venta e inventario multi-sede. El responsable del
+        tratamiento de los datos personales es el negocio que opera el Sistema, representado
+        por su <strong>Administrador</strong>, quien da de alta a los usuarios, sucursales y
+        catálogos.
+      </p>
+      <p>
+        Este aviso se emite conforme a la Ley Federal de Protección de Datos Personales en
+        Posesión de los Particulares y su normativa aplicable en los Estados Unidos Mexicanos.
+      </p>
+    </section>
+
+    <section id="datos">
+      <h2>2. Datos personales que recabamos</h2>
+      <p>El Sistema únicamente trata los datos necesarios para su operación:</p>
+      <div class="privacy-table-wrap">
+        <table class="privacy-table">
+          <thead>
+            <tr><th>Titular</th><th>Datos</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Usuarios (Administrador, Gerente, Cajero)</td>
+              <td>Nombre, correo electrónico, contraseña (almacenada solo como hash cifrado),
+                rol, sucursal asignada, estado activo/inactivo y fecha de alta.</td>
+            </tr>
+            <tr>
+              <td>Sucursales</td>
+              <td>Nombre, dirección, teléfono y nombre de la persona de contacto;
+                gerente asignado.</td>
+            </tr>
+            <tr>
+              <td>Operaciones</td>
+              <td>Registro de cada venta y entrada de inventario asociado al usuario que la
+                realizó, su sucursal, fecha y hora, método de pago e importes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        El Sistema <strong>no recaba datos de los clientes finales</strong> del negocio
+        (nombre, RFC, domicilio, etc.), ni datos de tarjetas bancarias: el método de pago se
+        registra solo como categoría (por ejemplo, efectivo o tarjeta). Tampoco se recaban
+        datos personales sensibles.
+      </p>
+    </section>
+
+    <section id="finalidades">
+      <h2>3. Finalidades del tratamiento</h2>
+      <h3>Finalidades primarias (necesarias)</h3>
+      <ul>
+        <li>Identificar y autenticar a los usuarios al iniciar sesión.</li>
+        <li>Asignar permisos según el rol y la sucursal de cada usuario.</li>
+        <li>Registrar ventas, entradas de inventario y existencias por sucursal.</li>
+        <li>Generar comprobantes de venta y reportes operativos y de ventas.</li>
+        <li>Mantener la trazabilidad de las operaciones (quién, dónde y cuándo).</li>
+      </ul>
+      <h3>Finalidades secundarias</h3>
+      <p>
+        El Sistema no utiliza los datos con fines publicitarios, de mercadotecnia ni de
+        elaboración de perfiles, y no los comercializa.
+      </p>
+    </section>
+
+    <section id="seguridad">
+      <h2>4. Medidas de seguridad</h2>
+      <ul>
+        <li>Las contraseñas se almacenan con el algoritmo <strong>bcrypt</strong>; nunca se
+          guardan en texto plano ni pueden ser consultadas por otros usuarios.</li>
+        <li>La sesión se mantiene mediante una cookie firmada con una clave secreta del
+          servidor; en producción solo se transmite por <strong>HTTPS</strong>.</li>
+        <li>Las cuentas desactivadas pierden el acceso de forma inmediata.</li>
+        <li>Las credenciales del servidor y de la base de datos se gestionan como variables
+          de entorno y no se almacenan en el código fuente.</li>
+      </ul>
+    </section>
+
+    <section id="acceso">
+      <h2>5. Acceso a la información por rol y sucursal</h2>
+      <ul>
+        <li><strong>Administrador:</strong> acceso a todas las sucursales, usuarios, productos,
+          inventario, ventas y reportes.</li>
+        <li><strong>Gerente:</strong> acceso a la información de su propia sucursal.</li>
+        <li><strong>Cajero:</strong> acceso a las funciones de venta y consulta de su
+          sucursal.</li>
+      </ul>
+      <p>
+        Ningún Gerente o Cajero puede consultar información de una sucursal distinta a la
+        que tiene asignada.
+      </p>
+    </section>
+
+    <section id="transferencias">
+      <h2>6. Encargados y transferencias</h2>
+      <p>
+        Para su funcionamiento, el Sistema se apoya en los siguientes proveedores, que actúan
+        como encargados y no pueden usar los datos para fines propios:
+      </p>
+      <ul>
+        <li><strong>Render</strong>: alojamiento de la aplicación y de la base de datos
+          PostgreSQL, en servidores ubicados en los Estados Unidos de América.</li>
+        <li><strong>Google Fonts</strong>: entrega de las tipografías de la interfaz; al
+          cargarlas, el navegador comparte la dirección IP con Google.</li>
+      </ul>
+      <p>
+        Fuera de lo anterior, los datos no se transfieren a terceros, salvo requerimiento de
+        una autoridad competente conforme a la ley.
+      </p>
+    </section>
+
+    <section id="cookies">
+      <h2>7. Cookies y almacenamiento local</h2>
+      <div class="privacy-table-wrap">
+        <table class="privacy-table">
+          <thead>
+            <tr><th>Elemento</th><th>Tipo</th><th>Uso</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>session</code></td>
+              <td>Cookie esencial</td>
+              <td>Mantiene la sesión iniciada. Se elimina al cerrar sesión.</td>
+            </tr>
+            <tr>
+              <td><code>colorMode</code></td>
+              <td>Almacenamiento local</td>
+              <td>Recuerda la preferencia de modo claro u oscuro.</td>
+            </tr>
+            <tr>
+              <td><code>lang</code></td>
+              <td>Almacenamiento local</td>
+              <td>Recuerda el idioma seleccionado (español o inglés).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        El Sistema no utiliza cookies de rastreo, analítica ni publicidad. Las preferencias
+        locales permanecen solo en el navegador del usuario y pueden borrarse desde su
+        configuración.
+      </p>
+    </section>
+
+    <section id="conservacion">
+      <h2>8. Conservación de los datos</h2>
+      <p>
+        Los datos de los usuarios se conservan mientras su cuenta exista. Cuando un usuario
+        deja de colaborar con el negocio, su cuenta se <strong>desactiva</strong> en lugar de
+        eliminarse, para conservar la trazabilidad de las ventas e inventario que registró,
+        durante el tiempo que exijan las obligaciones contables y fiscales del negocio.
+      </p>
+    </section>
+
+    <section id="arco">
+      <h2>9. Derechos ARCO y revocación del consentimiento</h2>
+      <p>
+        Como titular de datos personales, puede ejercer sus derechos de
+        <strong>Acceso, Rectificación, Cancelación u Oposición</strong> (ARCO), así como
+        revocar su consentimiento o limitar el uso de sus datos.
+      </p>
+      <p>
+        Para ello, envíe una solicitud al Administrador del Sistema de su negocio que incluya:
+      </p>
+      <ul>
+        <li>Nombre completo y correo electrónico registrado en el Sistema.</li>
+        <li>Documento que acredite su identidad (o la de su representante legal).</li>
+        <li>Descripción clara del derecho que desea ejercer y de los datos involucrados.</li>
+      </ul>
+      <p>
+        La solicitud será atendida en un plazo máximo de 20 días hábiles, y la resolución, de
+        ser procedente, se hará efectiva dentro de los 15 días hábiles siguientes.
+      </p>
+    </section>
+
+    <section id="uso">
+      <h2>10. Políticas de uso del Sistema</h2>
+      <ul>
+        <li>Las credenciales de acceso son personales e intransferibles; cada usuario es
+          responsable de las operaciones realizadas con su cuenta.</li>
+        <li>No comparta su contraseña ni deje su sesión abierta en equipos compartidos;
+          utilice siempre la opción “Cerrar sesión”.</li>
+        <li>La información del Sistema (ventas, inventario, reportes) es confidencial y de
+          uso exclusivo para la operación del negocio.</li>
+        <li>Queda prohibido intentar acceder a información de otras sucursales o a funciones
+          no autorizadas para su rol.</li>
+        <li>Cualquier incidente de seguridad o uso indebido debe reportarse de inmediato al
+          Administrador.</li>
+        <li>El código fuente del Sistema se distribuye bajo la licencia
+          <strong>GNU AGPL-3.0</strong>.</li>
+      </ul>
+    </section>
+
+    <section id="cambios">
+      <h2>11. Cambios al aviso de privacidad</h2>
+      <p>
+        Este aviso puede actualizarse por cambios en el Sistema o en la legislación. La
+        versión vigente estará siempre disponible en esta página, indicando la fecha de su
+        última actualización.
+      </p>
+    </section>
+
+    <footer class="privacy-footer">
+      <p>Proyecto Integrador · Sistema de Gestión de Pequeños Negocios</p>
+    </footer>
+  </main>
+</body>
+</html>

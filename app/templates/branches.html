@@ -4,64 +4,99 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sucursales</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/crud.css">
 </head>
 <body>
-  <main class="crud-page">
-    <h1 data-i18n="branches.title">Sucursales</h1>
-    <a href="/dashboard">Volver al panel</a>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Sucursales" %}
+      {% set page_title_key = "branches.title" %}
+      {% set page_subtitle = "Sedes de la empresa" %}
+      {% set page_subtitle_key = "branches.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <p id="page-success" role="status" hidden></p>
-    <p id="page-error" class="page-error" role="alert" hidden></p>
+      <main class="app-content">
+        <section class="panel panel-list">
+          <div class="toolbar">
+            <div class="toolbar-title">
+              <h2 class="section-title">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+                Sedes
+              </h2>
+              <span class="count-chip" id="branches-count">0</span>
+            </div>
+            <div class="toolbar-actions">
+              <button type="button" id="branch-new" hidden>
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                <span data-i18n="branches.add_title">Añadir sucursal</span>
+              </button>
+            </div>
+          </div>
 
-    <form id="branch-form">
-      <input id="branch-id" type="hidden">
+          <div class="card-grid" id="branches-grid" data-searchable></div>
+        </section>
+      </main>
 
-      <label for="branch-name">Nombre</label>
-      <input id="branch-name" type="text" required>
+      <dialog class="modal" id="branch-modal">
+        <form id="branch-form">
+          <div class="modal-header">
+            <h2 class="section-title" id="branch-modal-title">Añadir sucursal</h2>
+            <button type="button" class="modal-x" data-modal-close aria-label="Cerrar">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
 
-      <label for="branch-address">Dirección</label>
-      <input id="branch-address" type="text" required>
+          <div class="modal-body">
+            <input id="branch-id" type="hidden">
 
-      <label for="branch-phone">Teléfono</label>
-      <input id="branch-phone" type="text">
+            <div class="form-grid">
+              <div class="field field-full">
+                <label for="branch-name">Nombre</label>
+                <input id="branch-name" type="text" required>
+              </div>
+              <div class="field field-full">
+                <label for="branch-address">Dirección</label>
+                <input id="branch-address" type="text" required>
+              </div>
+              <div class="field">
+                <label for="branch-phone">Teléfono</label>
+                <input id="branch-phone" type="text">
+              </div>
+              <div class="field">
+                <label for="branch-contact">Información de contacto</label>
+                <input id="branch-contact" type="text">
+              </div>
+              <div class="field">
+                <label for="branch-manager-id">Gerente responsable</label>
+                <select id="branch-manager-id">
+                  <option value="">Sin asignar</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="branch-active" id="branch-active-label" hidden>Estado</label>
+                <select id="branch-active" hidden>
+                  <option value="true">Activa</option>
+                  <option value="false">Inactiva</option>
+                </select>
+              </div>
+            </div>
 
-      <label for="branch-contact">Información de contacto</label>
-      <input id="branch-contact" type="text">
+            <div class="modal-footer">
+              <button type="button" class="btn-ghost" data-modal-close>Cancelar</button>
+              <button type="submit" id="branch-submit">Guardar sucursal</button>
+            </div>
+          </div>
+        </form>
+      </dialog>
+    </div>
+  </div>
 
-      <label for="branch-manager-id">Gerente responsable</label>
-      <select id="branch-manager-id">
-        <option value="">Sin asignar</option>
-      </select>
-
-      <label for="branch-active" id="branch-active-label" hidden>Estado</label>
-      <select id="branch-active" hidden>
-        <option value="true">Activa</option>
-        <option value="false">Inactiva</option>
-      </select>
-
-      <button type="submit" id="branch-submit">Guardar sucursal</button>
-      <button type="button" id="branch-cancel" hidden>Cancelar edición</button>
-    </form>
-
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Dirección</th>
-          <th>Teléfono</th>
-          <th>Contacto</th>
-          <th>Gerente</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="branches-body"></tbody>
-    </table>
-  </main>
-  
   <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/modal.js"></script>
   <script src="/static/js/branches.js"></script>
 </body>
 </html>

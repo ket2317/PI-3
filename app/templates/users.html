@@ -3,54 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <h1 data-i18n="users.title">Usuarios</h1>
+  <title>Usuarios</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/crud.css">
 </head>
 <body>
-  <main class="crud-page">
-    <h1>Usuarios</h1>
-    <a href="/dashboard">Volver al panel</a>
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+    <div class="app-main">
+      {% set page_title = "Usuarios" %}
+      {% set page_title_key = "users.title" %}
+      {% set page_subtitle = "Gerentes y cajeros del sistema" %}
+      {% set page_subtitle_key = "users.subtitle" %}
+      {% include "_topbar.html" %}
 
-    <p id="page-success" role="status" hidden></p>
-    <p id="page-error" class="page-error" role="alert" hidden></p>
+      <main class="app-content">
+        <section class="panel panel-list">
+          <div class="toolbar">
+            <div class="toolbar-title">
+              <h2 class="section-title">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M16 4a4 4 0 0 1 0 8M22 21c0-3-1.8-5.6-4.5-6.6"/></svg>
+                Equipo
+              </h2>
+              <span class="count-chip" id="users-count">0</span>
+            </div>
+            <div class="toolbar-actions">
+              <button type="button" id="user-new">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                <span data-i18n="users.add_title">Añadir usuario</span>
+              </button>
+            </div>
+          </div>
 
-    <form id="user-form">
-      <input id="user-id" type="hidden">
+          <div class="card-grid" id="users-grid" data-searchable></div>
+        </section>
+      </main>
 
-      <label for="user-name">Nombre</label>
-      <input id="user-name" type="text" required>
+      <dialog class="modal" id="user-modal">
+        <form id="user-form">
+          <div class="modal-header">
+            <h2 class="section-title" id="user-modal-title">Añadir usuario</h2>
+            <button type="button" class="modal-x" data-modal-close aria-label="Cerrar">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
 
-      <label for="user-email">Correo</label>
-      <input id="user-email" type="email" required>
+          <div class="modal-body">
+            <input id="user-id" type="hidden">
 
-      <label for="user-password">Contraseña</label>
-      <input id="user-password" type="password">
+            <div class="form-grid">
+              <div class="field field-full">
+                <label for="user-name">Nombre</label>
+                <input id="user-name" type="text" required>
+              </div>
+              <div class="field">
+                <label for="user-email">Correo</label>
+                <input id="user-email" type="email" required>
+              </div>
+              <div class="field">
+                <label for="user-password">Contraseña</label>
+                <input id="user-password" type="password" autocomplete="new-password">
+                <p class="field-hint" id="user-password-hint" hidden>Déjala vacía para no cambiarla</p>
+              </div>
+              <div class="field">
+                <label for="user-role-id">Rol</label>
+                <select id="user-role-id" required></select>
+              </div>
+              <div class="field">
+                <label for="user-branch-id">Sucursal</label>
+                <select id="user-branch-id"></select>
+              </div>
+            </div>
 
-      <label for="user-role-id">Rol</label>
-      <select id="user-role-id" required></select>
+            <div class="modal-footer">
+              <button type="button" class="btn-ghost" data-modal-close>Cancelar</button>
+              <button type="submit" id="user-submit">Guardar usuario</button>
+            </div>
+          </div>
+        </form>
+      </dialog>
+    </div>
+  </div>
 
-      <label for="user-branch-id">Sucursal</label>
-      <select id="user-branch-id"></select>
-
-      <button type="submit" id="user-submit">Guardar usuario</button>
-      <button type="button" id="user-cancel" hidden>Cancelar edición</button>
-    </form>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Correo</th>
-          <th>Rol</th>
-          <th>Sucursal</th>
-          <th>Activo</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="users-body"></tbody>
-    </table>
-  </main>
   <script src="/static/js/i18n.js"></script>
+  <script src="/static/js/toast.js"></script>
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/modal.js"></script>
   <script src="/static/js/users.js"></script>
 </body>
 </html>

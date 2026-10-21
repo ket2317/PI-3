@@ -3,28 +3,16 @@ let managers = [];
 let branches = [];
 
 function showError(message) {
-  const el = document.querySelector("#page-error");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "error");
 }
 
-function clearError() {
-  const el = document.querySelector("#page-error");
-  el.hidden = true;
-  el.textContent = "";
-}
+function clearError() {}
 
 function showSuccess(message) {
-  const el = document.querySelector("#page-success");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "success");
 }
 
-function clearSuccess() {
-  const el = document.querySelector("#page-success");
-  el.hidden = true;
-  el.textContent = "";
-}
+function clearSuccess() {}
 
 async function apiRequest(url, options = {}) {
   const response = await fetch(url, { credentials: "same-origin", ...options });
@@ -43,8 +31,8 @@ async function apiRequest(url, options = {}) {
 function resetForm() {
   document.querySelector("#branch-form").reset();
   document.querySelector("#branch-id").value = "";
+  document.querySelector("#branch-modal-title").textContent = "Añadir sucursal";
   document.querySelector("#branch-submit").textContent = "Guardar sucursal";
-  document.querySelector("#branch-cancel").hidden = true;
   document.querySelector("#branch-active").hidden = true;
   document.querySelector("#branch-active-label").hidden = true;
   renderManagerOptions(null);
@@ -53,9 +41,7 @@ function resetForm() {
 
 async function loadCurrentUser() {
   currentUser = await apiRequest("/auth/me");
-  if (currentUser.rol !== "ADMIN") {
-    document.querySelector("#branch-form").hidden = true;
-  }
+  document.querySelector("#branch-new").hidden = currentUser.rol !== "ADMIN";
 }
 
 async function loadManagers() {
@@ -104,9 +90,9 @@ function editBranch(branch) {
   activeLabel.hidden = false;
   activeField.value = String(branch.activo);
 
+  document.querySelector("#branch-modal-title").textContent = "Editar sucursal";
   document.querySelector("#branch-submit").textContent = "Guardar cambios";
-  document.querySelector("#branch-cancel").hidden = false;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  openModal("branch-modal");
 }
 
 async function deactivateBranch(branch) {
@@ -128,40 +114,52 @@ async function loadBranches() {
   branches = await apiRequest("/sucursales/");
   renderManagerOptions(document.querySelector("#branch-id").value ? Number(document.querySelector("#branch-id").value) : null);
 
-  const body = document.querySelector("#branches-body");
-  body.innerHTML = "";
+  const grid = document.querySelector("#branches-grid");
+  grid.innerHTML = "";
+  document.querySelector("#branches-count").textContent = branches.length;
+
+  if (branches.length === 0) {
+    grid.innerHTML = `<p class="empty-card" data-empty-state>Aún no hay sucursales registradas.</p>`;
+  }
 
   branches.forEach((branch) => {
     const manager = managers.find((m) => m.id === branch.gerente_id);
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${branch.id}</td>
-      <td>${branch.nombre}</td>
-      <td>${branch.direccion}</td>
-      <td>${branch.telefono}</td>
-      <td>${branch.contacto || "—"}</td>
-      <td>${manager ? manager.nombre : "Sin asignar"}</td>
-      <td>${branch.activo ? "Activa" : "Inactiva"}</td>
-      <td></td>
+    const card = document.createElement("article");
+    card.className = `entity-card${branch.activo ? "" : " is-inactive"}`;
+    card.innerHTML = `
+      <div class="entity-head">
+        <div class="entity-avatar is-square">${ICONS.store}</div>
+        <div>
+          <p class="entity-name">${branch.nombre}</p>
+          <p class="entity-sub">${branch.direccion}</p>
+        </div>
+      </div>
+      <div class="entity-facts">
+        <span>${ICONS.phone} ${branch.telefono || "Sin teléfono"}</span>
+        <span>${ICONS.user} ${manager ? manager.nombre : "Sin gerente asignado"}</span>
+        ${branch.contacto ? `<span>${ICONS.contact} ${branch.contacto}</span>` : ""}
+      </div>
+      <div class="entity-foot">
+        <span class="badge ${branch.activo ? "badge-success" : "badge-muted"}">${branch.activo ? "Activa" : "Inactiva"}</span>
+        <div class="entity-actions"></div>
+      </div>
     `;
 
     if (currentUser.rol === "ADMIN") {
-      const actionsCell = row.lastElementChild;
+      const actions = card.querySelector(".entity-actions");
 
-      const editButton = document.createElement("button");
-      editButton.type = "button";
-      editButton.textContent = "Editar";
+      const editButton = iconButton("edit", "edit", "Editar");
       editButton.addEventListener("click", () => editBranch(branch));
-      actionsCell.appendChild(editButton);
+      actions.appendChild(editButton);
 
-      const deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.textContent = "Desactivar";
-      deleteButton.addEventListener("click", () => deactivateBranch(branch));
-      actionsCell.appendChild(deleteButton);
+      if (branch.activo) {
+        const deleteButton = iconButton("delete", "disable", "Desactivar");
+        deleteButton.addEventListener("click", () => deactivateBranch(branch));
+        actions.appendChild(deleteButton);
+      }
     }
 
-    body.appendChild(row);
+    grid.appendChild(card);
   });
 }
 
@@ -194,14 +192,19 @@ document.querySelector("#branch-form").addEventListener("submit", async (event) 
     });
 
     showSuccess(branchId ? "Sucursal actualizada correctamente" : "Sucursal creada correctamente");
-    resetForm();
+    closeModal("branch-modal");
     await loadBranches();
   } catch (error) {
     showError(error.message);
   }
 });
 
-document.querySelector("#branch-cancel").addEventListener("click", resetForm);
+document.querySelector("#branch-new").addEventListener("click", () => {
+  resetForm();
+  openModal("branch-modal");
+});
+
+document.querySelector("#branch-modal").addEventListener("close", resetForm);
 
 (async () => {
   try {

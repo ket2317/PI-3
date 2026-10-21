@@ -1,23 +1,16 @@
 let currentUser = null;
 let branchProducts = [];
 let currentInventory = [];
+let onlyLowStock = false;
 
 function showError(message) {
-  const el = document.querySelector("#page-error");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "error");
 }
 
-function clearError() {
-  const el = document.querySelector("#page-error");
-  el.hidden = true;
-  el.textContent = "";
-}
+function clearError() {}
 
 function showSuccess(message) {
-  const el = document.querySelector("#page-success");
-  el.textContent = message;
-  el.hidden = false;
+  showToast(message, "success");
 }
 
 async function apiRequest(url, options = {}) {
@@ -106,21 +99,81 @@ async function loadInventory() {
   fillFieldsFromSelectedProduct();
 }
 
-function renderInventoryTable() {
-  const body = document.querySelector("#inventory-body");
-  body.innerHTML = "";
+function isLowStock(item) {
+  return item.existencia <= item.stock_minimo;
+}
 
-  currentInventory.forEach((item) => {
-    const product = branchProducts.find((p) => p.id === item.producto_id);
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${product ? product.codigo : item.producto_id}</td>
-      <td>${product ? product.nombre : "—"}</td>
-      <td>${item.existencia}</td>
-      <td>${item.stock_minimo}</td>
+function renderSummary() {
+  const low = currentInventory.filter(isLowStock).length;
+  const units = currentInventory.reduce((total, item) => total + item.existencia, 0);
+  document.querySelector("#summary-products").textContent = currentInventory.length;
+  document.querySelector("#summary-low").textContent = low;
+  document.querySelector("#summary-units").textContent = units.toLocaleString("es-MX");
+}
+
+function renderInventoryTable() {
+  renderSummary();
+
+  const list = document.querySelector("#inventory-body");
+  list.innerHTML = "";
+
+  const items = onlyLowStock
+    ? currentInventory.filter(isLowStock)
+    : currentInventory;
+
+  document.querySelector("#inventory-count").textContent = items.length;
+
+  if (items.length === 0) {
+    list.innerHTML = `
+      <p class="stock-empty" data-empty-state>
+        ${onlyLowStock
+          ? "No hay productos con bajo inventario en esta sucursal."
+          : "Aún no hay existencias registradas en esta sucursal."}
+      </p>
     `;
-    body.appendChild(row);
+  }
+
+  items.forEach((item) => {
+    const product = branchProducts.find((p) => p.id === item.producto_id);
+    const low = isLowStock(item);
+    // La barra se llena al 100% cuando hay el doble del stock mínimo
+    const target = Math.max(item.stock_minimo * 2, 1);
+    const percent = Math.min(100, Math.round((item.existencia / target) * 100));
+
+    const row = document.createElement("div");
+    row.className = `stock-row${low ? " is-low" : ""}`;
+    row.innerHTML = `
+      <div>
+        <p class="entity-name">${product ? product.nombre : "Producto " + item.producto_id}</p>
+        <p class="entity-sub">Código ${product ? product.codigo : item.producto_id}</p>
+      </div>
+      <div class="stock-level">
+        <div class="stock-bar"><span style="width:${percent}%"></span></div>
+        <div class="stock-meta">
+          <strong>${item.existencia} piezas</strong>
+          <span>mínimo ${item.stock_minimo}</span>
+        </div>
+      </div>
+      <div></div>
+    `;
+
+    const adjustButton = iconButton("edit", "adjust", "Ajustar existencia");
+    adjustButton.addEventListener("click", () => {
+      openInventoryModal(item.producto_id);
+    });
+    row.lastElementChild.appendChild(adjustButton);
+    list.appendChild(row);
   });
+}
+
+function openInventoryModal(productId) {
+  document.querySelector("#inventory-search").value = "";
+  renderProductOptions(branchProducts);
+  if (productId) {
+    document.querySelector("#inventory-product-select").value = productId;
+  }
+  fillFieldsFromSelectedProduct();
+  openModal("inventory-modal");
 }
 
 document.querySelector("#inventory-search").addEventListener("input", (event) => {
@@ -172,6 +225,7 @@ document.querySelector("#inventory-form").addEventListener("submit", async (even
       body: JSON.stringify(payload),
     });
     showSuccess("Inventario actualizado correctamente");
+    closeModal("inventory-modal");
     await loadInventory();
   } catch (error) {
     showError(error.message);
@@ -189,34 +243,14 @@ document.querySelector("#inventory-form").addEventListener("submit", async (even
   }
 })();
 
-document.querySelector("#low-stock-button").addEventListener("click", async () => {
-  try {
-    clearError();
-    const branchId = Number(document.querySelector("#inventory-branch-id").value);
-    const lowStock = await apiRequest(`/inventario/bajo-stock?sucursal_id=${branchId}`);
+document.querySelector("#inventory-new").addEventListener("click", () => {
+  openInventoryModal(null);
+});
 
-    const table = document.querySelector("#low-stock-table");
-    const body = document.querySelector("#low-stock-body");
-    body.innerHTML = "";
-
-    lowStock.forEach((item) => {
-      const product = branchProducts.find((p) => p.id === item.producto_id);
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${product ? product.codigo : item.producto_id}</td>
-        <td>${product ? product.nombre : "—"}</td>
-        <td>${item.existencia}</td>
-        <td>${item.stock_minimo}</td>
-      `;
-      body.appendChild(row);
-    });
-
-    table.hidden = false;
-
-    if (lowStock.length === 0) {
-      showSuccess("No hay productos con bajo inventario en esta sucursal");
-    }
-  } catch (error) {
-    showError(error.message);
-  }
+document.querySelector("#low-stock-button").addEventListener("click", (event) => {
+  onlyLowStock = !onlyLowStock;
+  const button = event.currentTarget;
+  button.classList.toggle("is-active", onlyLowStock);
+  button.setAttribute("aria-pressed", String(onlyLowStock));
+  renderInventoryTable();
 });
