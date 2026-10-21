@@ -1,6 +1,7 @@
 let currentUser = null;
 let branchProducts = [];
 let currentInventory = [];
+let onlyLowStock = false;
 
 function showError(message) {
   showToast(message, "error");
@@ -98,21 +99,61 @@ async function loadInventory() {
   fillFieldsFromSelectedProduct();
 }
 
+function isLowStock(item) {
+  return item.existencia <= item.stock_minimo;
+}
+
 function renderInventoryTable() {
   const body = document.querySelector("#inventory-body");
   body.innerHTML = "";
 
-  currentInventory.forEach((item) => {
+  const items = onlyLowStock
+    ? currentInventory.filter(isLowStock)
+    : currentInventory;
+
+  document.querySelector("#inventory-count").textContent = items.length;
+
+  if (items.length === 0) {
+    body.innerHTML = `
+      <tr><td colspan="5" class="empty-state">
+        ${onlyLowStock
+          ? "No hay productos con bajo inventario en esta sucursal."
+          : "Aún no hay existencias registradas en esta sucursal."}
+      </td></tr>
+    `;
+  }
+
+  items.forEach((item) => {
     const product = branchProducts.find((p) => p.id === item.producto_id);
+    const low = isLowStock(item);
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${product ? product.codigo : item.producto_id}</td>
-      <td>${product ? product.nombre : "—"}</td>
+      <td class="cell-strong">
+        ${product ? product.nombre : "—"}
+        <span class="cell-sub">Código ${product ? product.codigo : item.producto_id}</span>
+      </td>
       <td>${item.existencia}</td>
       <td>${item.stock_minimo}</td>
+      <td><span class="badge ${low ? "badge-danger" : "badge-success"}">${low ? "Bajo" : "Suficiente"}</span></td>
+      <td class="cell-actions">
+        <button type="button" data-action="edit">Ajustar</button>
+      </td>
     `;
+    row.querySelector('[data-action="edit"]').addEventListener("click", () => {
+      openInventoryModal(item.producto_id);
+    });
     body.appendChild(row);
   });
+}
+
+function openInventoryModal(productId) {
+  document.querySelector("#inventory-search").value = "";
+  renderProductOptions(branchProducts);
+  if (productId) {
+    document.querySelector("#inventory-product-select").value = productId;
+  }
+  fillFieldsFromSelectedProduct();
+  openModal("inventory-modal");
 }
 
 document.querySelector("#inventory-search").addEventListener("input", (event) => {
@@ -164,6 +205,7 @@ document.querySelector("#inventory-form").addEventListener("submit", async (even
       body: JSON.stringify(payload),
     });
     showSuccess("Inventario actualizado correctamente");
+    closeModal("inventory-modal");
     await loadInventory();
   } catch (error) {
     showError(error.message);
@@ -181,34 +223,14 @@ document.querySelector("#inventory-form").addEventListener("submit", async (even
   }
 })();
 
-document.querySelector("#low-stock-button").addEventListener("click", async () => {
-  try {
-    clearError();
-    const branchId = Number(document.querySelector("#inventory-branch-id").value);
-    const lowStock = await apiRequest(`/inventario/bajo-stock?sucursal_id=${branchId}`);
+document.querySelector("#inventory-new").addEventListener("click", () => {
+  openInventoryModal(null);
+});
 
-    const table = document.querySelector("#low-stock-table");
-    const body = document.querySelector("#low-stock-body");
-    body.innerHTML = "";
-
-    lowStock.forEach((item) => {
-      const product = branchProducts.find((p) => p.id === item.producto_id);
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${product ? product.codigo : item.producto_id}</td>
-        <td>${product ? product.nombre : "—"}</td>
-        <td>${item.existencia}</td>
-        <td>${item.stock_minimo}</td>
-      `;
-      body.appendChild(row);
-    });
-
-    table.hidden = false;
-
-    if (lowStock.length === 0) {
-      showSuccess("No hay productos con bajo inventario en esta sucursal");
-    }
-  } catch (error) {
-    showError(error.message);
-  }
+document.querySelector("#low-stock-button").addEventListener("click", (event) => {
+  onlyLowStock = !onlyLowStock;
+  const button = event.currentTarget;
+  button.classList.toggle("is-active", onlyLowStock);
+  button.setAttribute("aria-pressed", String(onlyLowStock));
+  renderInventoryTable();
 });

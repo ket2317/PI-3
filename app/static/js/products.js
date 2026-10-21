@@ -41,9 +41,18 @@ async function apiRequest(url, options = {}) {
     document.querySelector("#product-form").reset();
     document.querySelector("#product-id").value = "";
     document.querySelector("#product-tax").value = "0.16";
+    document.querySelector("#product-modal-title").textContent =
+    "Añadir producto";
     document.querySelector("#product-submit").textContent =
     "Guardar producto";
-    document.querySelector("#product-cancel").hidden = true;
+
+    const branchSelect = document.querySelector("#product-branch-id");
+    const filterValue = document.querySelector("#product-filter-branch").value;
+    if (currentUser && currentUser.rol === "GERENTE") {
+      branchSelect.value = currentUser.sucursal_id;
+    } else if (filterValue) {
+      branchSelect.value = filterValue;
+    }
     clearError();
   }
   
@@ -55,19 +64,25 @@ async function apiRequest(url, options = {}) {
     branches = await apiRequest("/sucursales/");
 
     const select = document.querySelector("#product-branch-id");
+    const filter = document.querySelector("#product-filter-branch");
     select.innerHTML = "";
+    filter.innerHTML = `<option value="">Todas las sucursales</option>`;
     
     branches.forEach((branch) => {
       const option = document.createElement("option");
       option.value = branch.id;
       option.textContent = branch.nombre;
       select.appendChild(option);
+      filter.appendChild(option.cloneNode(true));
     });
 
   if (currentUser.rol === "GERENTE") {
     select.value = currentUser.sucursal_id;
     select.disabled = true;
   }
+
+  // Solo el administrador ve varias sucursales
+  filter.hidden = currentUser.rol !== "ADMIN";
 }
 
 async function loadCategories() {
@@ -85,8 +100,9 @@ async function loadCategories() {
 }
 
 async function loadProducts() {
-  const branchSelect = document.querySelector("#product-branch-id");
-  const branchId = Number(branchSelect.value);
+  const branchId = Number(
+    document.querySelector("#product-filter-branch").value
+  );
 
   let url = "/productos/";
 
@@ -98,17 +114,28 @@ async function loadProducts() {
   const body = document.querySelector("#products-body");
 
   body.innerHTML = "";
+  document.querySelector("#products-count").textContent = products.length;
+
+  if (products.length === 0) {
+    body.innerHTML = `
+      <tr><td colspan="5" class="empty-state">
+        Aún no hay productos. Usa “Añadir producto” para registrar el primero.
+      </td></tr>
+    `;
+  }
 
   products.forEach((product) => {
     const row = document.createElement("tr");
 
     row.innerHTML = `
+      <td class="cell-strong">
+        ${product.nombre}
+        <span class="cell-sub">Código ${product.codigo}</span>
+      </td>
       <td>${getBranchName(product.sucursal_id)}</td>
-      <td>${product.codigo}</td>
-      <td>${product.nombre}</td>
-      <td>${product.precio}</td>
-      <td>${product.iva}</td>
-      <td>
+      <td>$${Number(product.precio).toFixed(2)}</td>
+      <td>${Math.round(Number(product.iva) * 100)}%</td>
+      <td class="cell-actions">
         <button type="button" data-action="edit">Editar</button>
         <button type="button" data-action="delete">Desactivar</button>
       </td>
@@ -134,9 +161,11 @@ function editProduct(product) {
   document.querySelector("#product-name").value = product.nombre;
   document.querySelector("#product-price").value = product.precio;
   document.querySelector("#product-tax").value = product.iva;
+  document.querySelector("#product-modal-title").textContent =
+    "Editar producto";
   document.querySelector("#product-submit").textContent =
     "Guardar cambios";
-  document.querySelector("#product-cancel").hidden = false;
+  openModal("product-modal");
 }
 
 async function deactivateProduct(product) {
@@ -203,17 +232,23 @@ document.querySelector("#product-form")
         : "Producto creado correctamente"
       );
 
-      resetForm();
+      closeModal("product-modal");
       await loadProducts();
     } catch (error) {
       showError(error.message);
     }
   });
 
-document.querySelector("#product-cancel")
-  .addEventListener("click", resetForm);
+document.querySelector("#product-new")
+  .addEventListener("click", () => {
+    resetForm();
+    openModal("product-modal");
+  });
 
-document.querySelector("#product-branch-id")
+document.querySelector("#product-modal")
+  .addEventListener("close", resetForm);
+
+document.querySelector("#product-filter-branch")
   .addEventListener("change", async () => {
     try {
       await loadProducts();

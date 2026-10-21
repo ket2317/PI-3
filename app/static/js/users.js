@@ -30,8 +30,13 @@ async function apiRequest(url, options = {}) {
 function resetForm() {
   document.querySelector("#user-form").reset();
   document.querySelector("#user-id").value = "";
+  document.querySelector("#user-modal-title").textContent = "Añadir usuario";
   document.querySelector("#user-submit").textContent = "Guardar usuario";
-  document.querySelector("#user-cancel").hidden = true;
+  document.querySelector("#user-password").required = true;
+  document.querySelector("#user-password-hint").hidden = true;
+  if (currentUser && currentUser.rol === "GERENTE") {
+    document.querySelector("#user-branch-id").value = currentUser.sucursal_id;
+  }
   clearError();
 }
 
@@ -82,17 +87,26 @@ async function loadUsers() {
   const users = await apiRequest("/usuarios/");
   const body = document.querySelector("#users-body");
   body.innerHTML = "";
+  document.querySelector("#users-count").textContent = users.length;
+
+  if (users.length === 0) {
+    body.innerHTML = `
+      <tr><td colspan="5" class="empty-state">Aún no hay usuarios registrados.</td></tr>
+    `;
+  }
 
   users.forEach((user) => {
     const branch = branches.find((b) => b.id === user.sucursal_id);
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${user.nombre}</td>
-      <td>${user.correo}</td>
+      <td class="cell-strong">
+        ${user.nombre}
+        <span class="cell-sub">${user.correo}</span>
+      </td>
       <td>${roleName(user.rol_id)}</td>
       <td>${branch ? branch.nombre : "—"}</td>
       <td><span class="badge ${user.activo ? "badge-success" : "badge-muted"}">${user.activo ? "Activo" : "Inactivo"}</span></td>
-      <td>
+      <td class="cell-actions">
         <button type="button" data-action="edit">Editar</button>
         <button type="button" data-action="delete">Desactivar</button>
       </td>
@@ -109,8 +123,11 @@ function editUser(user) {
   document.querySelector("#user-email").value = user.correo;
   document.querySelector("#user-role-id").value = user.rol_id;
   document.querySelector("#user-branch-id").value = user.sucursal_id || "";
+  document.querySelector("#user-modal-title").textContent = "Editar usuario";
   document.querySelector("#user-submit").textContent = "Guardar cambios";
-  document.querySelector("#user-cancel").hidden = false;
+  document.querySelector("#user-password").required = false;
+  document.querySelector("#user-password-hint").hidden = false;
+  openModal("user-modal");
 }
 
 async function deactivateUser(user) {
@@ -162,14 +179,19 @@ document.querySelector("#user-form").addEventListener("submit", async (event) =>
     });
 
     showSuccess(userId ? "Usuario actualizado correctamente" : "Usuario creado correctamente");
-    resetForm();
+    closeModal("user-modal");
     await loadUsers();
   } catch (error) {
     showError(error.message);
   }
 });
 
-document.querySelector("#user-cancel").addEventListener("click", resetForm);
+document.querySelector("#user-new").addEventListener("click", () => {
+  resetForm();
+  openModal("user-modal");
+});
+
+document.querySelector("#user-modal").addEventListener("close", resetForm);
 
 (async () => {
   try {
