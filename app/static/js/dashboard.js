@@ -29,11 +29,11 @@ async function apiRequest(url, options = {}) {
 }
 
 function renderUser(user) {
-  document.querySelector("#current-user").textContent =
-    `Usuario: ${user.nombre}`;
+ document.querySelector("#current-user").textContent =
+  `Usuario: ${user.nombre || "Sin nombre"}`;
 
-  document.querySelector("#current-role").textContent =
-    `Rol: ${user.rol}`;
+document.querySelector("#current-role").textContent =
+  `Rol: ${user.rol || "Sin rol"}`;
 
   const branchElement = document.querySelector("#current-branch");
 
@@ -59,21 +59,24 @@ async function loadMyBranch(user) {
         return;
     }
 
-    const branch = await apiRequest(`/sucursales/${user.sucursal_id}`);
+     const branch = await apiRequest(`/sucursales/${user.sucursal_id}`);
 
     document.querySelector("#my-branch-section").hidden = false;
 
+    const lang = getLanguage();
+    const t = translations[lang];
+
     document.querySelector("#branch-name").textContent =
-        `Nombre: ${branch.nombre}`;
+        `${t["branch.name"]}: ${branch.nombre}`;
 
     document.querySelector("#branch-address").textContent =
-        `Dirección: ${branch.direccion}`;
+        `${t["branch.address"]}: ${branch.direccion}`;
 
     document.querySelector("#branch-phone").textContent =
-        `Teléfono: ${branch.telefono || "Sin registrar"}`;
+        `${t["branch.phone"]}: ${branch.telefono || t["branch.no_data"]}`;
 
     document.querySelector("#branch-contact").textContent =
-        `Contacto: ${branch.contacto || "Sin registrar"}`;
+        `${t["branch.contact"]}: ${branch.contacto || t["branch.no_data"]}`;
 }
 
 (async () => {

@@ -35,6 +35,16 @@ const translations = {
     "branches.title": "Sucursales",
     "branches.subtitle": "Sedes de la empresa",
     "branches.add_title": "Añadir sucursal",
+    "branch.name": "Nombre",
+    "branch.address": "Dirección",
+    "branch.phone": "Teléfono",
+    "branch.contact": "Contacto",
+    "branch.no_data": "Sin registrar",
+    "dashboard.user": "Usuario",
+    "dashboard.role": "Rol",
+    "dashboard.assigned_branch": "Sucursal asignada",
+    "dashboard.general_admin": "Administración general",
+
   },
   en: {
     "sidebar.subtitle": "Control panel",
@@ -72,6 +82,16 @@ const translations = {
     "branches.title": "Branches",
     "branches.subtitle": "Company locations",
     "branches.add_title": "Add branch",
+    "branch.name": "Name",
+    "branch.address": "Address",
+    "branch.phone": "Phone",
+    "branch.contact": "Contact",
+    "branch.no_data": "Not registered",
+    "dashboard.user": "User",
+    "dashboard.role": "Role",
+    "dashboard.assigned_branch": "Assigned branch",
+    "dashboard.general_admin": "General administration",
+
   },
 };
 

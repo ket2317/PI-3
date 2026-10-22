@@ -1,41 +1,45 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --color-bg: #f3efe6;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f7f4ec;
-  --color-border: #e4ddcc;
+  --color-bg: #F7F2EA;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #EFE5D8;
+  --color-border: #E2D5C5;
 
-  --color-text: #2a241c;
-  --color-text-muted: #6b6255;
+  --color-text: #252321;
+  --color-text-muted: #75685D;
 
-  --color-primary: #7a3038;
-  --color-primary-contrast: #ffffff;
-  --color-primary-soft: #f4e3e4;
+  --color-primary: #C96F56;
+  --color-primary-contrast: #FFFFFF;
+  --color-primary-soft: #F5E1DA;
 
-  --color-accent-blue: #7f97ac;
-  --color-accent-blue-soft: #e7edf1;
-  --color-accent-tan: #b08f68;
-  --color-accent-tan-soft: #efe6d8;
-  --color-accent-olive: #9a9770;
-  --color-accent-olive-soft: #eeecdd;
+  --color-accent-blue: #8EADC4;
+  --color-accent-blue-soft: #DCEAF4;
 
-  --color-success: #3f6b4f;
-  --color-success-soft: #e2ede3;
-  --color-error: #a13b3b;
-  --color-error-soft: #f6e3e2;
+  --color-accent-tan: #B99572;
+  --color-accent-tan-soft: #EFE2D2;
 
-  --sidebar-bg: #f3efe6;
-  --sidebar-active-bg: #dfe6ec;
-  --sidebar-text: #45403a;
-  --sidebar-text-muted: #948a78;
+  --color-accent-olive: #A6A084;
+  --color-accent-olive-soft: #EEEBDD;
+
+  --color-success: #477653;
+  --color-success-soft: #E2EDE3;
+
+  --color-error: #A64238;
+  --color-error-soft: #F7E3DF;
+
+  --sidebar-bg: #EFE5D8;
+  --sidebar-active-bg: #DCEAF4;
+  --sidebar-text: #3B302A;
+  --sidebar-text-muted: #8A7B6D;
 
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
 
-  --shadow-card: 0 1px 2px rgba(42, 36, 28, 0.04), 0 8px 24px rgba(42, 36, 28, 0.06);
-  --shadow-pop: 0 12px 32px rgba(42, 36, 28, 0.16);
+  --shadow-card: 0 1px 2px rgba(37, 35, 33, 0.04),
+    0 8px 24px rgba(37, 35, 33, 0.06);
+  --shadow-pop: 0 12px 32px rgba(37, 35, 33, 0.16);
 
   --font-heading: "Fraunces", Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;

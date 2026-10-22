@@ -19,14 +19,12 @@
 }
 
 body {
-  background-color: var(--bg-main);
+    min-height: 100vh;
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-background);
 
-
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
 }
 
 .login-wrapper {
