@@ -18,31 +18,41 @@ async function apiRequest(url, options = {}) {
 
   if (response.status === 401) {
     window.location.href = "/login";
-    throw new Error("Debes iniciar sesión");
+    throw new Error(translateKey("error.session_expired") || "Debes iniciar sesión");
   }
 
   if (!response.ok) {
-    throw new Error(data.detail || "No fue posible completar la operación");
+    throw new Error(data.detail || translateKey("error.generic") || "No fue posible completar la operación");
   }
 
   return data;
 }
 
 function renderUser(user) {
- document.querySelector("#current-user").textContent =
-  `Usuario: ${user.nombre || "Sin nombre"}`;
+  // Traducimos usando las etiquetas correspondientes del diccionario
+  const userLabel = translateKey("dashboard.user");
+  const roleLabel = translateKey("dashboard.role");
+  const assignedBranchLabel = translateKey("dashboard.assigned_branch");
+  const generalAdminText = translateKey("dashboard.general_admin");
 
-document.querySelector("#current-role").textContent =
-  `Rol: ${user.rol || "Sin rol"}`;
+  document.querySelector("#current-user").textContent =
+    `${userLabel}: ${user.nombre || translateKey("branch.no_data")}`;
+
+  // Mapeamos el rol del usuario a una clave del diccionario si existe, o mostramos el valor original
+  const roleKey = `role.${user.rol ? user.rol.toLowerCase() : ''}`;
+  const translatedRole = translations[getLanguage()][roleKey] || user.rol || "Sin rol";
+
+  document.querySelector("#current-role").textContent =
+    `${roleLabel}: ${translatedRole}`;
 
   const branchElement = document.querySelector("#current-branch");
 
   if (user.sucursal_id) {
     branchElement.textContent =
-      `Sucursal asignada: ${user.sucursal_id}`;
+      `${assignedBranchLabel}: ${user.sucursal_id}`;
   } else {
     branchElement.textContent =
-      "Sucursal asignada: Administración general";
+      `${assignedBranchLabel}: ${generalAdminText}`;
   }
 
   if (user.rol !== "ADMIN") {
@@ -59,27 +69,26 @@ async function loadMyBranch(user) {
         return;
     }
 
-     const branch = await apiRequest(`/sucursales/${user.sucursal_id}`);
+    const branch = await apiRequest(`/sucursales/${user.sucursal_id}`);
 
     document.querySelector("#my-branch-section").hidden = false;
 
-    const lang = getLanguage();
-    const t = translations[lang];
-
+    // Usamos translateKey para obtener las etiquetas traducidas en tiempo real
     document.querySelector("#branch-name").textContent =
-        `${t["branch.name"]}: ${branch.nombre}`;
+        `${translateKey("branch.name")}: ${branch.nombre}`;
 
     document.querySelector("#branch-address").textContent =
-        `${t["branch.address"]}: ${branch.direccion}`;
+        `${translateKey("branch.address")}: ${branch.direccion}`;
 
     document.querySelector("#branch-phone").textContent =
-        `${t["branch.phone"]}: ${branch.telefono || t["branch.no_data"]}`;
+        `${translateKey("branch.phone")}: ${branch.telefono || translateKey("branch.no_data")}`;
 
     document.querySelector("#branch-contact").textContent =
-        `${t["branch.contact"]}: ${branch.contacto || t["branch.no_data"]}`;
+        `${translateKey("branch.contact")}: ${branch.contacto || translateKey("branch.no_data")}`;
 }
 
-(async () => {
+// Hacemos la función de carga accesible globalmente por si cambian de idioma
+window.reloadDashboardData = async function() {
     try {
         const user = await apiRequest("/auth/me");
         renderUser(user);
@@ -87,4 +96,8 @@ async function loadMyBranch(user) {
     } catch (error) {
         showError(error.message);
     }
+};
+
+(async () => {
+    await window.reloadDashboardData();
 })();

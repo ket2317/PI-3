@@ -44,7 +44,11 @@ const translations = {
     "dashboard.role": "Rol",
     "dashboard.assigned_branch": "Sucursal asignada",
     "dashboard.general_admin": "Administración general",
-
+    // Nuevas claves agregadas para textos dinámicos
+    "dashboard.loading_user": "Cargando usuario...",
+    "role.admin": "Administrador",
+    "role.manager": "Gerente",
+    "role.cashier": "Cajero",
   },
   en: {
     "sidebar.subtitle": "Control panel",
@@ -91,7 +95,11 @@ const translations = {
     "dashboard.role": "Role",
     "dashboard.assigned_branch": "Assigned branch",
     "dashboard.general_admin": "General administration",
-
+    // Nuevas claves agregadas para textos dinámicos
+    "dashboard.loading_user": "Loading user...",
+    "role.admin": "Administrator",
+    "role.manager": "Manager",
+    "role.cashier": "Cashier",
   },
 };
 
@@ -99,9 +107,21 @@ function getLanguage() {
   return localStorage.getItem("lang") || "es";
 }
 
+// Función global para traducir una clave directamente desde otros scripts
+function translateKey(key) {
+  const lang = getLanguage();
+  return (translations[lang] && translations[lang][key]) || key;
+}
+
 function setLanguage(lang) {
   localStorage.setItem("lang", lang);
   applyTranslations();
+  
+  // Opcional: Si tienes una función global en tu dashboard.js para recargar los datos del usuario, 
+  // puedes llamarla aquí para que los textos dinámicos se traduzcan inmediatamente al cambiar el idioma.
+  if (typeof window.reloadDashboardData === "function") {
+    window.reloadDashboardData();
+  }
 }
 
 // Cambia solo el texto del elemento; los íconos SVG que contiene se conservan.
