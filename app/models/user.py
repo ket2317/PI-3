@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, Text
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, Text, String
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
@@ -55,3 +55,5 @@ class User(Base):
         foreign_keys=[sucursal_id],
         back_populates="usuarios"
     )
+
+    reset_token = Column(String, nullable=True)

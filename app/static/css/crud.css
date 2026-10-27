@@ -475,3 +475,12 @@ button.summary-tile:hover { filter: none; border-color: var(--color-error); }
   .stock-row { grid-template-columns: minmax(0, 1fr) auto; }
   .stock-row .stock-level { grid-column: 1 / -1; grid-row: 2; }
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
+  caret-color: var(--color-text);
+  transition: background-color 9999s ease-out;
+}
