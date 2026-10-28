@@ -75,6 +75,7 @@ function renderProductGrid(products) {
 
 async function loadProductsForBranch() {
   const branchId = Number(document.querySelector("#sale-branch-id").value);
+  if (!branchId) return;
   branchProducts = await apiRequest(`/productos/?sucursal_id=${branchId}`);
   document.querySelector("#item-search").value = "";
   renderProductGrid(branchProducts);
@@ -86,22 +87,29 @@ document.querySelector("#item-search").addEventListener("input", (event) => {
     ? branchProducts.filter(
         (p) =>
           p.codigo.toLowerCase().includes(term) ||
-          p.nombre.toLowerCase().includes(term),
+          p.nombre.toLowerCase().includes(term)
       )
     : branchProducts;
   renderProductGrid(filtered);
 });
 
 async function loadPaymentMethods() {
-  const methods = await apiRequest("/metodos-pago/");
   const select = document.querySelector("#payment-method-id");
-  select.innerHTML = "";
-  methods.forEach((m) => {
-    const option = document.createElement("option");
-    option.value = m.id;
-    option.textContent = m.nombre;
-    select.appendChild(option);
-  });
+  if (!select) return;
+
+  try {
+    const methods = await apiRequest("/metodos-pago/");
+    select.innerHTML = '<option value="" disabled selected>Selecciona método de pago</option>';
+    
+    methods.forEach((m) => {
+      const option = document.createElement("option");
+      option.value = m.id;
+      option.textContent = m.nombre;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    showError("No se pudieron cargar los métodos de pago");
+  }
 }
 
 function addToCart(productId) {
@@ -144,7 +152,7 @@ function renderCart() {
     if (!product) return;
 
     const itemSubtotal = Number(product.precio) * item.cantidad;
-    const itemIva = itemSubtotal * Number(product.iva);
+    const itemIva = itemSubtotal * Number(product.iva || 0); // Corrección de sintaxis realizada aquí
 
     subtotal += itemSubtotal;
     iva += itemIva;
@@ -162,13 +170,13 @@ function renderCart() {
       <span class="cart-item-subtotal">$${itemSubtotal.toFixed(2)}</span>
     `;
     row.querySelector('[data-action="decrease"]').addEventListener("click", () =>
-      changeQuantity(item.producto_id, -1),
+      changeQuantity(item.producto_id, -1)
     );
     row.querySelector('[data-action="increase"]').addEventListener("click", () =>
-      changeQuantity(item.producto_id, 1),
+      changeQuantity(item.producto_id, 1)
     );
     row.querySelector(".cart-item-remove").addEventListener("click", () =>
-      removeFromCart(item.producto_id),
+      removeFromCart(item.producto_id)
     );
     container.appendChild(row);
   });
@@ -221,13 +229,19 @@ document.querySelector("#confirm-sale").addEventListener("click", async () => {
     return;
   }
 
+  const paymentMethodId = document.querySelector("#payment-method-id").value;
+  if (!paymentMethodId) {
+    showError("Por favor selecciona un método de pago");
+    return;
+  }
+
   try {
     const venta = await apiRequest("/ventas/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         sucursal_id: Number(document.querySelector("#sale-branch-id").value),
-        metodo_pago_id: Number(document.querySelector("#payment-method-id").value),
+        metodo_pago_id: Number(paymentMethodId),
         items: cart,
       }),
     });
