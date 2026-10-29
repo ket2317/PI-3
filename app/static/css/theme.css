@@ -1,13 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --color-bg: #f3efe6;
+  --color-bg: #f8fafc;
   --color-surface: #ffffff;
-  --color-surface-muted: #f7f4ec;
-  --color-border: #e4ddcc;
+  --color-surface-muted: #f1f5f9;
+  --color-border: #e5eaf2;
 
-  --color-text: #2a241c;
-  --color-text-muted: #6b6255;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
 
   --color-primary: #7a3038;
   --color-primary-contrast: #ffffff;
@@ -388,3 +388,387 @@ a { color: inherit; }
 @keyframes toast-out {
   to { transform: translateX(24px); opacity: 0; }
 }
+
+
+/* ---------- SIDEBAR ---------- */
+
+
+/* ==========================================
+  SIDEBAR DESPLEGABLE - VENDORA
+   ========================================== */
+
+:root {
+  --sidebar-width: 232px;
+  --sidebar-collapsed-width: 72px;
+}
+
+/* Sidebar principal */
+.app-sidebar {
+  width: var(--sidebar-width);
+  overflow-x: hidden;
+  z-index: 100;
+  transition:
+    width 0.3s ease,
+    background 0.2s ease;
+}
+
+/* Contenido principal */
+.app-main {
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s ease;
+}
+
+
+
+
+
+.sidebar-toggle:hover {
+  background: var(--sidebar-active-bg);
+}
+
+/* Textos de navegación */
+.app-nav .nav-label,
+.app-logout .nav-label {
+  white-space: nowrap;
+}
+
+/* ==========================================
+  ESTADO CONTRAÍDO
+   ========================================== */
+
+.app-shell.sidebar-collapsed .app-sidebar {
+  width: var(--sidebar-collapsed-width);
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.app-shell.sidebar-collapsed .app-main {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+.app-shell.sidebar-collapsed .app-logo {
+  flex-direction: column;
+  padding-bottom: 20px;
+  gap: 8px;
+}
+
+.app-shell.sidebar-collapsed .app-logo-text,
+.app-shell.sidebar-collapsed .app-nav .nav-label,
+.app-shell.sidebar-collapsed .app-sidebar-footer-text,
+.app-shell.sidebar-collapsed .app-logout .nav-label {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .sidebar-toggle {
+  margin-left: 0;
+  transform: rotate(180deg);
+}
+
+.app-shell.sidebar-collapsed .app-nav a {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.app-shell.sidebar-collapsed .app-sidebar-footer {
+  justify-content: center;
+}
+
+.app-shell.sidebar-collapsed .app-logout {
+  justify-content: center;
+}
+
+/* Evitar que los iconos se reduzcan */
+.app-nav .icon,
+.app-logout .icon {
+  flex-shrink: 0;
+}
+
+/* ==========================================
+  PANTALLAS PEQUEÑAS
+   ========================================== */
+
+@media (max-width: 860px) {
+  .app-sidebar,
+  .app-shell.sidebar-collapsed .app-sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+
+  .app-main,
+  .app-shell.sidebar-collapsed .app-main {
+    margin-left: 0;
+  }
+
+  .app-shell.sidebar-collapsed .app-logo {
+    flex-direction: row;
+  }
+
+  .app-shell.sidebar-collapsed .app-logo-text,
+  .app-shell.sidebar-collapsed .app-nav .nav-label,
+  .app-shell.sidebar-collapsed .app-sidebar-footer-text,
+  .app-shell.sidebar-collapsed .app-logout .nav-label {
+    display: revert;
+  }
+
+  .app-shell.sidebar-collapsed .app-logo-text,
+  .app-shell.sidebar-collapsed .app-sidebar-footer-text {
+    display: flex;
+  }
+
+  .app-shell.sidebar-collapsed .app-nav a {
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  .app-shell.sidebar-collapsed .app-sidebar-footer,
+  .app-shell.sidebar-collapsed .app-logout {
+    justify-content: flex-start;
+  }
+}
+
+
+
+
+
+
+/* =========================================
+   VENDORA - NUEVA IDENTIDAD VISUAL
+   ========================================= */
+
+
+/* Modo claro - Vendora */
+:root {
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #475569;
+  --sidebar-text-muted: #64748b;
+  --sidebar-active-bg: #f9e9ed;
+
+  --vendora-accent: #9b4057;
+  --vendora-accent-hover: #813248;
+  --vendora-border: #e5eaf2;
+  --vendora-muted-bg: #f8fafc;
+  --vendora-heading: #1e293b;
+}
+
+
+
+/* Modo oscuro - Colores originales */
+:root[data-theme="dark"] {
+  --sidebar-bg: #1c1712;
+  --sidebar-text: #ece4d8;
+  --sidebar-text-muted: #8f8471;
+  --sidebar-active-bg: #2c2620;
+
+  --vendora-accent: #b5555e;
+  --vendora-accent-hover: #ca737c;
+  --vendora-border: #3a3128;
+  --vendora-muted-bg: #211b16;
+  --vendora-heading: #f2ece1;
+}
+
+
+/* Contenedor principal */
+.app-sidebar {
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--vendora-border);
+}
+
+/* Logo y encabezado */
+.app-logo {
+  padding-top: 10px;
+  padding-bottom: 28px;
+}
+
+.app-logo-text strong {
+  color: var(--vendora-heading);
+  font-weight: 700;
+}
+
+.app-logo-text span {
+  color: var(--sidebar-text-muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
+.sidebar-toggle {
+  color: var(--sidebar-text-muted);
+}
+
+.sidebar-toggle:hover {
+  background: var(--vendora-muted-bg);
+  color: var(--vendora-accent);
+}
+
+/* Navegación */
+.app-nav {
+  gap: 5px;
+}
+
+.app-nav a {
+  color: var(--sidebar-text);
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.app-nav a .icon {
+  color: var(--sidebar-text-muted);
+}
+
+.app-nav a:hover {
+  background: var(--vendora-muted-bg);
+  color: var(--vendora-heading);
+}
+
+.app-nav a.active {
+  background: var(--sidebar-active-bg);
+  color: var(--vendora-accent);
+  font-weight: 600;
+}
+
+.app-nav a.active .icon {
+  color: var(--vendora-accent);
+}
+
+/* Perfil de usuario */
+.app-sidebar-footer {
+  border-top: 1px solid var(--vendora-border);
+  padding-top: 18px;
+}
+
+.app-avatar {
+  background: var(--sidebar-active-bg);
+  color: var(--vendora-accent);
+}
+
+.app-sidebar-footer-text strong {
+  color: var(--vendora-heading);
+}
+
+.app-sidebar-footer-text span {
+  color: var(--sidebar-text-muted);
+}
+
+/* Cerrar sesión */
+.app-logout {
+  margin-top: 14px;
+  background: var(--vendora-muted-bg);
+  border: 1px solid transparent;
+  color: var(--sidebar-text);
+  border-radius: 10px;
+  padding: 12px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.app-logout:hover {
+  background: var(--sidebar-active-bg);
+  color: var(--vendora-accent);
+}
+
+
+
+/* Separador debajo del logo de Vendora */
+.app-logo {
+  position: relative;
+  margin-bottom: 18px;
+  padding-bottom: 22px;
+}
+
+.app-logo::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--vendora-border);
+}
+
+/* Ajuste cuando el sidebar está contraído */
+.app-shell.sidebar-collapsed .app-logo {
+  margin-bottom: 14px;
+  padding-bottom: 18px;
+}
+
+
+
+/* Encabezado más compacto */
+.app-sidebar {
+  overflow: visible;
+  padding-top: 14px;
+}
+
+.app-logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 14px;
+  margin-bottom: 14px;
+  min-height: 54px;
+}
+
+.app-logo-image {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.app-logo-text {
+  gap: 3px;
+}
+
+.app-logo-text strong {
+  font-size: 1.05rem;
+}
+
+.app-logo-text span {
+  font-size: 0.73rem;
+}
+
+/* Botón flotante sobre el borde */
+.sidebar-toggle {
+  position: absolute;
+  top: 30px;
+  right: -13px;
+  z-index: 110;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--vendora-border);
+  border-radius: 50%;
+  background: var(--sidebar-bg);
+  color: var(--vendora-accent);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: none;
+}
+
+.sidebar-toggle .icon {
+  width: 15px;
+  height: 15px;
+}
+
+.sidebar-toggle:hover {
+  background: var(--sidebar-active-bg);
+  border-color: var(--vendora-accent);
+}
+
+
+/* Mantener el botón dentro del sidebar en móvil */
+@media (max-width: 860px) {
+  .sidebar-toggle,
+  .app-shell.sidebar-collapsed .sidebar-toggle {
+    position: static;
+    margin: 0 0 12px auto;
+  }
+}
+
+
+

@@ -22,3 +22,5 @@ alembic==1.16.5
 itsdangerous==2.2.0
 pytest
 httpx
+fastapi-mail==1.6.8
+email-validator==2.3.0
