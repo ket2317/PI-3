@@ -110,7 +110,7 @@ async function loadProducts() {
     url += `?sucursal_id=${branchId}`;
   }
 
-  const products = await apiRequest(url);
+  const products = await apiRequest(withSearch(url));
   const body = document.querySelector("#products-body");
 
   body.innerHTML = "";
@@ -119,7 +119,7 @@ async function loadProducts() {
   if (products.length === 0) {
     body.innerHTML = `
       <tr data-empty-state><td colspan="5" class="empty-state">
-        Aún no hay productos. Usa “Añadir producto” para registrar el primero.
+        ${emptyMessage("Aún no hay productos. Usa “Añadir producto” para registrar el primero.")}
       </td></tr>
     `;
   }
@@ -262,6 +262,7 @@ document.querySelector("#product-filter-branch")
     await loadBranches();
     await loadCategories();
     await loadProducts();
+    onSearch(loadProducts);
   } catch (error) {
     showError(error.message);
   }

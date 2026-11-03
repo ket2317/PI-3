@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -6,6 +6,7 @@ from app.database import get_db
 from app.dependencies.auth import require_admin, require_admin_or_manager, require_authenticated
 from app.models.branch import Sucursal
 from app.models.user import User
+from app.utils.search import ilike_any, like_term
 from app.schemas.branch import SucursalCreate, SucursalResponse, SucursalUpdate
 
 
@@ -26,12 +27,18 @@ def ensure_branch_access(user: User, sucursal_id: int) -> None:
 
 @router.get("/", response_model=list[SucursalResponse])
 def obtener_sucursales(
+    q: str | None = Query(default=None, max_length=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_authenticated),
 ):
     query = db.query(Sucursal).filter(Sucursal.activo.is_(True))
     if current_user.role_name in ("GERENTE", "CAJERO"):
         query = query.filter(Sucursal.id == current_user.sucursal_id)
+    pattern = like_term(q)
+    if pattern is not None:
+        query = query.filter(
+            ilike_any(pattern, Sucursal.nombre, Sucursal.direccion, Sucursal.contacto)
+        )
     return query.all()
 
 

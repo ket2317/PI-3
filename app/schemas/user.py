@@ -21,6 +21,7 @@ class AuthUser(BaseModel):
     correo : str
     rol :  str
     sucursal_id : int | None
+    acepto_privacidad: bool = False
 
 class UserUpdate(BaseModel):
     nombre : str

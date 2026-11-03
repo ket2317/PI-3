@@ -111,18 +111,23 @@ async function deactivateBranch(branch) {
 }
 
 async function loadBranches() {
+  // La lista completa se usa para saber qué gerentes ya están asignados;
+  // la tarjeta solo muestra las que coinciden con la búsqueda.
   branches = await apiRequest("/sucursales/");
+  const visibleBranches = getSearchTerm()
+    ? await apiRequest(withSearch("/sucursales/"))
+    : branches;
   renderManagerOptions(document.querySelector("#branch-id").value ? Number(document.querySelector("#branch-id").value) : null);
 
   const grid = document.querySelector("#branches-grid");
   grid.innerHTML = "";
-  document.querySelector("#branches-count").textContent = branches.length;
+  document.querySelector("#branches-count").textContent = visibleBranches.length;
 
-  if (branches.length === 0) {
-    grid.innerHTML = `<p class="empty-card" data-empty-state>Aún no hay sucursales registradas.</p>`;
+  if (visibleBranches.length === 0) {
+    grid.innerHTML = `<p class="empty-card" data-empty-state>${emptyMessage("Aún no hay sucursales registradas.")}</p>`;
   }
 
-  branches.forEach((branch) => {
+  visibleBranches.forEach((branch) => {
     const manager = managers.find((m) => m.id === branch.gerente_id);
     const card = document.createElement("article");
     card.className = `entity-card${branch.activo ? "" : " is-inactive"}`;
@@ -211,6 +216,7 @@ document.querySelector("#branch-modal").addEventListener("close", resetForm);
     await loadCurrentUser();
     await loadManagers();
     await loadBranches();
+    onSearch(loadBranches);
   } catch (error) {
     showError(error.message);
   }

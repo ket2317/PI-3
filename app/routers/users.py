@@ -1,6 +1,6 @@
 import bcrypt
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -13,6 +13,7 @@ from app.dependencies.auth import (
 )
 from app.models.branch import Sucursal
 from app.models.user import Role, User
+from app.utils.search import ilike_any, like_term
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 
@@ -89,6 +90,7 @@ def validate_role_and_branch(
 
 @router.get("/", response_model=list[UserResponse])
 def obtener_usuarios(
+    q: str | None = Query(default=None, max_length=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin_or_manager),
 ):
@@ -102,6 +104,10 @@ def obtener_usuarios(
             User.sucursal_id == current_user.sucursal_id,
             User.rol_id == (cajero_role.id if cajero_role else -1),
         )
+
+    pattern = like_term(q)
+    if pattern is not None:
+        query = query.filter(ilike_any(pattern, User.nombre, User.correo))
 
     return query.all()
 

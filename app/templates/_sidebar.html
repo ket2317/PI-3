@@ -1,3 +1,19 @@
+<script>
+  // Se ejecuta antes de pintar el menú: así no se ve la animación de
+  // expandir/contraer ni aparecen secciones que el rol no puede usar.
+  (function () {
+    var shell = document.currentScript.closest(".app-shell");
+    if (!shell) return;
+    shell.classList.add("no-sidebar-transition");
+    try {
+      if (localStorage.getItem("vendora-sidebar-collapsed") === "true") {
+        shell.classList.add("sidebar-collapsed");
+      }
+      var rol = sessionStorage.getItem("vendora-rol");
+      if (rol) shell.dataset.rol = rol;
+    } catch (error) {}
+  })();
+</script>
 <aside class="app-sidebar" id="app-sidebar">
   <div class="app-logo">
     <img

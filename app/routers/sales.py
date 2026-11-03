@@ -9,20 +9,41 @@ from app.models.product import Product
 from app.models.sale import Sale
 from app.models.sale_detail import SaleDetail
 from app.models.user import User
+from app.models.branch import Sucursal
 from app.schemas.sale import SaleCreate, SaleResponse
+from app.utils.search import ilike_any, like_term
 
 router = APIRouter(prefix="/ventas", tags=["Ventas"])
+
+
+def filtrar_ventas(query, q: str | None):
+    """Busca por número de venta, sucursal, cajero o método de pago."""
+    pattern = like_term(q)
+    if pattern is None:
+        return query
+
+    condiciones = ilike_any(pattern, Sucursal.nombre, User.nombre, PaymentMethod.nombre)
+    if q.strip().lstrip("#").isdigit():
+        condiciones = condiciones | (Sale.id == int(q.strip().lstrip("#")))
+
+    return (
+        query.join(Sucursal, Sucursal.id == Sale.sucursal_id)
+        .join(User, User.id == Sale.usuario_id)
+        .join(PaymentMethod, PaymentMethod.id == Sale.metodo_pago_id)
+        .filter(condiciones)
+    )
 
 
 @router.get("/", response_model=list[SaleResponse])
 def obtener_ventas(
     sucursal_id: int | None = Query(default=None),
+    q: str | None = Query(default=None, max_length=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_authenticated),
 ):
     branch_id = ensure_branch_access(current_user, sucursal_id, db)
 
-    query = db.query(Sale)
+    query = filtrar_ventas(db.query(Sale), q)
     if branch_id is not None:
         query = query.filter(Sale.sucursal_id == branch_id)
 

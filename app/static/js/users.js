@@ -84,13 +84,13 @@ function roleName(rolId) {
 }
 
 async function loadUsers() {
-  const users = await apiRequest("/usuarios/");
+  const users = await apiRequest(withSearch("/usuarios/"));
   const grid = document.querySelector("#users-grid");
   grid.innerHTML = "";
   document.querySelector("#users-count").textContent = users.length;
 
   if (users.length === 0) {
-    grid.innerHTML = `<p class="empty-card" data-empty-state>Aún no hay usuarios registrados.</p>`;
+    grid.innerHTML = `<p class="empty-card" data-empty-state>${emptyMessage("Aún no hay usuarios registrados.")}</p>`;
   }
 
   users.forEach((user) => {
@@ -213,6 +213,7 @@ document.querySelector("#user-modal").addEventListener("close", resetForm);
     renderRoleOptions();
     await loadBranches();
     await loadUsers();
+    onSearch(loadUsers);
   } catch (error) {
     showError(error.message);
   }

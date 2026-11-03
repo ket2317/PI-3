@@ -15,6 +15,7 @@ from app.models import (  # noqa: F401
     category,
     inventory,
     payment_method,
+    privacy,
     product,
     sale,
     sale_detail,
@@ -26,6 +27,7 @@ from app.routers import (
     categories,
     inventory,
     payment_methods,
+    privacy,
     products,
     reports,
     sales,
@@ -70,6 +72,7 @@ app.include_router(inventory.router)
 app.include_router(sales.router)
 app.include_router(payment_methods.router)
 app.include_router(reports.router)
+app.include_router(privacy.router)
 
 
 @app.get("/health", tags=["Sistema"])

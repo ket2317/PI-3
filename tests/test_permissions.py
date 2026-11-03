@@ -364,3 +364,123 @@ def test_admin_consulta_informacion_general_del_sistema():
     data = response.json()
     assert "sucursales_activas" in data
     assert "ventas_totales" in data
+
+
+# ---------------------------------------------------------------------------
+# Semana 8: estadísticas, búsqueda y aviso de privacidad
+# ---------------------------------------------------------------------------
+
+
+def test_estadisticas_de_ventas():
+    cookies = login("pi3@admin.com", "pi12345")
+    response = client.get("/reportes/estadisticas", cookies=cookies)
+    assert response.status_code == 200
+    data = response.json()
+    for campo in (
+        "total_vendido",
+        "numero_ventas",
+        "ticket_promedio",
+        "productos_mas_vendidos",
+        "ventas_por_dia",
+        "ventas_por_sucursal",
+    ):
+        assert campo in data
+    assert len(data["productos_mas_vendidos"]) <= 5
+    if data["numero_ventas"]:
+        promedio = data["total_vendido"] / data["numero_ventas"]
+        assert abs(data["ticket_promedio"] - promedio) < 0.01
+
+
+def test_estadisticas_filtran_por_fechas():
+    cookies = login("pi3@admin.com", "pi12345")
+    response = client.get(
+        "/reportes/estadisticas?desde=2000-01-01&hasta=2000-01-02", cookies=cookies
+    )
+    assert response.status_code == 200
+    assert response.json()["numero_ventas"] == 0
+
+
+def test_cajero_no_ve_estadisticas():
+    cookies = login("cajero.prueba@test.com", "Test12345")
+    assert client.get("/reportes/estadisticas", cookies=cookies).status_code == 403
+
+
+def test_gerente_solo_ve_estadisticas_de_su_sucursal():
+    cookies = login("gerente.prueba@test.com", "Test12345")
+    response = client.get("/reportes/estadisticas", cookies=cookies)
+    assert response.status_code == 200
+    for fila in response.json()["ventas_por_sucursal"]:
+        assert fila["sucursal_id"] == 2
+
+
+@pytest.mark.parametrize(
+    "url",
+    ["/productos/", "/sucursales/", "/inventario/", "/ventas/", "/usuarios/", "/reportes/ventas"],
+)
+def test_busqueda_sin_coincidencias_devuelve_lista_vacia(url):
+    cookies = login("pi3@admin.com", "pi12345")
+    response = client.get(f"{url}?q=texto-que-no-existe-xyz", cookies=cookies)
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_busqueda_de_productos_por_nombre_y_codigo():
+    cookies = login("pi3@admin.com", "pi12345")
+    productos = client.get("/productos/", cookies=cookies).json()
+    if not productos:
+        pytest.skip("No hay productos para buscar")
+    producto = productos[0]
+
+    por_nombre = client.get(f"/productos/?q={producto['nombre'][:3].upper()}", cookies=cookies)
+    assert producto["id"] in [p["id"] for p in por_nombre.json()]
+
+    por_codigo = client.get(f"/productos/?q={producto['codigo']}", cookies=cookies)
+    assert producto["id"] in [p["id"] for p in por_codigo.json()]
+
+
+def test_busqueda_trata_comodines_como_texto():
+    cookies = login("pi3@admin.com", "pi12345")
+    response = client.get("/productos/?q=%25", cookies=cookies)
+    assert response.status_code == 200
+    assert all("%" in p["nombre"] or "%" in p["codigo"] for p in response.json())
+
+
+def test_aviso_de_privacidad_se_acepta_una_vez():
+    from sqlalchemy import text
+
+    from app.database import engine
+
+    correo = "gerente.prueba@test.com"
+    borrar = text(
+        "DELETE FROM aceptaciones_privacidad "
+        "WHERE usuario_id = (SELECT id FROM usuarios WHERE correo = :correo)"
+    )
+    with engine.begin() as conexion:
+        conexion.execute(borrar, {"correo": correo})
+
+    try:
+        response = client.post("/auth/login", json={"email": correo, "password": "Test12345"})
+        assert response.json()["acepto_privacidad"] is False
+        cookies = response.cookies
+
+        assert client.post("/privacidad/aceptar", cookies=cookies).status_code == 200
+        # Aceptar dos veces no duplica el registro (UNIQUE usuario + versión)
+        assert client.post("/privacidad/aceptar", cookies=cookies).status_code == 200
+        assert client.get("/auth/me", cookies=cookies).json()["acepto_privacidad"] is True
+
+        with engine.connect() as conexion:
+            total = conexion.execute(
+                text(
+                    "SELECT COUNT(*) FROM aceptaciones_privacidad "
+                    "WHERE usuario_id = (SELECT id FROM usuarios WHERE correo = :correo)"
+                ),
+                {"correo": correo},
+            ).scalar()
+        assert total == 1
+    finally:
+        with engine.begin() as conexion:
+            conexion.execute(borrar, {"correo": correo})
+
+
+def test_anonimo_no_acepta_aviso_de_privacidad():
+    assert TestClient(app).post("/privacidad/aceptar").status_code == 401

@@ -14,6 +14,7 @@ from app.models.branch import Sucursal
 from app.models.category import Category
 from app.models.product import Product
 from app.models.user import User
+from app.utils.search import ilike_any, like_term
 from app.schemas.product import ProductCreate, ProductResponse
 
 router = APIRouter(
@@ -116,6 +117,7 @@ def ensure_unique_code(
 )
 def obtener_productos(
     sucursal_id: int | None = Query(default=None),
+    q: str | None = Query(default=None, max_length=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_authenticated),
 ):
@@ -134,6 +136,10 @@ def obtener_productos(
         query = query.filter(
             Product.sucursal_id == allowed_branch_id,
         )
+
+    pattern = like_term(q)
+    if pattern is not None:
+        query = query.filter(ilike_any(pattern, Product.nombre, Product.codigo))
 
     return query.order_by(Product.nombre).all()
 

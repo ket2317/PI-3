@@ -8,6 +8,7 @@ from app.models.branch import Sucursal
 from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.user import Role, User
+from app.utils.search import ilike_any, like_term
 from app.schemas.inventory import InventoryResponse, InventoryUpdate
 
 
@@ -46,6 +47,7 @@ def resolve_write_branch(user: User, requested: int | None, db: Session) -> int:
 @router.get("/", response_model=list[InventoryResponse])
 def obtener_inventario(
     sucursal_id: int | None = Query(default=None),
+    q: str | None = Query(default=None, max_length=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_admin_or_manager),
 ):
@@ -53,6 +55,11 @@ def obtener_inventario(
     query = db.query(Inventory)
     if branch_id is not None:
         query = query.filter(Inventory.sucursal_id == branch_id)
+    pattern = like_term(q)
+    if pattern is not None:
+        query = query.join(Product, Product.id == Inventory.producto_id).filter(
+            ilike_any(pattern, Product.nombre, Product.codigo)
+        )
     return query.order_by(Inventory.sucursal_id, Inventory.producto_id).all()
 
 

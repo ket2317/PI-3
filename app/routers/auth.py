@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies.auth import get_current_user, get_role_name
 from app.models.user import User
+from app.routers.privacy import acepto_privacidad
 from app.schemas.user import AuthUser, UserLogin
 from app.services.email import enviar_correo_recuperacion
 import uuid
@@ -40,6 +41,7 @@ def to_auth_user(
         correo=user.correo,
         rol=get_role_name(user, db),
         sucursal_id=user.sucursal_id,
+        acepto_privacidad=acepto_privacidad(user, db),
     )
 
 

@@ -844,3 +844,34 @@ dialog.confirm-dialog::backdrop {
   background: var(--color-error);
   color: #fff;
 }
+
+/* ---------- Aviso de privacidad (primer inicio de sesión) ---------- */
+
+dialog.privacy-dialog { width: min(440px, calc(100vw - 32px)); }
+.privacy-dialog p { margin-bottom: 12px; line-height: 1.5; }
+.privacy-dialog p:last-of-type { margin-bottom: 20px; }
+.privacy-dialog a { color: var(--color-primary); font-weight: 600; }
+.privacy-dialog .confirm-icon.privacy-icon {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.privacy-dialog .confirm-ok { background: var(--color-primary); }
+.privacy-dialog .confirm-ok:disabled { opacity: 0.6; cursor: wait; }
+
+/* ---------- Barra lateral al cambiar de sección ---------- */
+
+/* Sin animación mientras se aplica el estado guardado (contraída o no) */
+.app-shell.no-sidebar-transition .app-sidebar,
+.app-shell.no-sidebar-transition .app-main,
+.app-shell.no-sidebar-transition .sidebar-toggle {
+  transition: none !important;
+}
+
+/* Secciones restringidas ocultas hasta saber el rol del usuario */
+.app-shell:not([data-rol]) .app-nav a.admin-only,
+.app-shell:not([data-rol]) .app-nav a.admin-manager,
+.app-shell[data-rol="GERENTE"] .app-nav a.admin-only,
+.app-shell[data-rol="CAJERO"] .app-nav a.admin-only,
+.app-shell[data-rol="CAJERO"] .app-nav a.admin-manager {
+  display: none;
+}

@@ -26,6 +26,11 @@ form.addEventListener("submit", async (event) => {
       errorMessage.hidden = false;
       return;
     }
+    // El rol se guarda para que la barra lateral muestre desde el inicio
+    // solo las secciones permitidas
+    try {
+      sessionStorage.setItem("vendora-rol", data.rol);
+    } catch (error) {}
     window.location.href = "/dashboard";
   } catch (error) {
     errorMessage.textContent = "No se pudo conectar con el servidor";

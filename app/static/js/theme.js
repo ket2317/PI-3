@@ -30,32 +30,62 @@ function initials(name) {
     .toUpperCase();
 }
 
-// Buscador de la barra superior: filtra los hijos de cualquier
-// contenedor marcado con data-searchable (filas o tarjetas).
-function applySearch() {
-  const input = document.querySelector(".app-search input");
-  if (!input) return;
-  const term = input.value.trim().toLowerCase();
+// Buscador de la barra superior. Cada página registra con onSearch()
+// la función que vuelve a pedir su lista a la API con ?q=.
+const SEARCH_DELAY_MS = 300;
+let searchHandler = null;
 
-  document.querySelectorAll("[data-searchable] > *").forEach((item) => {
-    if (item.dataset.emptyState !== undefined) return;
-    item.hidden = Boolean(term) && !item.textContent.toLowerCase().includes(term);
-  });
+function getSearchTerm() {
+  const input = document.querySelector(".app-search input");
+  return input ? input.value.trim() : "";
+}
+
+// Agrega ?q= (o &q=) a una URL de la API si hay texto en el buscador
+function withSearch(url) {
+  const term = getSearchTerm();
+  if (!term) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}q=${encodeURIComponent(term)}`;
+}
+
+function onSearch(handler) {
+  searchHandler = handler;
+  const input = document.querySelector(".app-search input");
+  if (input) input.disabled = false;
+}
+
+function emptyMessage(defaultText) {
+  return getSearchTerm() ? "Sin resultados" : defaultText;
 }
 
 function initSearch() {
   const input = document.querySelector(".app-search input");
-  const containers = document.querySelectorAll("[data-searchable]");
-  if (!input || containers.length === 0) return;
+  if (!input) return;
 
-  input.disabled = false;
-  input.addEventListener("input", applySearch);
+  let timer = null;
+  let running = false;
+  let lastSearched = null;
 
-  // Las páginas vuelven a pintar sus listas al cargar datos;
-  // se reaplica el filtro cada vez que cambian.
-  const observer = new MutationObserver(applySearch);
-  containers.forEach((container) => {
-    observer.observe(container, { childList: true });
+  // Las búsquedas se hacen una a la vez; si el texto cambió mientras se
+  // esperaba la respuesta, se repite al final para que la lista coincida
+  // con lo último que se escribió.
+  async function runSearch() {
+    if (!searchHandler || running) return;
+    running = true;
+    try {
+      while (lastSearched !== getSearchTerm()) {
+        lastSearched = getSearchTerm();
+        await searchHandler(lastSearched);
+      }
+    } catch (error) {
+      if (typeof showToast === "function") showToast(error.message, "error");
+    } finally {
+      running = false;
+    }
+  }
+
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(runSearch, SEARCH_DELAY_MS);
   });
 }
 
@@ -89,6 +119,73 @@ function markActiveNavLink() {
   });
 }
 
+// Aviso de privacidad: se muestra hasta que el usuario lo acepta y no se
+// puede cerrar de otra forma (ni con Esc ni haciendo clic afuera).
+function showPrivacyNotice() {
+  if (document.querySelector(".privacy-dialog")) return;
+
+  const dialog = document.createElement("dialog");
+  dialog.className = "confirm-dialog privacy-dialog";
+  dialog.innerHTML = `
+    <div class="confirm-icon privacy-icon">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+    </div>
+    <h2>Aviso de privacidad</h2>
+    <p>
+      Antes de usar Vendora debes aceptar el aviso de privacidad y las políticas de uso.
+      En él se explica qué datos personales se recaban, para qué se usan y cómo ejercer
+      tus derechos ARCO.
+    </p>
+    <p><a href="/aviso-de-privacidad" target="_blank" rel="noopener">Leer el aviso completo</a></p>
+    <div class="confirm-actions">
+      <button type="button" class="confirm-ok privacy-accept">Acepto el aviso de privacidad</button>
+    </div>
+  `;
+
+  // Chrome deja cerrar con Esc aunque se cancele el evento cuando la
+  // ventana se abrió sin un clic; si se cierra sin aceptar, se vuelve a abrir.
+  let accepted = false;
+  dialog.addEventListener("cancel", (event) => event.preventDefault());
+  dialog.addEventListener("close", () => {
+    if (!accepted) dialog.showModal();
+  });
+
+  const accept = dialog.querySelector(".privacy-accept");
+  accept.addEventListener("click", async () => {
+    accept.disabled = true;
+    try {
+      const response = await fetch("/privacidad/aceptar", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      if (!response.ok) throw new Error();
+      accepted = true;
+      dialog.close();
+      dialog.remove();
+      if (typeof showToast === "function") showToast("Aviso de privacidad aceptado", "success");
+    } catch (error) {
+      accept.disabled = false;
+      if (typeof showToast === "function") showToast("No se pudo registrar la aceptación", "error");
+    }
+  });
+
+  document.body.appendChild(dialog);
+  dialog.showModal();
+}
+
+// Muestra solo las secciones que el rol puede usar. Mientras no se conoce
+// el rol, el CSS oculta las secciones restringidas.
+function applyNavRole(rol) {
+  const shell = document.querySelector(".app-shell");
+  if (shell) shell.dataset.rol = rol;
+  document.querySelectorAll(".app-nav a.admin-only").forEach((el) => {
+    el.hidden = rol !== "ADMIN";
+  });
+  document.querySelectorAll(".app-nav a.admin-manager").forEach((el) => {
+    el.hidden = !["ADMIN", "GERENTE"].includes(rol);
+  });
+}
+
 async function initSidebarUser() {
   const avatar = document.querySelector("#sidebar-avatar");
   const nameEl = document.querySelector("#sidebar-user-name");
@@ -109,16 +206,20 @@ async function initSidebarUser() {
     nameEl.textContent = user.nombre;
     roleEl.textContent = user.rol;
 
-    document.querySelectorAll(".app-nav a.admin-only").forEach((el) => {
-      el.hidden = user.rol !== "ADMIN";
-    });
-    document.querySelectorAll(".app-nav a.admin-manager").forEach((el) => {
-      el.hidden = !["ADMIN", "GERENTE"].includes(user.rol);
-    });
+    if (user.acepto_privacidad === false) {
+      showPrivacyNotice();
+    }
+
+    applyNavRole(user.rol);
+    try {
+      sessionStorage.setItem("vendora-rol", user.rol);
+    } catch (error) {}
   } catch (error) {
     // silencioso: cada pagina ya maneja sus propios errores de sesion
   }
 }
+
+const SESSION_STORAGE_KEYS = ["token", "access_token", "user"];
 
 function confirmLogout() {
   return new Promise((resolve) => {
@@ -158,8 +259,14 @@ function initLogoutButton() {
   const button = document.querySelector("#logout-button");
   if (!button) return;
 
-  button.addEventListener("click", async () => {
+  button.addEventListener("click", async (event) => {
+    event.preventDefault();
     if (!(await confirmLogout())) return;
+    // Datos de sesión guardados en el navegador; se conservan tema, idioma y menú
+    SESSION_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+    try {
+      sessionStorage.removeItem("vendora-rol");
+    } catch (error) {}
     try {
       await fetch("/auth/logout", { method: "POST", credentials: "same-origin" });
       if (typeof showToast === "function") {
@@ -198,6 +305,12 @@ function initSidebarToggle() {
   // Recuperar el estado guardado al cambiar de página
   const savedState = localStorage.getItem(storageKey);
   updateSidebar(savedState === "true");
+
+  // El estado inicial se aplica sin animación; las transiciones vuelven
+  // a activarse después del primer cuadro
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => shell.classList.remove("no-sidebar-transition"));
+  });
 
   // Expandir o contraer al presionar la flecha
   toggle.addEventListener("click", () => {

@@ -1,6 +1,8 @@
 let currentUser = null;
 let branchProducts = [];
 let currentInventory = [];
+// Lo que se muestra en la lista: todo el inventario o solo lo que coincide con la búsqueda
+let visibleInventory = [];
 let onlyLowStock = false;
 
 function showError(message) {
@@ -95,6 +97,14 @@ async function loadProductsForBranch() {
 async function loadInventory() {
   const branchId = Number(document.querySelector("#inventory-branch-id").value);
   currentInventory = await apiRequest(`/inventario/?sucursal_id=${branchId}`);
+  await loadVisibleInventory();
+}
+
+async function loadVisibleInventory() {
+  const branchId = Number(document.querySelector("#inventory-branch-id").value);
+  visibleInventory = getSearchTerm()
+    ? await apiRequest(withSearch(`/inventario/?sucursal_id=${branchId}`))
+    : currentInventory;
   renderInventoryTable();
   fillFieldsFromSelectedProduct();
 }
@@ -118,17 +128,17 @@ function renderInventoryTable() {
   list.innerHTML = "";
 
   const items = onlyLowStock
-    ? currentInventory.filter(isLowStock)
-    : currentInventory;
+    ? visibleInventory.filter(isLowStock)
+    : visibleInventory;
 
   document.querySelector("#inventory-count").textContent = items.length;
 
   if (items.length === 0) {
     list.innerHTML = `
       <p class="stock-empty" data-empty-state>
-        ${onlyLowStock
+        ${emptyMessage(onlyLowStock
           ? "No hay productos con bajo inventario en esta sucursal."
-          : "Aún no hay existencias registradas en esta sucursal."}
+          : "Aún no hay existencias registradas en esta sucursal.")}
       </p>
     `;
   }
@@ -238,6 +248,7 @@ document.querySelector("#inventory-form").addEventListener("submit", async (even
     await loadBranches();
     await loadProductsForBranch();
     await loadInventory();
+    onSearch(loadVisibleInventory);
   } catch (error) {
     showError(error.message);
   }
