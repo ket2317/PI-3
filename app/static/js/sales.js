@@ -99,8 +99,13 @@ async function loadPaymentMethods() {
 
   try {
     const methods = await apiRequest("/metodos-pago/");
+    if (methods.length === 0) {
+      select.innerHTML = '<option value="" disabled selected>No hay métodos de pago registrados</option>';
+      showError("No hay métodos de pago registrados");
+      return;
+    }
     select.innerHTML = '<option value="" disabled selected>Selecciona método de pago</option>';
-    
+
     methods.forEach((m) => {
       const option = document.createElement("option");
       option.value = m.id;
@@ -129,6 +134,18 @@ function changeQuantity(productId, delta) {
   if (item.cantidad <= 0) {
     cart = cart.filter((i) => i.producto_id !== productId);
   }
+  renderCart();
+}
+
+function setQuantity(productId, value) {
+  const item = cart.find((i) => i.producto_id === productId);
+  if (!item) return;
+  const quantity = Math.floor(Number(value));
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    removeFromCart(productId);
+    return;
+  }
+  item.cantidad = quantity;
   renderCart();
 }
 
@@ -164,7 +181,7 @@ function renderCart() {
       <button type="button" class="cart-item-remove" aria-label="Quitar">&times;</button>
       <span class="cart-item-qty">
         <button type="button" data-action="decrease">−</button>
-        <span>${item.cantidad}</span>
+        <input type="number" class="cart-item-qty-input" min="1" step="1" value="${item.cantidad}" aria-label="Cantidad de ${product.nombre}">
         <button type="button" data-action="increase">+</button>
       </span>
       <span class="cart-item-subtotal">$${itemSubtotal.toFixed(2)}</span>
@@ -175,6 +192,12 @@ function renderCart() {
     row.querySelector('[data-action="increase"]').addEventListener("click", () =>
       changeQuantity(item.producto_id, 1)
     );
+    const qtyInput = row.querySelector(".cart-item-qty-input");
+    qtyInput.addEventListener("change", () => setQuantity(item.producto_id, qtyInput.value));
+    qtyInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") qtyInput.blur();
+    });
+    qtyInput.addEventListener("focus", () => qtyInput.select());
     row.querySelector(".cart-item-remove").addEventListener("click", () =>
       removeFromCart(item.producto_id)
     );
@@ -260,9 +283,18 @@ document.querySelector("#confirm-sale").addEventListener("click", async () => {
 (async () => {
   try {
     await loadCurrentUser();
+  } catch (error) {
+    showError(error.message);
+    return;
+  }
+
+  // Los métodos de pago se cargan aparte para que un error en sucursales
+  // o productos no deje el selector vacío
+  await loadPaymentMethods();
+  renderCart();
+
+  try {
     await loadBranches();
-    await loadPaymentMethods();
-    renderCart();
   } catch (error) {
     showError(error.message);
   }

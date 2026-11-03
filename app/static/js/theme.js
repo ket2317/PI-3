@@ -120,11 +120,46 @@ async function initSidebarUser() {
   }
 }
 
+function confirmLogout() {
+  return new Promise((resolve) => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "confirm-dialog";
+    dialog.innerHTML = `
+      <div class="confirm-icon">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L14.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      </div>
+      <h2>¿Cerrar sesión?</h2>
+      <p>Tendrás que volver a iniciar sesión para seguir usando el sistema.</p>
+      <div class="confirm-actions">
+        <button type="button" class="confirm-cancel">Cancelar</button>
+        <button type="button" class="confirm-ok">Cerrar sesión</button>
+      </div>
+    `;
+
+    const close = (result) => {
+      dialog.close();
+      dialog.remove();
+      resolve(result);
+    };
+    dialog.querySelector(".confirm-cancel").addEventListener("click", () => close(false));
+    dialog.querySelector(".confirm-ok").addEventListener("click", () => close(true));
+    dialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      close(false);
+    });
+
+    document.body.appendChild(dialog);
+    dialog.showModal();
+    dialog.querySelector(".confirm-cancel").focus();
+  });
+}
+
 function initLogoutButton() {
   const button = document.querySelector("#logout-button");
   if (!button) return;
 
   button.addEventListener("click", async () => {
+    if (!(await confirmLogout())) return;
     try {
       await fetch("/auth/logout", { method: "POST", credentials: "same-origin" });
       if (typeof showToast === "function") {
