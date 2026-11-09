@@ -1,0 +1,2159 @@
+From 523673ce2cc8a874690cb68bc79486abc5e0f51c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 2 Nov 2026 19:52:31 -0600
+Subject: [PATCH] =?UTF-8?q?Redise=C3=B1a=20la=20interfaz=20del=20Dashboard?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Nuevo sidebar y topbar compactos, ocho indicadores, gráfico de ventas
+por día, dona de métodos de pago, productos destacados e inventario bajo.
+Modo claro/oscuro y responsive, limitado a body.page-dashboard.
+Usa solo endpoints existentes; conserva IDs y permisos por rol.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01NM1a3MpsMJ88tpgMGZEpti
+---
+ app/static/css/dashboard.css | 958 ++++++++++++++++++++++++++++++++++-
+ app/static/js/dashboard.js   | 763 +++++++++++++++++++++++++++-
+ app/static/js/i18n.js        |  98 +++-
+ app/templates/dashboard.html | 220 ++++++--
+ 4 files changed, 1967 insertions(+), 72 deletions(-)
+
+diff --git a/app/static/css/dashboard.css b/app/static/css/dashboard.css
+index 99260be..f77406b 100644
+--- a/app/static/css/dashboard.css
++++ b/app/static/css/dashboard.css
+@@ -1,52 +1,960 @@
+-.session-card {
+-  max-width: 720px;
+-  margin: 0 0 20px;
+-  padding: 24px 26px;
++/* ==========================================================================
++   VENDORA · Dashboard
++   Todo el rediseño está limitado a body.page-dashboard, de modo que
++   theme.css y las demás pantallas siguen funcionando igual.
++   Escala de espaciado: 4 · 8 · 12 · 16 · 20 · 24 · 32
++   ========================================================================== */
++
++/* ---------- Tokens · modo claro ---------- */
++
++body.page-dashboard {
++  color-scheme: light;
++
++  --pink: #C94F7C;
++  --pink-light: #F3A6BD;
++  --mauve: #895078;
++  --purple: #9584D6;
++  --teal: #39999A;
++  --gold: #DFA348;
++  --red: #D95B65;
++
++  --color-bg: #F8F7FA;
++  --color-surface: #FFFFFF;
++  --color-surface-muted: #F3F1F6;
++  --color-border: #EAE6ED;
++  --color-text: #292631;
++  --color-text-muted: #817B89;
++
++  --color-primary: #C94F7C;
++  --color-primary-contrast: #FFFFFF;
++  --color-primary-soft: #FBEBF1;
++  --color-success: #39999A;
++  --color-success-soft: #E4F2F2;
++  --color-error: #D95B65;
++  --color-error-soft: #FBE9EA;
++
++  --sidebar-bg: #FFFFFF;
++  --sidebar-text: #4B4655;
++  --sidebar-text-muted: #817B89;
++  --sidebar-active-bg: #FBEBF1;
++
++  --vendora-accent: #C94F7C;
++  --vendora-accent-hover: #B2416A;
++  --vendora-border: #EAE6ED;
++  --vendora-muted-bg: #F3F1F6;
++  --vendora-heading: #292631;
++
++  /* Series de gráficos (orden fijo, asignadas por entidad) */
++  --series-1: #C94F7C;
++  --series-2: #9584D6;
++  --series-3: #39999A;
++  --series-4: #DFA348;
++  --series-5: #895078;
++  --series-other: #B9B3C2;
++
++  --s1: 4px;
++  --s2: 8px;
++  --s3: 12px;
++  --s4: 16px;
++  --s5: 20px;
++  --s6: 24px;
++  --s8: 32px;
++
++  --radius-sm: 12px;
++  --radius-md: 12px;
++  --radius-lg: 16px;
++
++  --shadow-card: 0 1px 2px rgba(41, 38, 49, 0.04), 0 4px 16px rgba(41, 38, 49, 0.04);
++  --shadow-pop: 0 8px 24px rgba(41, 38, 49, 0.14);
++
++  --font-heading: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
++  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
++
++  font-family: var(--font-body);
++}
++
++/* ---------- Tokens · modo oscuro ---------- */
++
++:root[data-theme="dark"] body.page-dashboard {
++  color-scheme: dark;
++
++  --color-bg: #15131A;
++  --color-surface: #1E1B25;
++  --color-surface-muted: #26222E;
++  --color-border: #332E3C;
++  --color-text: #F2EFF6;
++  --color-text-muted: #A29BAD;
++
++  --color-primary: #D4608A;
++  --color-primary-contrast: #FFFFFF;
++  --color-primary-soft: #36202B;
++  --color-success: #4DB3B4;
++  --color-success-soft: #1C2E31;
++  --color-error: #E8737C;
++  --color-error-soft: #3A2226;
++
++  --sidebar-bg: #1A1720;
++  --sidebar-text: #D9D4E0;
++  --sidebar-text-muted: #A29BAD;
++  --sidebar-active-bg: #36202B;
++
++  --vendora-accent: #E27AA2;
++  --vendora-accent-hover: #F3A6BD;
++  --vendora-border: #332E3C;
++  --vendora-muted-bg: #26222E;
++  --vendora-heading: #F2EFF6;
++
++  --series-1: #D4608A;
++  --series-2: #9584D6;
++  --series-3: #39999A;
++  --series-4: #DFA348;
++  --series-5: #B27AA1;
++  --series-other: #5E5868;
++
++  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.22);
++  --shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.5);
++}
++
++html:has(body.page-dashboard) { background: #F8F7FA; }
++html[data-theme="dark"]:has(body.page-dashboard) { background: #15131A; }
++
++body.page-dashboard h1,
++body.page-dashboard h2,
++body.page-dashboard h3 {
++  font-family: var(--font-heading);
++}
++
++/* ---------- Utilidades ---------- */
++
++.page-dashboard .sr-only {
++  position: absolute;
++  width: 1px;
++  height: 1px;
++  margin: -1px;
++  padding: 0;
++  overflow: hidden;
++  clip: rect(0, 0, 0, 0);
++  white-space: nowrap;
++  border: 0;
++}
++
++.page-dashboard :focus-visible {
++  outline: 2px solid var(--color-primary);
++  outline-offset: 2px;
++}
++
++/* ---------- Sidebar ---------- */
++
++.page-dashboard .app-sidebar {
++  padding: 16px 12px;
++  background: var(--sidebar-bg);
++  border-right: 1px solid var(--color-border);
++}
++
++.page-dashboard .app-logo {
++  gap: 12px;
++  min-height: 48px;
++  margin-bottom: 12px;
++  padding: 4px 8px 16px;
++}
++
++.page-dashboard .app-logo-image {
++  width: 36px;
++  height: 36px;
++  border-radius: 12px;
++  object-fit: contain;
++}
++
++.page-dashboard .app-logo-text strong {
++  font-family: var(--font-heading);
++  font-size: 1rem;
++  font-weight: 700;
++  letter-spacing: -0.01em;
++}
++
++.page-dashboard .app-logo-text span {
++  font-family: var(--font-body);
++  font-size: 0.75rem;
++  font-weight: 500;
++  color: var(--color-text-muted);
++}
++
++.page-dashboard .app-nav { gap: 4px; }
++
++.page-dashboard .app-nav a {
++  position: relative;
++  padding: 12px;
++  border-radius: 12px;
++  font-size: 0.875rem;
++  font-weight: 500;
++  color: var(--sidebar-text);
++  transition: background 0.15s ease, color 0.15s ease;
++}
++
++.page-dashboard .app-nav a .icon { color: var(--sidebar-text-muted); transition: color 0.15s ease; }
++
++.page-dashboard .app-nav a:hover {
++  background: var(--color-surface-muted);
++  color: var(--color-text);
++}
++
++.page-dashboard .app-nav a:hover .icon { color: var(--color-primary); }
++
++.page-dashboard .app-nav a.active {
++  background: var(--sidebar-active-bg);
++  color: var(--color-primary);
++  font-weight: 600;
++}
++
++.page-dashboard .app-nav a.active .icon { color: var(--color-primary); }
++
++.page-dashboard .app-nav a.active::before {
++  content: "";
++  position: absolute;
++  left: -12px;
++  top: 12px;
++  bottom: 12px;
++  width: 3px;
++  border-radius: 0 4px 4px 0;
++  background: var(--color-primary);
++}
++
++.page-dashboard .app-sidebar-footer {
++  margin-top: 8px;
++  padding: 8px;
++  border: 1px solid var(--color-border);
++  border-radius: 12px;
++  background: var(--color-surface-muted);
++}
++
++.page-dashboard .app-avatar {
++  width: 36px;
++  height: 36px;
++  background: var(--color-primary);
++  color: var(--color-primary-contrast);
++}
++
++.page-dashboard .app-sidebar-footer-text strong {
++  font-size: 0.8125rem;
++  font-weight: 600;
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.page-dashboard .app-sidebar-footer-text span {
++  font-size: 0.75rem;
++  color: var(--color-text-muted);
++}
++
++.page-dashboard .app-logout {
++  margin-top: 8px;
++  padding: 12px;
++  border: 1px solid transparent;
++  border-radius: 12px;
++  background: transparent;
++  color: var(--color-text-muted);
++  font-size: 0.875rem;
++  font-weight: 500;
++}
++
++.page-dashboard .app-logout:hover {
++  background: var(--color-error-soft);
++  border-color: transparent;
++  color: var(--color-error);
++}
++
++.page-dashboard .sidebar-toggle {
++  border-color: var(--color-border);
++  background: var(--color-surface);
++  color: var(--color-text-muted);
++  box-shadow: var(--shadow-card);
++}
++
++.page-dashboard .sidebar-toggle:hover {
++  background: var(--color-primary-soft);
++  border-color: var(--color-primary);
++  color: var(--color-primary);
++}
++
++/* ---------- Topbar compacta ---------- */
++
++.page-dashboard .app-topbar {
++  position: sticky;
++  top: 0;
++  z-index: 50;
++  min-height: 56px;
++  padding: 12px 24px;
++  gap: 12px;
++  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
++  -webkit-backdrop-filter: blur(8px);
++  backdrop-filter: blur(8px);
++  border-bottom: 1px solid var(--color-border);
++}
++
++.page-dashboard .app-topbar-title {
++  display: flex;
++  align-items: baseline;
++  gap: 12px;
++  min-width: 0;
++}
++
++.page-dashboard .app-topbar-title h1 {
++  font-size: 1.125rem;
++  font-weight: 700;
++  letter-spacing: -0.01em;
++  white-space: nowrap;
++}
++
++.page-dashboard .app-topbar-title p {
++  margin: 0;
++  font-size: 0.8125rem;
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.page-dashboard .app-topbar-actions { gap: 8px; }
++
++.page-dashboard .app-search {
++  min-width: 240px;
++  height: 36px;
++  padding: 0 12px;
++  border-radius: 12px;
++  background: var(--color-surface);
++  font-size: 0.875rem;
++}
++
++.page-dashboard .app-search:focus-within { border-color: var(--color-primary); }
++
++.page-dashboard .app-search input:disabled { cursor: not-allowed; }
++
++.page-dashboard .icon-button {
++  width: 36px;
++  height: 36px;
++  border-radius: 12px;
++}
++
++.page-dashboard .icon-button.lang-toggle {
++  width: auto;
++  padding: 0 12px;
++}
++
++/* ---------- Contenido ---------- */
++
++.page-dashboard .app-content { padding: 16px 24px 32px; }
++
++.dash {
++  max-width: 1440px;
++  margin: 0 auto;
++  display: flex;
++  flex-direction: column;
++  gap: 16px;
++}
++
++.dash-toolbar {
++  display: flex;
++  flex-wrap: wrap;
++  align-items: center;
++  justify-content: space-between;
++  gap: 12px;
++}
++
++.dash-context,
++.dash-filters {
++  display: flex;
++  flex-wrap: wrap;
++  align-items: center;
++  gap: 8px;
++}
++
++.chip {
++  display: inline-flex;
++  align-items: center;
++  gap: 8px;
++  height: 32px;
++  max-width: 360px;
++  padding: 0 12px;
++  border: 1px solid var(--color-border);
++  border-radius: 12px;
++  background: var(--color-surface);
++  font-size: 0.8125rem;
++  color: var(--color-text);
++}
++
++.chip .icon { color: var(--color-text-muted); }
++
++.chip-text {
++  min-width: 0;
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.field-select {
++  appearance: none;
++  -webkit-appearance: none;
++  height: 32px;
++  max-width: 240px;
++  padding: 0 32px 0 12px;
++  border: 1px solid var(--color-border);
++  border-radius: 12px;
++  background: var(--color-surface)
++    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23817B89' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
++    no-repeat right 8px center / 16px;
++  color: var(--color-text);
++  font: inherit;
++  font-size: 0.8125rem;
++  cursor: pointer;
++}
++
++.field-select:hover { border-color: var(--color-primary); }
++
++.segmented {
++  display: inline-flex;
++  gap: 4px;
++  padding: 4px;
++  border: 1px solid var(--color-border);
++  border-radius: 12px;
++  background: var(--color-surface);
++}
++
++.segmented button {
++  height: 24px;
++  padding: 0 12px;
++  border: 0;
++  border-radius: 8px;
++  background: transparent;
++  color: var(--color-text-muted);
++  font: inherit;
++  font-size: 0.8125rem;
++  font-weight: 500;
++  cursor: pointer;
++  transition: background 0.15s ease, color 0.15s ease;
++}
++
++.segmented button:hover { color: var(--color-text); background: var(--color-surface-muted); }
++
++.segmented button[aria-pressed="true"] {
++  background: var(--color-primary-soft);
++  color: var(--color-primary);
++  font-weight: 600;
++}
++
++/* ---------- Indicadores ---------- */
++
++.kpi-grid {
++  display: grid;
++  grid-template-columns: repeat(4, minmax(0, 1fr));
++  gap: 12px;
++}
++
++.kpi {
++  --tone: var(--pink);
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  min-width: 0;
++  padding: 12px 16px;
++  border: 1px solid var(--color-border);
++  border-radius: 16px;
+   background: var(--color-surface);
++  box-shadow: var(--shadow-card);
++  transition: transform 0.15s ease, border-color 0.15s ease;
++}
++
++.kpi:hover {
++  transform: translateY(-1px);
++  border-color: color-mix(in srgb, var(--tone) 40%, var(--color-border));
++}
++
++.tone-rose { --tone: var(--series-1); }
++.tone-purple { --tone: var(--series-2); }
++.tone-teal { --tone: var(--series-3); }
++.tone-gold { --tone: var(--series-4); }
++.tone-mauve { --tone: var(--series-5); }
++.tone-red { --tone: var(--color-error); }
++
++.kpi-icon {
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  flex: none;
++  width: 36px;
++  height: 36px;
++  border-radius: 12px;
++  background: color-mix(in srgb, var(--tone) 14%, var(--color-surface));
++  color: var(--tone);
++}
++
++.kpi-icon .icon { width: 20px; height: 20px; vertical-align: 0; }
++
++.kpi-body {
++  display: flex;
++  flex-direction: column;
++  min-width: 0;
++  line-height: 1.25;
++}
++
++.kpi-label {
++  font-size: 0.8125rem;
++  font-weight: 500;
++  color: var(--color-text-muted);
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.kpi-value {
++  font-size: 1.25rem;
++  font-weight: 700;
++  letter-spacing: -0.01em;
++  font-variant-numeric: tabular-nums;
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.kpi-sub {
++  font-size: 0.75rem;
++  color: var(--color-text-muted);
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.trend {
++  display: inline-block;
++  margin-right: 4px;
++  font-size: 0.75rem;
++  vertical-align: 2px;
++}
++.trend-up { color: var(--color-success); }
++.trend-down { color: var(--color-error); }
++
++/* Estado de carga y recarga */
++
++.dash.is-loading .kpi-value,
++.dash.is-loading .kpi-sub {
++  width: 72px;
++  min-height: 16px;
++  border-radius: 8px;
++  color: transparent;
++  background: linear-gradient(90deg, var(--color-surface-muted), var(--color-border), var(--color-surface-muted));
++  background-size: 200% 100%;
++  animation: dash-shimmer 1.4s linear infinite;
++  user-select: none;
++}
++
++.dash.is-loading .kpi-sub { width: 48px; min-height: 12px; }
++
++.dash.is-refetching .kpi,
++.dash.is-refetching .panel {
++  opacity: 0.6;
++  transition: opacity 0.15s ease;
++}
++
++@keyframes dash-shimmer {
++  from { background-position: 200% 0; }
++  to { background-position: -200% 0; }
++}
++
++/* ---------- Paneles ---------- */
++
++.dash-row { display: grid; gap: 16px; }
++
++.dash-row-charts { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
++.dash-row-lists { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
++
++.panel {
++  position: relative;
++  min-width: 0;
++  padding: 16px;
+   border: 1px solid var(--color-border);
+-  border-radius: var(--radius-lg);
++  border-radius: 16px;
++  background: var(--color-surface);
+   box-shadow: var(--shadow-card);
+ }
+ 
+-.session-card-header {
++.panel-head {
+   display: flex;
+-  align-items: flex-start;
+-  gap: 14px;
+-  margin-bottom: 18px;
++  align-items: baseline;
++  justify-content: space-between;
++  gap: 12px;
++  margin-bottom: 12px;
++}
++
++.panel-head h2 {
++  font-size: 0.9375rem;
++  font-weight: 600;
++  letter-spacing: -0.01em;
+ }
+ 
+-.session-card-header .icon {
++.panel-meta {
++  font-size: 0.75rem;
++  color: var(--color-text-muted);
++}
++
++.panel-link {
++  font-size: 0.8125rem;
++  font-weight: 600;
+   color: var(--color-primary);
+-  margin-top: 2px;
++  text-decoration: none;
+ }
++.panel-link:hover { text-decoration: underline; }
+ 
+-.session-card-header h2 {
+-  font-size: 1.05rem;
+-  margin-bottom: 2px;
++/* ---------- Gráfico de ventas ---------- */
++
++.chart-wrap {
++  position: relative;
++  flex: 1;
++  min-height: 208px;
+ }
+ 
+-.muted {
++#sales-chart-panel { display: flex; flex-direction: column; }
++
++.chart-svg { position: absolute; inset: 0; display: block; overflow: visible; }
++
++.chart-svg .grid { stroke: var(--color-border); stroke-width: 1; }
++.chart-svg .axis-label { fill: var(--color-text-muted); font-size: 11px; font-family: inherit; }
++.chart-svg .area { fill: var(--series-1); opacity: 0.12; }
++.chart-svg .line {
++  fill: none;
++  stroke: var(--series-1);
++  stroke-width: 2;
++  stroke-linecap: round;
++  stroke-linejoin: round;
++}
++.chart-svg .marker { fill: var(--series-1); stroke: var(--color-surface); stroke-width: 2; }
++.chart-svg .crosshair { stroke: var(--color-text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
++.chart-svg .focus-dot { fill: var(--series-1); stroke: var(--color-surface); stroke-width: 2; }
++.chart-svg .overlay { fill: transparent; cursor: crosshair; }
++
++.chart-tooltip {
++  position: absolute;
++  z-index: 5;
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
++  padding: 8px 12px;
++  border: 1px solid var(--color-border);
++  border-radius: 12px;
++  background: var(--color-surface);
++  box-shadow: var(--shadow-pop);
++  pointer-events: none;
++  white-space: nowrap;
++}
++
++#sales-chart-panel .chart-tooltip { left: 0; top: 0; }
++
++.tip-date { font-size: 0.75rem; color: var(--color-text-muted); }
++.tip-value { font-size: 0.9375rem; font-weight: 700; font-variant-numeric: tabular-nums; }
++.tip-meta { font-size: 0.75rem; color: var(--color-text-muted); }
++
++.chart-empty,
++.list-empty {
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  gap: 8px;
++  min-height: 160px;
++  padding: 16px;
++  text-align: center;
++  font-size: 0.8125rem;
+   color: var(--color-text-muted);
++}
++
++.chart-empty .icon,
++.list-empty .icon { width: 24px; height: 24px; }
++
++/* ---------- Dona de métodos de pago ---------- */
++
++.donut-layout {
++  display: flex;
++  flex-direction: column;
++  flex-wrap: nowrap;
++  align-items: center;
++  justify-content: center;
++  gap: 16px;
++}
++
++.donut-wrap { flex: none; width: 148px; height: 148px; }
++.donut-wrap:has(.chart-empty) { flex: 1; width: auto; height: auto; }
++
++.donut-svg { display: block; }
++.donut-svg .segment { cursor: pointer; transition: opacity 0.15s ease; }
++.donut-svg .segment:focus { outline: none; }
++.donut-svg.is-hovering .segment { opacity: 0.45; }
++.donut-svg.is-hovering .segment.is-active { opacity: 1; }
++.donut-svg .donut-main { fill: var(--color-text); font-size: 16px; font-weight: 700; font-family: inherit; }
++.donut-svg .donut-sub { fill: var(--color-text-muted); font-size: 11px; font-family: inherit; }
++
++.legend {
++  align-self: stretch;
++  min-width: 0;
++  margin: 0;
++  padding: 0;
++  list-style: none;
++  display: flex;
++  flex-direction: column;
++  gap: 8px;
++}
++
++.legend li {
++  display: grid;
++  grid-template-columns: 12px minmax(0, 1fr) auto;
++  align-items: center;
++  column-gap: 8px;
++  font-size: 0.8125rem;
++}
++
++.legend-swatch { width: 12px; height: 12px; border-radius: 4px; }
++.legend-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.legend-value { font-weight: 600; font-variant-numeric: tabular-nums; }
++.legend-pct { grid-column: 2 / 4; font-size: 0.75rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
++
++/* ---------- Listas: destacados e inventario bajo ---------- */
++
++.rank-list,
++.stock-list {
+   margin: 0;
+-  font-size: 0.9rem;
++  padding: 0;
++  list-style: none;
++  display: flex;
++  flex-direction: column;
++  gap: 12px;
++}
++
++.rank-item { display: flex; align-items: flex-start; gap: 12px; }
++
++.rank-pos {
++  flex: none;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  width: 24px;
++  height: 24px;
++  border-radius: 8px;
++  background: var(--color-primary-soft);
++  color: var(--color-primary);
++  font-size: 0.75rem;
++  font-weight: 700;
++}
++
++.rank-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
++
++.rank-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
++
++.rank-name {
++  min-width: 0;
++  font-size: 0.8125rem;
++  font-weight: 600;
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.rank-value { font-size: 0.8125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
++
++.rank-bar { height: 4px; border-radius: 4px; background: var(--color-surface-muted); overflow: hidden; }
++.rank-bar span { display: block; height: 100%; border-radius: 4px; background: var(--series-1); transition: width 0.4s ease; }
++
++.rank-sub { font-size: 0.75rem; color: var(--color-text-muted); }
++
++.stock-item {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 12px;
++  padding: 8px 12px;
++  border: 1px solid var(--color-border);
++  border-radius: 12px;
++  background: var(--color-surface-muted);
++}
++
++.stock-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
++
++.stock-name {
++  font-size: 0.8125rem;
++  font-weight: 600;
++  white-space: nowrap;
++  overflow: hidden;
++  text-overflow: ellipsis;
++}
++
++.stock-sub { font-size: 0.75rem; color: var(--color-text-muted); }
++
++.badge {
++  --tone: var(--series-4);
++  flex: none;
++  display: inline-flex;
++  align-items: center;
++  gap: 8px;
++  height: 24px;
++  padding: 0 12px;
++  border-radius: 999px;
++  background: color-mix(in srgb, var(--tone) 16%, var(--color-surface));
++  color: var(--color-text);
++  font-size: 0.75rem;
++  font-weight: 600;
++  white-space: nowrap;
++}
++
++.badge::before {
++  content: "";
++  width: 8px;
++  height: 8px;
++  border-radius: 50%;
++  background: var(--tone);
+ }
+ 
+-.session-card-grid {
++.badge-out { --tone: var(--color-error); }
++
++.stock-more { font-size: 0.75rem; color: var(--color-text-muted); text-align: center; }
++
++/* ---------- Mi sucursal ---------- */
++
++.branch-strip { padding: 12px 16px; }
++.branch-strip .panel-head { margin-bottom: 8px; }
++
++.branch-facts {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+-  gap: 14px;
++  gap: 8px;
+ }
+ 
+-.session-fact {
++.page-dashboard .session-fact {
+   display: flex;
+   align-items: center;
+-  gap: 10px;
+-  padding: 12px 14px;
++  gap: 8px;
++  padding: 8px 12px;
++  border-radius: 12px;
+   background: var(--color-surface-muted);
+-  border-radius: var(--radius-sm);
+-  font-size: 0.92rem;
++  font-size: 0.8125rem;
++}
++
++.page-dashboard .chip.session-fact {
++  padding: 0 12px;
++  background: var(--color-surface);
++}
++
++.page-dashboard .session-fact .icon { color: var(--color-text-muted); }
++
++/* ---------- Responsive ---------- */
++
++@media (max-width: 1180px) {
++  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
++}
++
++@media (max-width: 1100px) {
++  .dash-row-charts { grid-template-columns: minmax(0, 1fr); }
++  .donut-layout { flex-direction: row; flex-wrap: wrap; }
++  .legend { align-self: auto; flex: 1; min-width: 200px; }
++}
++
++/* Sidebar compacto: barra superior horizontal */
++@media (max-width: 860px) {
++  .page-dashboard .app-shell .app-sidebar,
++  .page-dashboard .app-shell.sidebar-collapsed .app-sidebar {
++    position: sticky;
++    top: 0;
++    z-index: 100;
++    flex-direction: row;
++    align-items: center;
++    gap: 8px;
++    width: 100%;
++    height: 56px;
++    padding: 8px 12px;
++    border-right: 0;
++    border-bottom: 1px solid var(--color-border);
++    overflow: visible;
++  }
++
++  .page-dashboard .app-shell .app-logo,
++  .page-dashboard .app-shell.sidebar-collapsed .app-logo {
++    flex: none;
++    flex-direction: row;
++    min-height: 0;
++    margin: 0;
++    padding: 0;
++  }
++
++  .page-dashboard .app-logo::after { display: none; }
++
++  .page-dashboard .app-shell .app-logo-text,
++  .page-dashboard .app-shell.sidebar-collapsed .app-logo-text,
++  .page-dashboard .app-shell .app-nav .nav-label,
++  .page-dashboard .app-shell.sidebar-collapsed .app-nav .nav-label,
++  .page-dashboard .app-shell .app-logout .nav-label,
++  .page-dashboard .app-shell.sidebar-collapsed .app-logout .nav-label,
++  .page-dashboard .app-shell .app-sidebar-footer,
++  .page-dashboard .app-shell.sidebar-collapsed .app-sidebar-footer,
++  .page-dashboard .sidebar-toggle,
++  .page-dashboard .app-shell.sidebar-collapsed .sidebar-toggle {
++    display: none;
++  }
++
++  .page-dashboard .app-shell .app-nav,
++  .page-dashboard .app-shell.sidebar-collapsed .app-nav {
++    flex: 1;
++    flex-direction: row;
++    gap: 4px;
++    min-width: 0;
++    overflow-x: auto;
++    scrollbar-width: none;
++  }
++
++  .page-dashboard .app-nav::-webkit-scrollbar { display: none; }
++
++  .page-dashboard .app-shell .app-nav a,
++  .page-dashboard .app-shell.sidebar-collapsed .app-nav a {
++    flex: none;
++    justify-content: center;
++    padding: 12px;
++  }
++
++  .page-dashboard .app-nav a.active::before { display: none; }
++
++  .page-dashboard .app-shell .app-logout,
++  .page-dashboard .app-shell.sidebar-collapsed .app-logout {
++    flex: none;
++    width: auto;
++    margin: 0;
++    padding: 12px;
++    justify-content: center;
++  }
++
++  .page-dashboard .app-topbar { position: static; padding: 12px 16px; }
++  .page-dashboard .app-content { padding: 12px 16px 32px; }
++}
++
++@media (max-width: 720px) {
++  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
++  .page-dashboard .app-topbar-title p { display: none; }
++  .page-dashboard .app-topbar-actions { flex: 1; justify-content: flex-end; }
++  .page-dashboard .app-search { flex: 1; min-width: 0; }
++  .dash-toolbar { align-items: stretch; }
++  .dash-filters { width: 100%; }
++  .dash-filters .segmented { margin-left: auto; }
++  .dash-row-lists { grid-template-columns: minmax(0, 1fr); }
++}
++
++@media (max-width: 480px) {
++  .kpi { padding: 12px; }
++  .kpi-icon { display: none; }
++  .kpi-value { font-size: 1.0625rem; }
++}
++
++@media (max-width: 340px) {
++  .kpi-grid { grid-template-columns: minmax(0, 1fr); }
+ }
+ 
+-.session-fact .icon {
+-  color: var(--color-accent-blue);
++@media (prefers-reduced-motion: reduce) {
++  .page-dashboard *,
++  .page-dashboard *::before,
++  .page-dashboard *::after {
++    animation: none !important;
++    transition: none !important;
++  }
+ }
+diff --git a/app/static/js/dashboard.js b/app/static/js/dashboard.js
+index 7c73547..4d786e2 100644
+--- a/app/static/js/dashboard.js
++++ b/app/static/js/dashboard.js
+@@ -76,12 +76,771 @@ async function loadMyBranch(user) {
+         `Contacto: ${branch.contacto || "Sin registrar"}`;
+ }
+ 
++/* ==========================================================================
++   Dashboard: indicadores, gráficos y listas.
++   Usa únicamente endpoints existentes:
++     /ventas/, /productos/, /metodos-pago/, /sucursales/, /inventario/bajo-stock
++   El backend ya filtra por sucursal según el rol; aquí solo se agrega.
++   ========================================================================== */
++
++const DashboardUI = (() => {
++  "use strict";
++
++  const SVG_NS = "http://www.w3.org/2000/svg";
++  const DAY_MS = 86400000;
++  const MAX_SERIES = 5;
++
++  const state = {
++    user: null,
++    branches: [],
++    branchMap: new Map(),
++    days: 30,
++    branchId: "",
++    data: null,
++    requestId: 0,
++    series: [],
++  };
++
++  const $ = (selector) => document.querySelector(selector);
++
++  /* ---------- Helpers ---------- */
++
++  function t(key, vars = {}) {
++    const lang = typeof getLanguage === "function" ? getLanguage() : "es";
++    const dict = (typeof translations !== "undefined" && translations[lang]) || {};
++    let text = dict[key] !== undefined ? dict[key] : key;
++    Object.entries(vars).forEach(([name, value]) => {
++      text = text.replace(`{${name}}`, value);
++    });
++    return text;
++  }
++
++  function locale() {
++    return typeof getLanguage === "function" && getLanguage() === "en" ? "en-US" : "es-MX";
++  }
++
++  function money(value) {
++    const number = Number(value) || 0;
++    const digits = Math.abs(number) >= 1e5 ? 0 : 2;
++    return "$" + number.toLocaleString(locale(), {
++      minimumFractionDigits: digits,
++      maximumFractionDigits: digits,
++    });
++  }
++
++  function integer(value) {
++    return (Number(value) || 0).toLocaleString(locale());
++  }
++
++  function trimDecimal(value) {
++    return String(Math.round(value * 10) / 10);
++  }
++
++  function compact(value) {
++    const abs = Math.abs(value);
++    if (abs >= 1e6) return `${trimDecimal(value / 1e6)}M`;
++    if (abs >= 1e3) return `${trimDecimal(value / 1e3)}k`;
++    return String(Math.round(value));
++  }
++
++  // Máximo "redondo" que permite 4 divisiones enteras en el eje Y.
++  function niceMax(value) {
++    if (value <= 0) return 4;
++    const exponent = Math.floor(Math.log10(value));
++    const fraction = value / 10 ** exponent;
++    const steps = [1, 2, 4, 8, 10];
++    const next = steps.find((step) => fraction <= step) || 10;
++    return next * 10 ** exponent;
++  }
++
++  function startOfDay(date) {
++    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
++  }
++
++  function addDays(date, amount) {
++    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount);
++  }
++
++  function svgEl(name, attrs = {}) {
++    const element = document.createElementNS(SVG_NS, name);
++    Object.entries(attrs).forEach(([key, value]) => element.setAttribute(key, value));
++    return element;
++  }
++
++  function htmlEl(tag, className, text) {
++    const element = document.createElement(tag);
++    if (className) element.className = className;
++    if (text !== undefined) element.textContent = text;
++    return element;
++  }
++
++  function emptyMessage(className, text) {
++    const box = htmlEl("div", className);
++    box.innerHTML =
++      '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>';
++    box.append(htmlEl("span", "", text));
++    return box;
++  }
++
++  /* ---------- Métricas ---------- */
++
++  function computeMetrics() {
++    const { ventas, productos, pagos, stock } = state.data;
++    const days = state.days;
++    const today = startOfDay(new Date());
++    const start = addDays(today, -(days - 1));
++    const prevStart = addDays(start, -days);
++    const end = addDays(today, 1);
++
++    const productMap = new Map(productos.map((product) => [product.id, product]));
++    const daily = Array.from({ length: days }, (_, index) => ({
++      date: addDays(start, index),
++      total: 0,
++      count: 0,
++    }));
++    const payTotals = new Map();
++    const topMap = new Map();
++
++    let revenue = 0;
++    let vat = 0;
++    let units = 0;
++    let count = 0;
++    let todayCount = 0;
++    let prevRevenue = 0;
++
++    ventas.forEach((venta) => {
++      const when = new Date(venta.created_at);
++      const total = Number(venta.total) || 0;
++
++      if (when >= start && when < end) {
++        revenue += total;
++        vat += Number(venta.iva) || 0;
++        count += 1;
++        if (when >= today) todayCount += 1;
++
++        const index = Math.min(
++          days - 1,
++          Math.max(0, Math.round((startOfDay(when) - start) / DAY_MS)),
++        );
++        daily[index].total += total;
++        daily[index].count += 1;
++
++        const pay = payTotals.get(venta.metodo_pago_id) || { value: 0, count: 0 };
++        pay.value += total;
++        pay.count += 1;
++        payTotals.set(venta.metodo_pago_id, pay);
++
++        (venta.detalles || []).forEach((detalle) => {
++          const quantity = Number(detalle.cantidad) || 0;
++          units += quantity;
++          const item = topMap.get(detalle.producto_id) || { id: detalle.producto_id, units: 0, revenue: 0 };
++          item.units += quantity;
++          item.revenue += Number(detalle.subtotal) || 0;
++          topMap.set(detalle.producto_id, item);
++        });
++      } else if (when >= prevStart && when < start) {
++        prevRevenue += total;
++      }
++    });
++
++    // El color sigue a la entidad (método de pago), no a su posición en el ranking.
++    const methodsById = [...pagos].sort((a, b) => a.id - b.id);
++    const colorIndex = new Map(methodsById.map((method, index) => [method.id, index]));
++    const nameById = new Map(pagos.map((method) => [method.id, method.nombre]));
++
++    const payments = [];
++    let otherValue = 0;
++    let otherCount = 0;
++    payTotals.forEach((pay, id) => {
++      const index = colorIndex.has(id) ? colorIndex.get(id) : methodsById.length;
++      if (index < MAX_SERIES) {
++        payments.push({ name: nameById.get(id) || `#${id}`, value: pay.value, count: pay.count, color: index });
++      } else {
++        otherValue += pay.value;
++        otherCount += pay.count;
++      }
++    });
++    if (otherValue > 0) {
++      payments.push({ name: t("dashboard.chart.other"), value: otherValue, count: otherCount, color: MAX_SERIES });
++    }
++    payments.sort((a, b) => b.value - a.value);
++
++    const top = [...topMap.values()]
++      .sort((a, b) => b.units - a.units || b.revenue - a.revenue)
++      .slice(0, 5)
++      .map((item) => ({ ...item, product: productMap.get(item.id) }));
++
++    const lowStock = stock
++      .map((row) => ({ ...row, product: productMap.get(row.producto_id) }))
++      .filter((row) => row.product)
++      .sort((a, b) => a.existencia - b.existencia || a.product.nombre.localeCompare(b.product.nombre));
++
++    return {
++      revenue,
++      vat,
++      units,
++      count,
++      todayCount,
++      prevRevenue,
++      daily,
++      payments,
++      top,
++      lowStock,
++      activeProducts: productos.length,
++    };
++  }
++
++  /* ---------- Indicadores ---------- */
++
++  function setKpi(id, value, sub) {
++    $(`#kpi-${id}`).textContent = value;
++    $(`#kpi-${id}-sub`).textContent = sub;
++  }
++
++  function renderKpis(metrics) {
++    const days = state.days;
++    const canSeeStock = ["ADMIN", "GERENTE"].includes(state.user.rol);
++
++    setKpi("revenue", money(metrics.revenue), t("dashboard.sub.period", { n: days }));
++    setKpi("sales", integer(metrics.count), t("dashboard.sub.transactions"));
++    setKpi(
++      "ticket",
++      metrics.count ? money(metrics.revenue / metrics.count) : "—",
++      t("dashboard.sub.per_sale"),
++    );
++    setKpi("units", integer(metrics.units), t("dashboard.sub.units"));
++    setKpi("vat", money(metrics.vat), t("dashboard.sub.vat"));
++    setKpi("products", integer(metrics.activeProducts), t("dashboard.sub.catalog"));
++
++    // Crecimiento: ingresos del periodo vs. el periodo inmediato anterior.
++    const growth = $("#kpi-growth");
++    growth.replaceChildren();
++    if (metrics.prevRevenue > 0) {
++      const change = ((metrics.revenue - metrics.prevRevenue) / metrics.prevRevenue) * 100;
++      const arrow = htmlEl("span", `trend ${change >= 0 ? "trend-up" : "trend-down"}`, change >= 0 ? "▲" : "▼");
++      arrow.setAttribute("aria-hidden", "true");
++      const sign = change > 0 ? "+" : "";
++      growth.append(arrow, `${sign}${change.toLocaleString(locale(), { maximumFractionDigits: 1 })}%`);
++      $("#kpi-growth-sub").textContent = t("dashboard.sub.vs_prev", { n: days });
++    } else {
++      growth.textContent = "—";
++      $("#kpi-growth-sub").textContent = t("dashboard.sub.no_prev");
++    }
++
++    // Octavo indicador: alertas de stock (admin/gerente) o ventas de hoy (cajero).
++    if (canSeeStock) {
++      const alerts = metrics.lowStock.length;
++      setKpi("alerts", integer(alerts), alerts ? t("dashboard.sub.restock") : t("dashboard.sub.all_good"));
++    } else {
++      setKpi("alerts", integer(metrics.todayCount), t("dashboard.sub.transactions"));
++    }
++  }
++
++  /* ---------- Gráfico de ventas por día ---------- */
++
++  function renderSalesTable(series) {
++    const table = $("#sales-table");
++    table.replaceChildren();
++    const caption = htmlEl("caption", "", t("dashboard.chart.sales"));
++    const head = htmlEl("tr");
++    ["dashboard.chart.table_date", "dashboard.chart.table_total", "dashboard.chart.table_count"].forEach((key) => {
++      head.append(htmlEl("th", "", t(key)));
++    });
++    table.append(caption, head);
++    series.forEach((point) => {
++      const row = htmlEl("tr");
++      row.append(
++        htmlEl("td", "", point.date.toLocaleDateString(locale())),
++        htmlEl("td", "", money(point.total)),
++        htmlEl("td", "", String(point.count)),
++      );
++      table.append(row);
++    });
++  }
++
++  function renderSalesChart(metrics) {
++    const container = $("#sales-chart");
++    const tooltip = $("#sales-tooltip");
++    const series = metrics.daily;
++    state.series = series;
++
++    tooltip.hidden = true;
++    container.replaceChildren();
++    $("#sales-chart-meta").textContent = t("dashboard.sub.period", { n: state.days });
++    renderSalesTable(series);
++
++    if (!series.some((point) => point.total > 0)) {
++      container.append(emptyMessage("chart-empty", t("dashboard.chart.empty")));
++      return;
++    }
++
++    const width = Math.max(container.clientWidth, 240);
++    const height = Math.max(container.clientHeight, 208);
++    const margin = { top: 12, right: 12, bottom: 24, left: 48 };
++    const innerWidth = width - margin.left - margin.right;
++    const innerHeight = height - margin.top - margin.bottom;
++    const count = series.length;
++    const maxValue = niceMax(Math.max(...series.map((point) => point.total)));
++
++    const x = (index) => margin.left + (count === 1 ? innerWidth / 2 : (index / (count - 1)) * innerWidth);
++    const y = (value) => margin.top + innerHeight - (value / maxValue) * innerHeight;
++
++    const svg = svgEl("svg", {
++      class: "chart-svg",
++      width,
++      height,
++      viewBox: `0 0 ${width} ${height}`,
++      role: "img",
++      tabindex: "0",
++      "aria-label": `${t("dashboard.chart.sales")}: ${t("dashboard.sub.period", { n: state.days })}`,
++    });
++
++    // Cuadrícula tenue y etiquetas del eje Y
++    for (let step = 0; step <= 4; step += 1) {
++      const value = (maxValue * step) / 4;
++      const yy = y(value);
++      svg.append(svgEl("line", { class: "grid", x1: margin.left, x2: width - margin.right, y1: yy, y2: yy }));
++      const label = svgEl("text", { class: "axis-label", x: margin.left - 8, y: yy + 4, "text-anchor": "end" });
++      label.textContent = `$${compact(value)}`;
++      svg.append(label);
++    }
++
++    // Etiquetas del eje X: pocas y repartidas
++    const tickTotal = Math.min(count, width < 420 ? 3 : 5);
++    const tickIndexes = new Set();
++    for (let k = 0; k < tickTotal; k += 1) {
++      tickIndexes.add(tickTotal === 1 ? 0 : Math.round((k * (count - 1)) / (tickTotal - 1)));
++    }
++    const lastTick = Math.max(...tickIndexes);
++    tickIndexes.forEach((index) => {
++      const anchor = index === 0 ? "start" : index === lastTick && count > 1 ? "end" : "middle";
++      const label = svgEl("text", { class: "axis-label", x: x(index), y: height - 6, "text-anchor": anchor });
++      label.textContent = series[index].date.toLocaleDateString(locale(), { day: "numeric", month: "short" });
++      svg.append(label);
++    });
++
++    // Área y línea
++    const linePath = series.map((point, index) => `${index ? "L" : "M"}${x(index)},${y(point.total)}`).join(" ");
++    svg.append(
++      svgEl("path", { class: "area", d: `${linePath} L${x(count - 1)},${y(0)} L${x(0)},${y(0)} Z` }),
++      svgEl("path", { class: "line", d: linePath }),
++    );
++
++    if (count <= 14) {
++      series.forEach((point, index) => {
++        svg.append(svgEl("circle", { class: "marker", cx: x(index), cy: y(point.total), r: 4 }));
++      });
++    }
++
++    // Capa interactiva: línea guía + punto + tooltip
++    const crosshair = svgEl("line", { class: "crosshair", y1: margin.top, y2: margin.top + innerHeight, visibility: "hidden" });
++    const focusDot = svgEl("circle", { class: "focus-dot", r: 5, visibility: "hidden" });
++    const overlay = svgEl("rect", {
++      class: "overlay",
++      x: margin.left,
++      y: margin.top,
++      width: innerWidth,
++      height: innerHeight,
++    });
++    svg.append(crosshair, focusDot, overlay);
++
++    let activeIndex = null;
++
++    function showPoint(index) {
++      activeIndex = index;
++      const point = series[index];
++      const cx = x(index);
++      const cy = y(point.total);
++
++      crosshair.setAttribute("x1", cx);
++      crosshair.setAttribute("x2", cx);
++      crosshair.setAttribute("visibility", "visible");
++      focusDot.setAttribute("cx", cx);
++      focusDot.setAttribute("cy", cy);
++      focusDot.setAttribute("visibility", "visible");
++
++      tooltip.replaceChildren(
++        htmlEl("span", "tip-date", point.date.toLocaleDateString(locale(), { weekday: "short", day: "numeric", month: "short" })),
++        htmlEl("strong", "tip-value", money(point.total)),
++        htmlEl(
++          "span",
++          "tip-meta",
++          t(point.count === 1 ? "dashboard.tip.sale_one" : "dashboard.tip.sale_other", { n: point.count }),
++        ),
++      );
++      tooltip.hidden = false;
++
++      const panelOffset = container.offsetTop;
++      const tipWidth = tooltip.offsetWidth;
++      const tipHeight = tooltip.offsetHeight;
++      let left = cx - tipWidth / 2;
++      left = Math.max(0, Math.min(left, width - tipWidth));
++      let top = cy - tipHeight - 12;
++      if (top < 0) top = cy + 12;
++      tooltip.style.left = `${left + container.offsetLeft}px`;
++      tooltip.style.top = `${top + panelOffset}px`;
++    }
++
++    function hidePoint() {
++      activeIndex = null;
++      crosshair.setAttribute("visibility", "hidden");
++      focusDot.setAttribute("visibility", "hidden");
++      tooltip.hidden = true;
++    }
++
++    function indexFromEvent(event) {
++      const rect = svg.getBoundingClientRect();
++      const px = event.clientX - rect.left - margin.left;
++      return Math.min(count - 1, Math.max(0, Math.round((px / innerWidth) * (count - 1))));
++    }
++
++    overlay.addEventListener("pointermove", (event) => showPoint(indexFromEvent(event)));
++    overlay.addEventListener("pointerleave", hidePoint);
++    svg.addEventListener("focus", () => showPoint(activeIndex === null ? count - 1 : activeIndex));
++    svg.addEventListener("blur", hidePoint);
++    svg.addEventListener("keydown", (event) => {
++      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
++      event.preventDefault();
++      const current = activeIndex === null ? count - 1 : activeIndex;
++      const next = event.key === "ArrowLeft" ? Math.max(0, current - 1) : Math.min(count - 1, current + 1);
++      showPoint(next);
++    });
++
++    container.append(svg);
++  }
++
++  /* ---------- Dona de métodos de pago ---------- */
++
++  function renderPayments(metrics) {
++    const wrap = $("#payments-chart");
++    const legend = $("#payments-legend");
++    wrap.replaceChildren();
++    legend.replaceChildren();
++
++    const items = metrics.payments;
++    const total = items.reduce((sum, item) => sum + item.value, 0);
++
++    if (!items.length || total <= 0) {
++      wrap.append(emptyMessage("chart-empty", t("dashboard.chart.empty")));
++      return;
++    }
++
++    const size = 148;
++    const center = size / 2;
++    const strokeWidth = 18;
++    const radius = center - strokeWidth / 2 - 4;
++    const circumference = 2 * Math.PI * radius;
++    const gap = items.length > 1 ? 2 : 0;
++
++    const svg = svgEl("svg", {
++      class: "donut-svg",
++      width: size,
++      height: size,
++      viewBox: `0 0 ${size} ${size}`,
++      role: "img",
++      "aria-label": t("dashboard.chart.payments"),
++    });
++
++    const main = svgEl("text", { class: "donut-main", x: center, y: center + 2, "text-anchor": "middle" });
++    const sub = svgEl("text", { class: "donut-sub", x: center, y: center + 18, "text-anchor": "middle" });
++    const resetCenter = () => {
++      main.textContent = `$${compact(total)}`;
++      sub.textContent = t("dashboard.chart.total");
++      svg.classList.remove("is-hovering");
++      svg.querySelectorAll(".segment").forEach((segment) => segment.classList.remove("is-active"));
++    };
++
++    let offset = 0;
++    items.forEach((item) => {
++      const fraction = item.value / total;
++      const length = Math.max(fraction * circumference - gap, 0.5);
++      const seriesVar = item.color >= MAX_SERIES ? "var(--series-other)" : `var(--series-${item.color + 1})`;
++      const segment = svgEl("circle", {
++        class: "segment",
++        cx: center,
++        cy: center,
++        r: radius,
++        fill: "none",
++        stroke: seriesVar,
++        "stroke-width": strokeWidth,
++        "stroke-dasharray": `${length} ${circumference - length}`,
++        "stroke-dashoffset": -offset,
++        transform: `rotate(-90 ${center} ${center})`,
++        tabindex: "0",
++        role: "img",
++        "aria-label": `${item.name}: ${money(item.value)} (${Math.round(fraction * 100)}%)`,
++      });
++      const activate = () => {
++        svg.classList.add("is-hovering");
++        svg.querySelectorAll(".segment").forEach((other) => other.classList.remove("is-active"));
++        segment.classList.add("is-active");
++        main.textContent = `${Math.round(fraction * 100)}%`;
++        sub.textContent = item.name;
++      };
++      segment.addEventListener("pointerenter", activate);
++      segment.addEventListener("focus", activate);
++      segment.addEventListener("pointerleave", resetCenter);
++      segment.addEventListener("blur", resetCenter);
++      svg.append(segment);
++      offset += fraction * circumference;
++
++      // Leyenda: el color identifica, el texto lleva el valor.
++      const row = htmlEl("li");
++      const swatch = htmlEl("span", "legend-swatch");
++      swatch.style.background = seriesVar;
++      row.append(
++        swatch,
++        htmlEl("span", "legend-name", item.name),
++        htmlEl("span", "legend-value", money(item.value)),
++        htmlEl("span", "legend-pct", `${(fraction * 100).toLocaleString(locale(), { maximumFractionDigits: 1 })}% · ${t(item.count === 1 ? "dashboard.tip.sale_one" : "dashboard.tip.sale_other", { n: item.count })}`),
++      );
++      legend.append(row);
++    });
++
++    svg.append(main, sub);
++    resetCenter();
++    wrap.append(svg);
++  }
++
++  /* ---------- Productos destacados ---------- */
++
++  function branchLabel(product) {
++    const showBranch = state.user.rol === "ADMIN" && !state.branchId && state.branches.length > 1;
++    if (!showBranch || !product) return "";
++    const branch = state.branchMap.get(product.sucursal_id);
++    return branch ? ` · ${branch.nombre}` : "";
++  }
++
++  function renderTopProducts(metrics) {
++    const list = $("#top-products-list");
++    list.replaceChildren();
++
++    if (!metrics.top.length) {
++      const empty = htmlEl("li");
++      empty.dataset.emptyState = "";
++      empty.append(emptyMessage("list-empty", t("dashboard.top.empty")));
++      list.append(empty);
++      return;
++    }
++
++    const maxUnits = Math.max(...metrics.top.map((item) => item.units), 1);
++    metrics.top.forEach((item, index) => {
++      const name = item.product ? item.product.nombre : `#${item.id}`;
++      const row = htmlEl("li", "rank-item");
++      const bar = htmlEl("div", "rank-bar");
++      const fill = htmlEl("span");
++      fill.style.width = `${Math.max(4, (item.units / maxUnits) * 100)}%`;
++      bar.append(fill);
++
++      const top = htmlEl("div", "rank-top");
++      top.append(htmlEl("strong", "rank-name", name), htmlEl("span", "rank-value", money(item.revenue)));
++
++      const main = htmlEl("div", "rank-main");
++      main.append(
++        top,
++        bar,
++        htmlEl("span", "rank-sub", `${t("dashboard.top.units", { n: integer(item.units) })}${branchLabel(item.product)}`),
++      );
++
++      row.append(htmlEl("span", "rank-pos", String(index + 1)), main);
++      list.append(row);
++    });
++  }
++
++  /* ---------- Inventario bajo ---------- */
++
++  function renderLowStock(metrics) {
++    const list = $("#low-stock-list");
++    list.replaceChildren();
++
++    if (!metrics.lowStock.length) {
++      const empty = htmlEl("li");
++      empty.dataset.emptyState = "";
++      empty.innerHTML =
++        '<div class="list-empty"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span></span></div>';
++      empty.querySelector("span").textContent = t("dashboard.stock.empty");
++      list.append(empty);
++      return;
++    }
++
++    const visible = metrics.lowStock.slice(0, 5);
++    visible.forEach((row) => {
++      const out = row.existencia <= 0;
++      const item = htmlEl("li", "stock-item");
++      const main = htmlEl("div", "stock-main");
++      main.append(
++        htmlEl("strong", "stock-name", row.product.nombre),
++        htmlEl(
++          "span",
++          "stock-sub",
++          `${t("dashboard.stock.detail", { a: integer(row.existencia), b: integer(row.stock_minimo) })}${branchLabel(row.product)}`,
++        ),
++      );
++      item.append(main, htmlEl("span", `badge${out ? " badge-out" : ""}`, t(out ? "dashboard.stock.out" : "dashboard.stock.low")));
++      list.append(item);
++    });
++
++    const remaining = metrics.lowStock.length - visible.length;
++    if (remaining > 0) {
++      const more = htmlEl("li", "stock-more", t("dashboard.stock.more", { n: remaining }));
++      more.dataset.emptyState = "";
++      list.append(more);
++    }
++  }
++
++  /* ---------- Render / carga ---------- */
++
++  function render() {
++    if (!state.data) return;
++    const metrics = computeMetrics();
++    renderKpis(metrics);
++    renderSalesChart(metrics);
++    renderPayments(metrics);
++    renderTopProducts(metrics);
++    renderLowStock(metrics);
++    $("#dashboard").classList.remove("is-loading");
++  }
++
++  async function load() {
++    const dash = $("#dashboard");
++    const requestId = ++state.requestId;
++    dash.classList.add("is-refetching");
++
++    const rol = state.user.rol;
++    const query = rol === "ADMIN" && state.branchId ? `?sucursal_id=${encodeURIComponent(state.branchId)}` : "";
++    const canSeeStock = rol === "ADMIN" || rol === "GERENTE";
++
++    const results = await Promise.allSettled([
++      apiRequest(`/ventas/${query}`),
++      apiRequest(`/productos/${query}`),
++      apiRequest("/metodos-pago/"),
++      canSeeStock ? apiRequest(`/inventario/bajo-stock${query}`) : Promise.resolve([]),
++    ]);
++
++    // Si el usuario cambió de sucursal mientras cargaba, se descarta esta respuesta.
++    if (requestId !== state.requestId) return;
++
++    const pick = (index) => {
++      const result = results[index];
++      return result.status === "fulfilled" && Array.isArray(result.value) ? result.value : [];
++    };
++
++    const failed = results.find((result) => result.status === "rejected");
++    if (failed) showError(failed.reason.message);
++
++    state.data = {
++      ventas: pick(0),
++      productos: pick(1),
++      pagos: pick(2),
++      stock: pick(3),
++    };
++
++    render();
++    dash.classList.remove("is-refetching");
++  }
++
++  /* ---------- Configuración por rol y filtros ---------- */
++
++  function setupRole(user) {
++    const canSeeStock = user.rol === "ADMIN" || user.rol === "GERENTE";
++
++    if (!canSeeStock) {
++      $("#low-stock-panel").hidden = true;
++      $("#kpi-alerts-label").setAttribute("data-i18n", "dashboard.kpi.today");
++      document.querySelector('[data-role-icon="stock"]').hidden = true;
++      document.querySelector('[data-role-icon="today"]').hidden = false;
++      $("#kpi-alerts-card").classList.remove("tone-red");
++      $("#kpi-alerts-card").classList.add("tone-gold");
++      if (typeof applyTranslations === "function") applyTranslations();
++    }
++  }
++
++  async function loadBranches(user) {
++    try {
++      const branches = await apiRequest("/sucursales/");
++      state.branches = Array.isArray(branches) ? branches : [];
++      state.branchMap = new Map(state.branches.map((branch) => [branch.id, branch]));
++    } catch (error) {
++      state.branches = [];
++      return;
++    }
++
++    if (user.sucursal_id && state.branchMap.has(user.sucursal_id)) {
++      $("#current-branch").textContent =
++        `Sucursal asignada: ${state.branchMap.get(user.sucursal_id).nombre}`;
++    }
++
++    if (user.rol === "ADMIN" && state.branches.length) {
++      const select = $("#branch-filter");
++      state.branches.forEach((branch) => {
++        const option = document.createElement("option");
++        option.value = String(branch.id);
++        option.textContent = branch.nombre;
++        select.append(option);
++      });
++      $("#branch-filter-wrap").hidden = false;
++    }
++  }
++
++  function bindFilters() {
++    const period = $("#period-filter");
++    period.addEventListener("click", (event) => {
++      const button = event.target.closest("button[data-days]");
++      if (!button) return;
++      state.days = Number(button.dataset.days);
++      period.querySelectorAll("button").forEach((other) => {
++        other.setAttribute("aria-pressed", String(other === button));
++      });
++      render();
++    });
++
++    $("#branch-filter").addEventListener("change", (event) => {
++      state.branchId = event.target.value;
++      load();
++    });
++
++    // Los textos dinámicos se vuelven a pintar al cambiar de idioma
++    // (i18n.js actualiza el idioma en su propio manejador del clic).
++    document.querySelectorAll("[data-lang-toggle]").forEach((button) => {
++      button.addEventListener("click", () => setTimeout(render, 0));
++    });
++
++    // Redibuja el gráfico de líneas cuando cambia el ancho disponible.
++    const chart = $("#sales-chart");
++    if (typeof ResizeObserver === "function") {
++      let lastWidth = chart.clientWidth;
++      let lastHeight = chart.clientHeight;
++      let frame = null;
++      new ResizeObserver(() => {
++        const sameSize =
++          Math.abs(chart.clientWidth - lastWidth) < 2 && Math.abs(chart.clientHeight - lastHeight) < 2;
++        if (sameSize || !state.data) return;
++        lastWidth = chart.clientWidth;
++        lastHeight = chart.clientHeight;
++        cancelAnimationFrame(frame);
++        frame = requestAnimationFrame(() => renderSalesChart(computeMetrics()));
++      }).observe(chart);
++    }
++  }
++
++  async function init(user) {
++    state.user = user;
++    setupRole(user);
++    bindFilters();
++    await loadBranches(user);
++    await load();
++  }
++
++  return { init };
++})();
++
+ (async () => {
+     try {
+         const user = await apiRequest("/auth/me");
+         renderUser(user);
+-        await loadMyBranch(user);
++        loadMyBranch(user).catch((error) => showError(error.message));
++        await DashboardUI.init(user);
+     } catch (error) {
+         showError(error.message);
+     }
+-})();
+\ No newline at end of file
++})();
+diff --git a/app/static/js/i18n.js b/app/static/js/i18n.js
+index 35fa361..5370c6a 100644
+--- a/app/static/js/i18n.js
++++ b/app/static/js/i18n.js
+@@ -11,9 +11,56 @@ const translations = {
+     "nav.logout": "Cerrar sesión",
+     "topbar.search": "Buscar...",
+     "dashboard.title": "Panel principal",
+-    "dashboard.subtitle": "Resumen general de tu sesión",
++    "dashboard.subtitle": "Resumen de ventas e inventario",
+     "dashboard.session_title": "Sesión actual",
+     "dashboard.my_branch_title": "Mi sucursal",
++    "dashboard.filter.period": "Periodo",
++    "dashboard.filter.branch": "Sucursal",
++    "dashboard.filter.all_branches": "Todas las sucursales",
++    "dashboard.period.7": "7 días",
++    "dashboard.period.30": "30 días",
++    "dashboard.period.90": "90 días",
++    "dashboard.kpi.revenue": "Ingresos",
++    "dashboard.kpi.sales": "Ventas",
++    "dashboard.kpi.ticket": "Ticket promedio",
++    "dashboard.kpi.units": "Productos vendidos",
++    "dashboard.kpi.vat": "IVA",
++    "dashboard.kpi.growth": "Crecimiento",
++    "dashboard.kpi.products": "Productos activos",
++    "dashboard.kpi.alerts": "Alertas de stock",
++    "dashboard.kpi.today": "Ventas de hoy",
++    "dashboard.sub.period": "Últimos {n} días",
++    "dashboard.sub.transactions": "Transacciones",
++    "dashboard.sub.per_sale": "Por venta",
++    "dashboard.sub.units": "Unidades",
++    "dashboard.sub.vat": "Incluido en ingresos",
++    "dashboard.sub.vs_prev": "vs. {n} días previos",
++    "dashboard.sub.no_prev": "Sin periodo previo",
++    "dashboard.sub.catalog": "En catálogo",
++    "dashboard.sub.restock": "Por reponer",
++    "dashboard.sub.all_good": "Todo en orden",
++    "dashboard.chart.sales": "Ventas por día",
++    "dashboard.chart.payments": "Métodos de pago",
++    "dashboard.chart.total": "Total",
++    "dashboard.chart.other": "Otros",
++    "dashboard.chart.empty": "Sin ventas en este periodo",
++    "dashboard.chart.table_date": "Fecha",
++    "dashboard.chart.table_total": "Ingresos",
++    "dashboard.chart.table_count": "Ventas",
++    "dashboard.tip.sale_one": "{n} venta",
++    "dashboard.tip.sale_other": "{n} ventas",
++    "dashboard.top.title": "Productos destacados",
++    "dashboard.top.meta": "Por unidades vendidas",
++    "dashboard.top.units": "{n} uds.",
++    "dashboard.top.empty": "Aún no hay ventas en este periodo",
++    "dashboard.stock.title": "Inventario bajo",
++    "dashboard.stock.view": "Ver inventario",
++    "dashboard.stock.out": "Agotado",
++    "dashboard.stock.low": "Stock bajo",
++    "dashboard.stock.detail": "Existencia {a} · mínimo {b}",
++    "dashboard.stock.empty": "Todos los productos tienen existencia suficiente",
++    "dashboard.stock.more": "y {n} más",
++    "dashboard.stock.count": "{n} por reponer",
+     "products.title": "Productos",
+     "products.subtitle": "Catálogo de productos por sucursal",
+     "products.back": "Volver al panel",
+@@ -48,9 +95,56 @@ const translations = {
+     "nav.logout": "Log out",
+     "topbar.search": "Search...",
+     "dashboard.title": "Dashboard",
+-    "dashboard.subtitle": "Overview of your session",
++    "dashboard.subtitle": "Sales and inventory overview",
+     "dashboard.session_title": "Current session",
+     "dashboard.my_branch_title": "My branch",
++    "dashboard.filter.period": "Period",
++    "dashboard.filter.branch": "Branch",
++    "dashboard.filter.all_branches": "All branches",
++    "dashboard.period.7": "7 days",
++    "dashboard.period.30": "30 days",
++    "dashboard.period.90": "90 days",
++    "dashboard.kpi.revenue": "Revenue",
++    "dashboard.kpi.sales": "Sales",
++    "dashboard.kpi.ticket": "Average ticket",
++    "dashboard.kpi.units": "Units sold",
++    "dashboard.kpi.vat": "VAT",
++    "dashboard.kpi.growth": "Growth",
++    "dashboard.kpi.products": "Active products",
++    "dashboard.kpi.alerts": "Stock alerts",
++    "dashboard.kpi.today": "Sales today",
++    "dashboard.sub.period": "Last {n} days",
++    "dashboard.sub.transactions": "Transactions",
++    "dashboard.sub.per_sale": "Per sale",
++    "dashboard.sub.units": "Units",
++    "dashboard.sub.vat": "Included in revenue",
++    "dashboard.sub.vs_prev": "vs. previous {n} days",
++    "dashboard.sub.no_prev": "No previous period",
++    "dashboard.sub.catalog": "In catalog",
++    "dashboard.sub.restock": "To restock",
++    "dashboard.sub.all_good": "All good",
++    "dashboard.chart.sales": "Daily sales",
++    "dashboard.chart.payments": "Payment methods",
++    "dashboard.chart.total": "Total",
++    "dashboard.chart.other": "Other",
++    "dashboard.chart.empty": "No sales in this period",
++    "dashboard.chart.table_date": "Date",
++    "dashboard.chart.table_total": "Revenue",
++    "dashboard.chart.table_count": "Sales",
++    "dashboard.tip.sale_one": "{n} sale",
++    "dashboard.tip.sale_other": "{n} sales",
++    "dashboard.top.title": "Top products",
++    "dashboard.top.meta": "By units sold",
++    "dashboard.top.units": "{n} units",
++    "dashboard.top.empty": "No sales in this period yet",
++    "dashboard.stock.title": "Low stock",
++    "dashboard.stock.view": "View inventory",
++    "dashboard.stock.out": "Out of stock",
++    "dashboard.stock.low": "Low stock",
++    "dashboard.stock.detail": "In stock {a} · minimum {b}",
++    "dashboard.stock.empty": "All products are sufficiently stocked",
++    "dashboard.stock.more": "and {n} more",
++    "dashboard.stock.count": "{n} to restock",
+     "products.title": "Products",
+     "products.subtitle": "Product catalog by branch",
+     "products.back": "Back to dashboard",
+diff --git a/app/templates/dashboard.html b/app/templates/dashboard.html
+index 3c24e8f..52c0c32 100644
+--- a/app/templates/dashboard.html
++++ b/app/templates/dashboard.html
+@@ -7,63 +7,197 @@
+   <link rel="stylesheet" href="/static/css/theme.css">
+   <link rel="stylesheet" href="/static/css/dashboard.css">
+ </head>
+-<body>
++<body class="page-dashboard">
+   <div class="app-shell">
+     {% include "_sidebar.html" %}
+     <div class="app-main">
+       {% set page_title = "Panel principal" %}
+       {% set page_title_key = "dashboard.title" %}
+-      {% set page_subtitle = "Resumen general de tu sesión" %}
++      {% set page_subtitle = "Resumen de ventas e inventario" %}
+       {% set page_subtitle_key = "dashboard.subtitle" %}
+       {% include "_topbar.html" %}
+ 
+       <main class="app-content">
+-        <section class="session-card">
+-          <div class="session-card-header">
+-            <svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+-            <div>
+-              <h2 data-i18n="dashboard.session_title">Sesión actual</h2>
+-              <p id="current-user" class="muted">Cargando usuario...</p>
+-            </div>
+-          </div>
+-          <div class="session-card-grid">
+-            <div class="session-fact">
+-              <svg class="icon" viewBox="0 0 24 24"><path d="M12 3 3 8v13h18V8Z"/><path d="M9 21v-6h6v6"/></svg>
+-              <span id="current-role"></span>
++        <div class="dash is-loading" id="dashboard">
++
++          <!-- Contexto de sesión + filtros -->
++          <section class="dash-toolbar">
++            <div class="dash-context">
++              <div class="chip session-fact">
++                <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
++                <span id="current-user" class="chip-text">Cargando usuario...</span>
++              </div>
++              <div class="chip session-fact">
++                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.4 3.2 8 8 9 4.8-1 8-4.6 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
++                <span id="current-role" class="chip-text"></span>
++              </div>
++              <div class="chip session-fact">
++                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
++                <span id="current-branch" class="chip-text"></span>
++              </div>
+             </div>
+-            <div class="session-fact">
+-              <svg class="icon" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+-              <span id="current-branch"></span>
++
++            <div class="dash-filters">
++              <label class="filter-field" id="branch-filter-wrap" hidden>
++                <span class="sr-only" data-i18n="dashboard.filter.branch">Sucursal</span>
++                <select id="branch-filter" class="field-select">
++                  <option value="" data-i18n="dashboard.filter.all_branches">Todas las sucursales</option>
++                </select>
++              </label>
++              <div class="segmented" id="period-filter" role="group" aria-label="Periodo">
++                <button type="button" data-days="7" aria-pressed="false" data-i18n="dashboard.period.7">7 días</button>
++                <button type="button" data-days="30" aria-pressed="true" data-i18n="dashboard.period.30">30 días</button>
++                <button type="button" data-days="90" aria-pressed="false" data-i18n="dashboard.period.90">90 días</button>
++              </div>
+             </div>
+-          </div>
+-        </section>
++          </section>
++
++          <!-- Ocho indicadores -->
++          <section class="kpi-grid" aria-label="Indicadores principales">
++            <article class="kpi tone-rose">
++              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M17 6.5A4 4 0 0 0 13 5h-2.5a3.5 3.5 0 0 0 0 7h3a3.5 3.5 0 0 1 0 7H10a4 4 0 0 1-4-1.5"/></svg></div>
++              <div class="kpi-body">
++                <span class="kpi-label" data-i18n="dashboard.kpi.revenue">Ingresos</span>
++                <strong class="kpi-value" id="kpi-revenue">—</strong>
++                <span class="kpi-sub" id="kpi-revenue-sub"></span>
++              </div>
++            </article>
++
++            <article class="kpi tone-purple">
++              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2Z"/><path d="M9 8h6"/><path d="M9 12h6"/></svg></div>
++              <div class="kpi-body">
++                <span class="kpi-label" data-i18n="dashboard.kpi.sales">Ventas</span>
++                <strong class="kpi-value" id="kpi-sales">—</strong>
++                <span class="kpi-sub" id="kpi-sales-sub"></span>
++              </div>
++            </article>
++
++            <article class="kpi tone-teal">
++              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20 12 12 20 3 11V3h8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg></div>
++              <div class="kpi-body">
++                <span class="kpi-label" data-i18n="dashboard.kpi.ticket">Ticket promedio</span>
++                <strong class="kpi-value" id="kpi-ticket">—</strong>
++                <span class="kpi-sub" id="kpi-ticket-sub"></span>
++              </div>
++            </article>
++
++            <article class="kpi tone-gold">
++              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
++              <div class="kpi-body">
++                <span class="kpi-label" data-i18n="dashboard.kpi.units">Productos vendidos</span>
++                <strong class="kpi-value" id="kpi-units">—</strong>
++                <span class="kpi-sub" id="kpi-units-sub"></span>
++              </div>
++            </article>
++
++            <article class="kpi tone-mauve">
++              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.2"/><circle cx="17" cy="17" r="2.2"/></svg></div>
++              <div class="kpi-body">
++                <span class="kpi-label" data-i18n="dashboard.kpi.vat">IVA</span>
++                <strong class="kpi-value" id="kpi-vat">—</strong>
++                <span class="kpi-sub" id="kpi-vat-sub"></span>
++              </div>
++            </article>
++
++            <article class="kpi tone-teal">
++              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div>
++              <div class="kpi-body">
++                <span class="kpi-label" data-i18n="dashboard.kpi.growth">Crecimiento</span>
++                <strong class="kpi-value" id="kpi-growth">—</strong>
++                <span class="kpi-sub" id="kpi-growth-sub"></span>
++              </div>
++            </article>
++
++            <article class="kpi tone-purple">
++              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
++              <div class="kpi-body">
++                <span class="kpi-label" data-i18n="dashboard.kpi.products">Productos activos</span>
++                <strong class="kpi-value" id="kpi-products">—</strong>
++                <span class="kpi-sub" id="kpi-products-sub"></span>
++              </div>
++            </article>
+ 
+-        <section class="session-card" id="my-branch-section" hidden>
+-          <div class="session-card-header">
+-            <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+-            <div>
++            <article class="kpi tone-red" id="kpi-alerts-card">
++              <div class="kpi-icon">
++                <svg class="icon" data-role-icon="stock" viewBox="0 0 24 24"><path d="M12 3 2 20h20Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>
++                <svg class="icon" data-role-icon="today" viewBox="0 0 24 24" hidden><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 10h18"/></svg>
++              </div>
++              <div class="kpi-body">
++                <span class="kpi-label" id="kpi-alerts-label" data-i18n="dashboard.kpi.alerts">Alertas de stock</span>
++                <strong class="kpi-value" id="kpi-alerts">—</strong>
++                <span class="kpi-sub" id="kpi-alerts-sub"></span>
++              </div>
++            </article>
++          </section>
++
++          <!-- Gráficos -->
++          <section class="dash-row dash-row-charts">
++            <article class="panel" id="sales-chart-panel">
++              <header class="panel-head">
++                <h2 data-i18n="dashboard.chart.sales">Ventas por día</h2>
++                <span class="panel-meta" id="sales-chart-meta"></span>
++              </header>
++              <div class="chart-wrap" id="sales-chart"></div>
++              <div class="chart-tooltip" id="sales-tooltip" role="status" hidden></div>
++              <table class="sr-only" id="sales-table"></table>
++            </article>
++
++            <article class="panel" id="payments-panel">
++              <header class="panel-head">
++                <h2 data-i18n="dashboard.chart.payments">Métodos de pago</h2>
++              </header>
++              <div class="donut-layout">
++                <div class="donut-wrap" id="payments-chart"></div>
++                <ul class="legend" id="payments-legend"></ul>
++              </div>
++            </article>
++          </section>
++
++          <!-- Productos destacados + inventario bajo -->
++          <section class="dash-row dash-row-lists">
++            <article class="panel" id="top-products-panel">
++              <header class="panel-head">
++                <h2 data-i18n="dashboard.top.title">Productos destacados</h2>
++                <span class="panel-meta" data-i18n="dashboard.top.meta">Por unidades vendidas</span>
++              </header>
++              <ol class="rank-list" id="top-products-list" data-searchable></ol>
++            </article>
++
++            <article class="panel" id="low-stock-panel">
++              <header class="panel-head">
++                <h2 data-i18n="dashboard.stock.title">Inventario bajo</h2>
++                <a class="panel-link" href="/inventario-ui" data-i18n="dashboard.stock.view">Ver inventario</a>
++              </header>
++              <ul class="stock-list" id="low-stock-list" data-searchable></ul>
++            </article>
++          </section>
++
++          <!-- Mi sucursal (solo gerente) -->
++          <section class="panel branch-strip" id="my-branch-section" hidden>
++            <header class="panel-head">
+               <h2 data-i18n="dashboard.my_branch_title">Mi sucursal</h2>
++            </header>
++            <div class="branch-facts">
++              <div class="session-fact">
++                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/></svg>
++                <span id="branch-name"></span>
++              </div>
++              <div class="session-fact">
++                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z"/><circle cx="12" cy="10" r="2.4"/></svg>
++                <span id="branch-address"></span>
++              </div>
++              <div class="session-fact">
++                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a2 2 0 0 1-2 2C9.5 22 2 14.5 2 6a2 2 0 0 1 2-2Z"/></svg>
++                <span id="branch-phone"></span>
++              </div>
++              <div class="session-fact">
++                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 4h16v16H4Z"/><path d="m4 6 8 6 8-6"/></svg>
++                <span id="branch-contact"></span>
++              </div>
+             </div>
+-          </div>
+-          <div class="session-card-grid">
+-            <div class="session-fact">
+-              <svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/></svg>
+-              <span id="branch-name"></span>
+-            </div>
+-            <div class="session-fact">
+-              <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+-              <span id="branch-address"></span>
+-            </div>
+-            <div class="session-fact">
+-              <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a2 2 0 0 1-2 2C9.5 22 2 14.5 2 6a2 2 0 0 1 2-2Z"/></svg>
+-              <span id="branch-phone"></span>
+-            </div>
+-            <div class="session-fact">
+-              <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4Z"/><path d="m4 6 8 6 8-6"/></svg>
+-              <span id="branch-contact"></span>
+-            </div>
+-          </div>
+-        </section>
++          </section>
++
++        </div>
+       </main>
+     </div>
+   </div>
+-- 
+2.43.0
+

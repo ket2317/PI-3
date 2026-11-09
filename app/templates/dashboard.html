@@ -7,63 +7,197 @@
   <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/dashboard.css">
 </head>
-<body>
+<body class="page-dashboard">
   <div class="app-shell">
     {% include "_sidebar.html" %}
     <div class="app-main">
       {% set page_title = "Panel principal" %}
       {% set page_title_key = "dashboard.title" %}
-      {% set page_subtitle = "Resumen general de tu sesión" %}
+      {% set page_subtitle = "Resumen de ventas e inventario" %}
       {% set page_subtitle_key = "dashboard.subtitle" %}
       {% include "_topbar.html" %}
 
       <main class="app-content">
-        <section class="session-card">
-          <div class="session-card-header">
-            <svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-            <div>
-              <h2 data-i18n="dashboard.session_title">Sesión actual</h2>
-              <p id="current-user" class="muted">Cargando usuario...</p>
-            </div>
-          </div>
-          <div class="session-card-grid">
-            <div class="session-fact">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M12 3 3 8v13h18V8Z"/><path d="M9 21v-6h6v6"/></svg>
-              <span id="current-role"></span>
-            </div>
-            <div class="session-fact">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
-              <span id="current-branch"></span>
-            </div>
-          </div>
-        </section>
+        <div class="dash is-loading" id="dashboard">
 
-        <section class="session-card" id="my-branch-section" hidden>
-          <div class="session-card-header">
-            <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
-            <div>
+          <!-- Contexto de sesión + filtros -->
+          <section class="dash-toolbar">
+            <div class="dash-context">
+              <div class="chip session-fact">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                <span id="current-user" class="chip-text">Cargando usuario...</span>
+              </div>
+              <div class="chip session-fact">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.4 3.2 8 8 9 4.8-1 8-4.6 8-9V6Z"/><path d="m9 12 2 2 4-4"/></svg>
+                <span id="current-role" class="chip-text"></span>
+              </div>
+              <div class="chip session-fact">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/></svg>
+                <span id="current-branch" class="chip-text"></span>
+              </div>
+            </div>
+
+            <div class="dash-filters">
+              <label class="filter-field" id="branch-filter-wrap" hidden>
+                <span class="sr-only" data-i18n="dashboard.filter.branch">Sucursal</span>
+                <select id="branch-filter" class="field-select">
+                  <option value="" data-i18n="dashboard.filter.all_branches">Todas las sucursales</option>
+                </select>
+              </label>
+              <div class="segmented" id="period-filter" role="group" aria-label="Periodo">
+                <button type="button" data-days="7" aria-pressed="false" data-i18n="dashboard.period.7">7 días</button>
+                <button type="button" data-days="30" aria-pressed="true" data-i18n="dashboard.period.30">30 días</button>
+                <button type="button" data-days="90" aria-pressed="false" data-i18n="dashboard.period.90">90 días</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Ocho indicadores -->
+          <section class="kpi-grid" aria-label="Indicadores principales">
+            <article class="kpi tone-rose">
+              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M17 6.5A4 4 0 0 0 13 5h-2.5a3.5 3.5 0 0 0 0 7h3a3.5 3.5 0 0 1 0 7H10a4 4 0 0 1-4-1.5"/></svg></div>
+              <div class="kpi-body">
+                <span class="kpi-label" data-i18n="dashboard.kpi.revenue">Ingresos</span>
+                <strong class="kpi-value" id="kpi-revenue">—</strong>
+                <span class="kpi-sub" id="kpi-revenue-sub"></span>
+              </div>
+            </article>
+
+            <article class="kpi tone-purple">
+              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2Z"/><path d="M9 8h6"/><path d="M9 12h6"/></svg></div>
+              <div class="kpi-body">
+                <span class="kpi-label" data-i18n="dashboard.kpi.sales">Ventas</span>
+                <strong class="kpi-value" id="kpi-sales">—</strong>
+                <span class="kpi-sub" id="kpi-sales-sub"></span>
+              </div>
+            </article>
+
+            <article class="kpi tone-teal">
+              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M20 12 12 20 3 11V3h8Z"/><circle cx="7.5" cy="7.5" r="1"/></svg></div>
+              <div class="kpi-body">
+                <span class="kpi-label" data-i18n="dashboard.kpi.ticket">Ticket promedio</span>
+                <strong class="kpi-value" id="kpi-ticket">—</strong>
+                <span class="kpi-sub" id="kpi-ticket-sub"></span>
+              </div>
+            </article>
+
+            <article class="kpi tone-gold">
+              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
+              <div class="kpi-body">
+                <span class="kpi-label" data-i18n="dashboard.kpi.units">Productos vendidos</span>
+                <strong class="kpi-value" id="kpi-units">—</strong>
+                <span class="kpi-sub" id="kpi-units-sub"></span>
+              </div>
+            </article>
+
+            <article class="kpi tone-mauve">
+              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.2"/><circle cx="17" cy="17" r="2.2"/></svg></div>
+              <div class="kpi-body">
+                <span class="kpi-label" data-i18n="dashboard.kpi.vat">IVA</span>
+                <strong class="kpi-value" id="kpi-vat">—</strong>
+                <span class="kpi-sub" id="kpi-vat-sub"></span>
+              </div>
+            </article>
+
+            <article class="kpi tone-teal">
+              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div>
+              <div class="kpi-body">
+                <span class="kpi-label" data-i18n="dashboard.kpi.growth">Crecimiento</span>
+                <strong class="kpi-value" id="kpi-growth">—</strong>
+                <span class="kpi-sub" id="kpi-growth-sub"></span>
+              </div>
+            </article>
+
+            <article class="kpi tone-purple">
+              <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+              <div class="kpi-body">
+                <span class="kpi-label" data-i18n="dashboard.kpi.products">Productos activos</span>
+                <strong class="kpi-value" id="kpi-products">—</strong>
+                <span class="kpi-sub" id="kpi-products-sub"></span>
+              </div>
+            </article>
+
+            <article class="kpi tone-red" id="kpi-alerts-card">
+              <div class="kpi-icon">
+                <svg class="icon" data-role-icon="stock" viewBox="0 0 24 24"><path d="M12 3 2 20h20Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>
+                <svg class="icon" data-role-icon="today" viewBox="0 0 24 24" hidden><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3 10h18"/></svg>
+              </div>
+              <div class="kpi-body">
+                <span class="kpi-label" id="kpi-alerts-label" data-i18n="dashboard.kpi.alerts">Alertas de stock</span>
+                <strong class="kpi-value" id="kpi-alerts">—</strong>
+                <span class="kpi-sub" id="kpi-alerts-sub"></span>
+              </div>
+            </article>
+          </section>
+
+          <!-- Gráficos -->
+          <section class="dash-row dash-row-charts">
+            <article class="panel" id="sales-chart-panel">
+              <header class="panel-head">
+                <h2 data-i18n="dashboard.chart.sales">Ventas por día</h2>
+                <span class="panel-meta" id="sales-chart-meta"></span>
+              </header>
+              <div class="chart-wrap" id="sales-chart"></div>
+              <div class="chart-tooltip" id="sales-tooltip" role="status" hidden></div>
+              <table class="sr-only" id="sales-table"></table>
+            </article>
+
+            <article class="panel" id="payments-panel">
+              <header class="panel-head">
+                <h2 data-i18n="dashboard.chart.payments">Métodos de pago</h2>
+              </header>
+              <div class="donut-layout">
+                <div class="donut-wrap" id="payments-chart"></div>
+                <ul class="legend" id="payments-legend"></ul>
+              </div>
+            </article>
+          </section>
+
+          <!-- Productos destacados + inventario bajo -->
+          <section class="dash-row dash-row-lists">
+            <article class="panel" id="top-products-panel">
+              <header class="panel-head">
+                <h2 data-i18n="dashboard.top.title">Productos destacados</h2>
+                <span class="panel-meta" data-i18n="dashboard.top.meta">Por unidades vendidas</span>
+              </header>
+              <ol class="rank-list" id="top-products-list" data-searchable></ol>
+            </article>
+
+            <article class="panel" id="low-stock-panel">
+              <header class="panel-head">
+                <h2 data-i18n="dashboard.stock.title">Inventario bajo</h2>
+                <a class="panel-link" href="/inventario-ui" data-i18n="dashboard.stock.view">Ver inventario</a>
+              </header>
+              <ul class="stock-list" id="low-stock-list" data-searchable></ul>
+            </article>
+          </section>
+
+          <!-- Mi sucursal (solo gerente) -->
+          <section class="panel branch-strip" id="my-branch-section" hidden>
+            <header class="panel-head">
               <h2 data-i18n="dashboard.my_branch_title">Mi sucursal</h2>
+            </header>
+            <div class="branch-facts">
+              <div class="session-fact">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/></svg>
+                <span id="branch-name"></span>
+              </div>
+              <div class="session-fact">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+                <span id="branch-address"></span>
+              </div>
+              <div class="session-fact">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a2 2 0 0 1-2 2C9.5 22 2 14.5 2 6a2 2 0 0 1 2-2Z"/></svg>
+                <span id="branch-phone"></span>
+              </div>
+              <div class="session-fact">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 4h16v16H4Z"/><path d="m4 6 8 6 8-6"/></svg>
+                <span id="branch-contact"></span>
+              </div>
             </div>
-          </div>
-          <div class="session-card-grid">
-            <div class="session-fact">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/></svg>
-              <span id="branch-name"></span>
-            </div>
-            <div class="session-fact">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 0 0-14 0c0 5.7 7 12 7 12Z"/><circle cx="12" cy="10" r="2.4"/></svg>
-              <span id="branch-address"></span>
-            </div>
-            <div class="session-fact">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h4l2 5-2.5 1.5a12 12 0 0 0 6 6L15 14l5 2v4a2 2 0 0 1-2 2C9.5 22 2 14.5 2 6a2 2 0 0 1 2-2Z"/></svg>
-              <span id="branch-phone"></span>
-            </div>
-            <div class="session-fact">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4Z"/><path d="m4 6 8 6 8-6"/></svg>
-              <span id="branch-contact"></span>
-            </div>
-          </div>
-        </section>
+          </section>
+
+        </div>
       </main>
     </div>
   </div>

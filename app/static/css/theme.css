@@ -771,4 +771,315 @@ a { color: inherit; }
 }
 
 
+/* ==========================================================================
+   VENDORA · Paleta global y sidebar
+   Fuente única de colores para todos los módulos (claro y oscuro).
+   Se declara al final para tener prioridad sobre los valores anteriores.
+   ========================================================================== */
 
+:root {
+  /* Paleta de marca */
+  --pink: #C94F7C;
+  --pink-light: #F3A6BD;
+  --mauve: #895078;
+  --purple: #9584D6;
+  --teal: #39999A;
+  --gold: #DFA348;
+  --red: #D95B65;
+
+  /* Superficies y texto */
+  --color-bg: #F8F7FA;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F3F1F6;
+  --color-border: #EAE6ED;
+  --color-text: #292631;
+  --color-text-muted: #817B89;
+
+  /* Acción principal y estados */
+  --color-primary: #C94F7C;
+  --color-primary-contrast: #FFFFFF;
+  --color-primary-soft: #FBEBF1;
+  --color-success: #39999A;
+  --color-success-soft: #E4F2F2;
+  --color-error: #D95B65;
+  --color-error-soft: #FBE9EA;
+
+  /* Acentos (reemplazan azul / arena / oliva anteriores) */
+  --color-accent-blue: #9584D6;
+  --color-accent-blue-soft: #EFECFA;
+  --color-accent-tan: #DFA348;
+  --color-accent-tan-soft: #FBF1E0;
+  --color-accent-olive: #39999A;
+  --color-accent-olive-soft: #E4F2F2;
+
+  /* Sidebar */
+  --sidebar-bg: #FFFFFF;
+  --sidebar-text: #4B4655;
+  --sidebar-text-muted: #817B89;
+  --sidebar-active-bg: #FBEBF1;
+
+  /* Alias usados por estilos existentes */
+  --vendora-accent: #C94F7C;
+  --vendora-accent-hover: #B2416A;
+  --vendora-border: #EAE6ED;
+  --vendora-muted-bg: #F3F1F6;
+  --vendora-heading: #292631;
+
+  /* Series de gráficos (orden fijo) */
+  --series-1: #C94F7C;
+  --series-2: #9584D6;
+  --series-3: #39999A;
+  --series-4: #DFA348;
+  --series-5: #895078;
+  --series-other: #B9B3C2;
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #15131A;
+  --color-surface: #1E1B25;
+  --color-surface-muted: #26222E;
+  --color-border: #332E3C;
+  --color-text: #F2EFF6;
+  --color-text-muted: #A29BAD;
+
+  --color-primary: #D4608A;
+  --color-primary-contrast: #FFFFFF;
+  --color-primary-soft: #36202B;
+  --color-success: #4DB3B4;
+  --color-success-soft: #1C2E31;
+  --color-error: #E8737C;
+  --color-error-soft: #3A2226;
+
+  --color-accent-blue: #A99BE3;
+  --color-accent-blue-soft: #2A2640;
+  --color-accent-tan: #E3B26B;
+  --color-accent-tan-soft: #382C1B;
+  --color-accent-olive: #4DB3B4;
+  --color-accent-olive-soft: #1C2E31;
+
+  --sidebar-bg: #1A1720;
+  --sidebar-text: #D9D4E0;
+  --sidebar-text-muted: #A29BAD;
+  --sidebar-active-bg: #36202B;
+
+  --vendora-accent: #E27AA2;
+  --vendora-accent-hover: #F3A6BD;
+  --vendora-border: #332E3C;
+  --vendora-muted-bg: #26222E;
+  --vendora-heading: #F2EFF6;
+
+  --series-1: #D4608A;
+  --series-2: #9584D6;
+  --series-3: #39999A;
+  --series-4: #DFA348;
+  --series-5: #B27AA1;
+  --series-other: #5E5868;
+}
+
+
+/* ---------- Sidebar (global) ---------- */
+
+.app-sidebar {
+  padding: 16px 12px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--color-border);
+}
+
+.app-logo {
+  gap: 12px;
+  min-height: 48px;
+  margin-bottom: 12px;
+  padding: 4px 8px 16px;
+}
+
+.app-logo-image {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.app-logo-text strong {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.app-logo-text span {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.app-nav { gap: 4px; }
+
+.app-nav a {
+  position: relative;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sidebar-text);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.app-nav a .icon { color: var(--sidebar-text-muted); transition: color 0.15s ease; }
+
+.app-nav a:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.app-nav a:hover .icon { color: var(--color-primary); }
+
+.app-nav a.active {
+  background: var(--sidebar-active-bg);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.app-nav a.active .icon { color: var(--color-primary); }
+
+.app-nav a.active::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: var(--color-primary);
+}
+
+.app-sidebar-footer {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+
+.app-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.app-sidebar-footer-text strong {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-sidebar-footer-text span {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.app-logout {
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.app-logout:hover {
+  background: var(--color-error-soft);
+  border-color: transparent;
+  color: var(--color-error);
+}
+
+.sidebar-toggle {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  box-shadow: var(--shadow-card);
+}
+
+.sidebar-toggle:hover {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Sidebar en pantallas pequeñas: barra superior horizontal */
+@media (max-width: 860px) {
+  .app-shell .app-sidebar,
+  .app-shell.sidebar-collapsed .app-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 56px;
+    padding: 8px 12px;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+    overflow: visible;
+  }
+
+  .app-shell .app-logo,
+  .app-shell.sidebar-collapsed .app-logo {
+    flex: none;
+    flex-direction: row;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .app-logo::after { display: none; }
+
+  .app-shell .app-logo-text,
+  .app-shell.sidebar-collapsed .app-logo-text,
+  .app-shell .app-nav .nav-label,
+  .app-shell.sidebar-collapsed .app-nav .nav-label,
+  .app-shell .app-logout .nav-label,
+  .app-shell.sidebar-collapsed .app-logout .nav-label,
+  .app-shell .app-sidebar-footer,
+  .app-shell.sidebar-collapsed .app-sidebar-footer,
+  .sidebar-toggle,
+  .app-shell.sidebar-collapsed .sidebar-toggle {
+    display: none;
+  }
+
+  .app-shell .app-nav,
+  .app-shell.sidebar-collapsed .app-nav {
+    flex: 1;
+    flex-direction: row;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .app-nav::-webkit-scrollbar { display: none; }
+
+  .app-shell .app-nav a,
+  .app-shell.sidebar-collapsed .app-nav a {
+    flex: none;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .app-nav a.active::before { display: none; }
+
+  .app-shell .app-logout,
+  .app-shell.sidebar-collapsed .app-logout {
+    flex: none;
+    width: auto;
+    margin: 0;
+    padding: 12px;
+    justify-content: center;
+  }
+}
