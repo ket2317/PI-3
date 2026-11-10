@@ -298,3 +298,32 @@
   font-size: 1.2rem;
   font-weight: 700;
 }
+
+/* ---------- Existencia en el punto de venta ---------- */ 
+
+.product-card-stock {
+  margin-top: 2px; 
+  padding: 2px 8px; 
+  border-radius: 999px; 
+  background: var(--color-success-soft); 
+  color: var(--color-success); 
+  font-size: 0.72rem; 
+  font-weight: 600; 
+} 
+
+.product-card-stock.is-low { 
+  background: var(--color-accent-tan-soft); 
+  color: var(--coloraccent-tan); 
+} 
+
+.product-card-stock.is-out { 
+  background: var(--color-error-soft); 
+  color: var(--colorerror); 
+} 
+
+.cart-item-stock { 
+  display: block; 
+  font-size: 0.72rem; 
+  font-weight: 400; 
+  color: var(--color-text-muted); 
+}

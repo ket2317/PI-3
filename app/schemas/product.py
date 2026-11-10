@@ -16,5 +16,7 @@ class ProductResponse(ProductCreate):
     id: int
     created_at: datetime
     activo: bool
+    # Piezas disponibles en la sucursal del producto (0 si no tiene inventario)
+    existencia: int = 0
 
     model_config = {"from_attributes": True}

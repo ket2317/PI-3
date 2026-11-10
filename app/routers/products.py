@@ -12,6 +12,7 @@ from app.dependencies.auth import (
 
 from app.models.branch import Sucursal
 from app.models.category import Category
+from app.models.inventory import Inventory
 from app.models.product import Product
 from app.models.user import User
 from app.utils.search import ilike_any, like_term
@@ -141,7 +142,27 @@ def obtener_productos(
     if pattern is not None:
         query = query.filter(ilike_any(pattern, Product.nombre, Product.codigo))
 
-    return query.order_by(Product.nombre).all()
+    productos = query.order_by(Product.nombre).all()
+    agregar_existencia(productos, db)
+    return productos
+
+def agregar_existencia(productos: list[Product], db: Session) -> None:
+    """Pone en cada producto cuántas piezas hay en su sucursal.
+    Se hace con una sola consulta para todos los productos, no una por producto. """
+    
+    if not productos:
+        return
+    
+    inventarios = (
+        db.query(Inventory)
+        .filter(Inventory.producto_id.in_([p.id for p in productos]))
+        .all()
+        )
+    existencias = {
+        (inv.sucursal_id, inv.producto_id): inv.existencia for inv in inventarios
+        }
+    for producto in productos:
+        producto.existencia = existencias.get((producto.sucursal_id, producto.id), 0)
 
 
 @router.get(
@@ -164,6 +185,7 @@ def obtener_producto(
         db,
     )
 
+    agregar_existencia([product], db)
     return product
 
 
