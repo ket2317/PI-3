@@ -59,7 +59,9 @@ function renderProductGrid(products) {
   products.forEach((p) => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "product-card";
+    card.className = `product-card${p.existencia <= 0 ? " is-out" : ""}`;
+    // Sin existencia no se puede agregar al ticket
+    card.disabled = p.existencia <= 0;
     card.innerHTML = `
       <span class="product-card-icon">
         <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
@@ -67,10 +69,40 @@ function renderProductGrid(products) {
       <span class="product-card-name">${p.nombre}</span>
       <span class="product-card-code">${p.codigo}</span>
       <span class="product-card-price">$${Number(p.precio).toFixed(2)}</span>
+      <span class="product-card-stock
+        ${stockClass(p.existencia)}">${stockText(p.existencia)}</span>
     `;
     card.addEventListener("click", () => addToCart(p.id));
     grid.appendChild(card);
   });
+}
+
+// ---------- Existencia ---------- //
+const LOW_STOCK = 5;
+function stockOf(productId) {
+  const product = branchProducts.find((p) => p.id === productId);
+  return product ? product.existencia : 0;
+}
+
+function stockText(existencia) {
+  if (existencia <= 0) return "Agotado";
+  return `${existencia} en existencia`;
+}
+
+function stockClass(existencia) {
+  if (existencia <= 0) return "is-out";
+  if (existencia <= LOW_STOCK) return "is-low";
+  return "";
+}
+
+// Ajusta la cantidad para no vender más de lo que hay
+function limitToStock(productId, quantity) {
+  const existencia = stockOf(productId);
+  if (quantity > existencia) {
+    showError(`Solo hay ${existencia} en existencia`);
+    return existencia;
+  }
+  return quantity;
 }
 
 async function loadProductsForBranch() {
@@ -119,10 +151,12 @@ async function loadPaymentMethods() {
 
 function addToCart(productId) {
   const existing = cart.find((item) => item.producto_id === productId);
+  const quantity = limitToStock(productId, (existing ? existing.cantidad : 0) + 1);
+  if (quantity <= 0) return;
   if (existing) {
-    existing.cantidad += 1;
+    existing.cantidad = quantity;
   } else {
-    cart.push({ producto_id: productId, cantidad: 1 });
+    cart.push({ producto_id: productId, cantidad: quantity });
   }
   renderCart();
 }
@@ -130,7 +164,7 @@ function addToCart(productId) {
 function changeQuantity(productId, delta) {
   const item = cart.find((i) => i.producto_id === productId);
   if (!item) return;
-  item.cantidad += delta;
+  item.cantidad = limitToStock(productId, item.cantidad + delta);
   if (item.cantidad <= 0) {
     cart = cart.filter((i) => i.producto_id !== productId);
   }
@@ -145,7 +179,7 @@ function setQuantity(productId, value) {
     removeFromCart(productId);
     return;
   }
-  item.cantidad = quantity;
+  item.cantidad = limitToStock(productId, quantity);
   renderCart();
 }
 
@@ -177,7 +211,9 @@ function renderCart() {
     const row = document.createElement("div");
     row.className = "cart-item";
     row.innerHTML = `
-      <span class="cart-item-name">${product.nombre}</span>
+      <span class="cart-item-name">${product.nombre}
+        <small class="cart-item-stock">de ${product.existencia} disponibles</small>
+      </span>
       <button type="button" class="cart-item-remove" aria-label="Quitar">&times;</button>
       <span class="cart-item-qty">
         <button type="button" data-action="decrease">−</button>
