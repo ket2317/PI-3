@@ -259,6 +259,36 @@ document.querySelector("#stats-clear").addEventListener("click", async () => {
   }
 });
 
+// Descarga el reporte con el mismo periodo y búsqueda que se ven en pantalla
+document.querySelector("#stats-pdf").addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  try {
+    const response = await fetch(withSearch(`/reportes/ventas/pdf${rangeQuery()}`), {
+      credentials: "same-origin",
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.detail || "No se pudo generar el PDF");
+    }
+
+    // Se crea un enlace temporal al archivo y se "le da clic" para descargarlo
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `reporte-ventas-${new Date().toISOString().slice(0, 10)}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    showError(error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
+
 (async () => {
   try {
     const user = await apiRequest("/auth/me");

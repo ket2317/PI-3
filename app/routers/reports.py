@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -21,6 +21,7 @@ from app.models.sale import Sale
 from app.models.sale_detail import SaleDetail
 from app.models.user import User
 from app.routers.sales import filtrar_ventas
+from app.services.reporte_pdf import generar_pdf_ventas
 
 # Las ventas se agrupan por día según la hora de México, no la del servidor
 ZONA_HORARIA = "America/Mexico_City"
@@ -61,6 +62,37 @@ def historial_ventas(
         }
         for venta in ventas
     ]
+
+
+@router.get("/ventas/pdf")
+def descargar_reporte_pdf(
+    sucursal_id: int | None = Query(default=None),
+    desde: date | None = Query(default=None),
+    hasta: date | None = Query(default=None),
+    q: str | None = Query(default=None, max_length=100),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_or_manager),
+):
+    # Se reutilizan las mismas funciones que usa la pantalla de reportes,
+    # así el PDF muestra exactamente los mismos datos
+    ventas = historial_ventas(
+        sucursal_id=sucursal_id, desde=desde, hasta=hasta, q=q,
+        db=db, current_user=current_user,
+    )
+    estadisticas = estadisticas_ventas(
+        desde=desde, hasta=hasta, sucursal_id=sucursal_id,
+        db=db, current_user=current_user,
+    )
+
+    pdf = generar_pdf_ventas(estadisticas, ventas, desde, hasta, current_user.nombre)
+
+    nombre = f"reporte-ventas-{date.today():%Y-%m-%d}.pdf"
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        # attachment = el navegador lo descarga en lugar de abrirlo
+        headers={"Content-Disposition": f'attachment; filename="{nombre}"'},
+    )
 
 
 def filtrar_periodo(query, branch_id: int | None, desde: date | None, hasta: date | None):
