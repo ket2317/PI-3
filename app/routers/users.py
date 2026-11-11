@@ -107,7 +107,7 @@ def obtener_usuarios(
 
     pattern = like_term(q)
     if pattern is not None:
-        query = query.filter(ilike_any(pattern, User.nombre, User.correo))
+        query = query.filter(ilike_any(pattern, User.nombre, User.usuario, User.correo))
 
     return query.all()
 
@@ -164,6 +164,18 @@ def crear_usuario(
         raise HTTPException(
             status_code=409,
             detail="El correo ya está registrado",
+        )
+
+    usuario_repetido = (
+        db.query(User)
+        .filter(User.usuario == usuario.usuario)
+        .first()
+    )
+
+    if usuario_repetido:
+        raise HTTPException(
+            status_code=409,
+            detail="El nombre de usuario ya está en uso",
         )
 
     datos = usuario.model_dump(exclude={"password"})
@@ -248,7 +260,23 @@ def actualizar_usuario(
             detail="El correo ya está registrado",
         )
 
+    usuario_repetido = (
+        db.query(User)
+        .filter(
+            User.usuario == usuario.usuario,
+            User.id != usuario_id,
+        )
+        .first()
+    )
+
+    if usuario_repetido:
+        raise HTTPException(
+            status_code=409,
+            detail="El nombre de usuario ya está en uso",
+        )
+
     usuario_db.nombre = usuario.nombre
+    usuario_db.usuario = usuario.usuario
     usuario_db.correo = usuario.correo
     usuario_db.rol_id = usuario.rol_id
     usuario_db.sucursal_id = usuario.sucursal_id

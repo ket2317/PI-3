@@ -8,8 +8,8 @@ from app.main import app
 client = TestClient(app)
 
 
-def login(email, password):
-    response = client.post("/auth/login", json={"email": email, "password": password})
+def login(usuario, password):
+    response = client.post("/auth/login", json={"usuario": usuario, "password": password})
     assert response.status_code == 200
     return response.cookies
 
@@ -31,34 +31,34 @@ def test_anonimo_no_puede_ver_nada():
 
 
 def test_cajero_no_ve_otra_sucursal():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     assert client.get("/productos/?sucursal_id=1", cookies=cookies).status_code == 403
 
 
 def test_cajero_no_administra_usuarios():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     assert client.get("/usuarios/", cookies=cookies).status_code == 403
 
 
 def test_cajero_no_ve_reportes():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     assert client.get("/reportes/ventas", cookies=cookies).status_code == 403
 
 
 def test_cajero_ve_productos_de_su_sucursal():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     response = client.get("/productos/", cookies=cookies)
     assert response.status_code == 200
 
 
 def test_cajero_ve_su_sucursal():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     response = client.get("/sucursales/", cookies=cookies)
     assert response.status_code == 200
 
 
 def test_cajero_no_ve_inventario():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     response = client.get("/inventario/", cookies=cookies)
     assert response.status_code == 403
 
@@ -67,8 +67,8 @@ def test_cajero_realiza_venta_en_su_sucursal():
     """Protocolo: 'los cajeros podrán realizar ventas...' — venta real, con
     descuento automático de inventario, restaurado al final para no afectar
     otras pruebas ni la demo."""
-    admin_cookies = login("pi3@admin.com", "pi12345")
-    cajero_cookies = login("cajero.prueba@test.com", "Test12345")
+    admin_cookies = login("pi3", "pi12345")
+    cajero_cookies = login("cajero.prueba", "Test12345")
 
     antes = client.get("/inventario/?sucursal_id=2", cookies=admin_cookies).json()
     existencia_antes = next(i["existencia"] for i in antes if i["producto_id"] == 3)
@@ -96,7 +96,7 @@ def test_cajero_realiza_venta_en_su_sucursal():
 
 
 def test_cajero_no_vende_en_otra_sucursal():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     payload = {
         "sucursal_id": 1,
         "metodo_pago_id": 1,
@@ -111,33 +111,33 @@ def test_cajero_no_vende_en_otra_sucursal():
 
 
 def test_gerente_no_ve_resumen_del_sistema():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     assert client.get("/reportes/resumen", cookies=cookies).status_code == 403
 
 
 def test_gerente_no_crea_sucursales():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     payload = {"nombre": "x", "direccion": "x", "telefono": "1", "contacto": None, "gerente_id": None}
     assert client.post("/sucursales/", json=payload, cookies=cookies).status_code == 403
 
 
 def test_gerente_consulta_informacion_de_su_sucursal():
     """Protocolo: 'Consultar la información de su sucursal.'"""
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     response = client.get("/sucursales/2", cookies=cookies)
     assert response.status_code == 200
     assert response.json()["id"] == 2
 
 
 def test_gerente_no_consulta_otra_sucursal():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     assert client.get("/sucursales/1", cookies=cookies).status_code == 403
 
 
 def test_gerente_registra_consulta_y_modifica_producto():
     """Protocolo: 'Registrar productos. Consultar productos. Modificar
     productos.' — se crea, se modifica y se desactiva al final (limpieza)."""
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
 
     payload = {
         "sucursal_id": 2,
@@ -165,10 +165,11 @@ def test_gerente_registra_consulta_y_modifica_producto():
 
 def test_gerente_registra_y_elimina_cajero_de_su_sucursal():
     """Protocolo: 'Registrar nuevas cajas. Eliminar cajas.'"""
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
 
     payload = {
         "nombre": "Cajero Pytest",
+        "usuario": f"cajero.pytest.{uuid.uuid4().hex[:8]}",
         "correo": f"cajero.pytest.{uuid.uuid4().hex[:8]}@test.com",
         "password": "Test12345",
         "rol_id": 3,
@@ -183,9 +184,10 @@ def test_gerente_registra_y_elimina_cajero_de_su_sucursal():
 
 
 def test_gerente_no_registra_cajero_en_otra_sucursal():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     payload = {
         "nombre": "Cajero Otra Sede",
+        "usuario": f"cajero.otra.{uuid.uuid4().hex[:8]}",
         "correo": f"cajero.otra.{uuid.uuid4().hex[:8]}@test.com",
         "password": "Test12345",
         "rol_id": 3,
@@ -195,9 +197,10 @@ def test_gerente_no_registra_cajero_en_otra_sucursal():
 
 
 def test_gerente_no_registra_otro_gerente_ni_admin():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     payload = {
         "nombre": "Otro Gerente",
+        "usuario": f"otro.gerente.{uuid.uuid4().hex[:8]}",
         "correo": f"otro.gerente.{uuid.uuid4().hex[:8]}@test.com",
         "password": "Test12345",
         "rol_id": 2,
@@ -207,7 +210,7 @@ def test_gerente_no_registra_otro_gerente_ni_admin():
 
 
 def test_gerente_ve_inventario_de_su_sucursal():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     response = client.get("/inventario/", cookies=cookies)
     assert response.status_code == 200
 
@@ -215,7 +218,7 @@ def test_gerente_ve_inventario_de_su_sucursal():
 def test_gerente_actualiza_existencias():
     """Protocolo: 'Controlar el inventario. Actualizar existencias.' — se
     sube en 1 y se restaura al final."""
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
 
     antes = client.get("/inventario/?sucursal_id=2", cookies=cookies).json()
     item = next(i for i in antes if i["producto_id"] == 3)
@@ -238,7 +241,7 @@ def test_gerente_actualiza_existencias():
 
 def test_gerente_consulta_bajo_inventario():
     """Protocolo: 'Consultar productos con bajo inventario.'"""
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     response = client.get("/inventario/bajo-stock", cookies=cookies)
     assert response.status_code == 200
 
@@ -246,7 +249,7 @@ def test_gerente_consulta_bajo_inventario():
 def test_gerente_consulta_historial_de_ventas_de_su_sucursal():
     """Protocolo: 'Consultar el historial de ventas. Supervisar las ventas
     realizadas en su sucursal.'"""
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     response = client.get("/reportes/ventas", cookies=cookies)
     assert response.status_code == 200
     for venta in response.json():
@@ -254,7 +257,7 @@ def test_gerente_consulta_historial_de_ventas_de_su_sucursal():
 
 
 def test_gerente_ve_usuarios_de_su_sucursal():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     response = client.get("/usuarios/", cookies=cookies)
     assert response.status_code == 200
     for usuario in response.json():
@@ -267,14 +270,14 @@ def test_gerente_ve_usuarios_de_su_sucursal():
 
 
 def test_admin_ve_todo():
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     assert client.get("/usuarios/", cookies=cookies).status_code == 200
     assert client.get("/reportes/resumen", cookies=cookies).status_code == 200
 
 
 def test_admin_consulta_sucursales():
     """Protocolo: 'Consultar sucursales.' — el admin ve TODAS, no solo una."""
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     response = client.get("/sucursales/", cookies=cookies)
     assert response.status_code == 200
     assert len(response.json()) >= 2
@@ -283,7 +286,7 @@ def test_admin_consulta_sucursales():
 def test_admin_crea_modifica_y_elimina_sucursal():
     """Protocolo: 'Crear sucursales. Modificar información de las
     sucursales. Eliminar sucursales.'"""
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
 
     payload = {
         "nombre": f"Sucursal Pytest {uuid.uuid4().hex[:8]}",
@@ -308,7 +311,7 @@ def test_admin_crea_modifica_y_elimina_sucursal():
 
 def test_admin_registra_gerente_y_lo_asigna_a_una_sucursal():
     """Protocolo: 'Registrar gerentes. Asignar gerentes a las sucursales.'"""
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
 
     branch_payload = {
         "nombre": f"Sucursal Temp {uuid.uuid4().hex[:6]}",
@@ -321,6 +324,7 @@ def test_admin_registra_gerente_y_lo_asigna_a_una_sucursal():
 
     user_payload = {
         "nombre": "Gerente Pytest",
+        "usuario": f"gerente.pytest.{uuid.uuid4().hex[:8]}",
         "correo": f"gerente.pytest.{uuid.uuid4().hex[:8]}@test.com",
         "password": "Test12345",
         "rol_id": 2,
@@ -344,21 +348,21 @@ def test_admin_registra_gerente_y_lo_asigna_a_una_sucursal():
 def test_admin_consulta_inventario_de_cualquier_sucursal():
     """Protocolo: 'Consultar los inventarios de las diferentes
     sucursales.'"""
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     assert client.get("/inventario/?sucursal_id=1", cookies=cookies).status_code == 200
     assert client.get("/inventario/?sucursal_id=2", cookies=cookies).status_code == 200
 
 
 def test_admin_consulta_ventas_de_las_sucursales():
     """Protocolo: 'Consultar las ventas realizadas en las sucursales.'"""
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     response = client.get("/reportes/ventas", cookies=cookies)
     assert response.status_code == 200
 
 
 def test_admin_consulta_informacion_general_del_sistema():
     """Protocolo: 'Consultar información general del sistema.'"""
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     response = client.get("/reportes/resumen", cookies=cookies)
     assert response.status_code == 200
     data = response.json()
@@ -372,7 +376,7 @@ def test_admin_consulta_informacion_general_del_sistema():
 
 
 def test_estadisticas_de_ventas():
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     response = client.get("/reportes/estadisticas", cookies=cookies)
     assert response.status_code == 200
     data = response.json()
@@ -392,7 +396,7 @@ def test_estadisticas_de_ventas():
 
 
 def test_estadisticas_filtran_por_fechas():
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     response = client.get(
         "/reportes/estadisticas?desde=2000-01-01&hasta=2000-01-02", cookies=cookies
     )
@@ -401,12 +405,12 @@ def test_estadisticas_filtran_por_fechas():
 
 
 def test_cajero_no_ve_estadisticas():
-    cookies = login("cajero.prueba@test.com", "Test12345")
+    cookies = login("cajero.prueba", "Test12345")
     assert client.get("/reportes/estadisticas", cookies=cookies).status_code == 403
 
 
 def test_gerente_solo_ve_estadisticas_de_su_sucursal():
-    cookies = login("gerente.prueba@test.com", "Test12345")
+    cookies = login("gerente.prueba", "Test12345")
     response = client.get("/reportes/estadisticas", cookies=cookies)
     assert response.status_code == 200
     for fila in response.json()["ventas_por_sucursal"]:
@@ -418,14 +422,14 @@ def test_gerente_solo_ve_estadisticas_de_su_sucursal():
     ["/productos/", "/sucursales/", "/inventario/", "/ventas/", "/usuarios/", "/reportes/ventas"],
 )
 def test_busqueda_sin_coincidencias_devuelve_lista_vacia(url):
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     response = client.get(f"{url}?q=texto-que-no-existe-xyz", cookies=cookies)
     assert response.status_code == 200
     assert response.json() == []
 
 
 def test_busqueda_de_productos_por_nombre_y_codigo():
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     productos = client.get("/productos/", cookies=cookies).json()
     if not productos:
         pytest.skip("No hay productos para buscar")
@@ -439,7 +443,7 @@ def test_busqueda_de_productos_por_nombre_y_codigo():
 
 
 def test_busqueda_trata_comodines_como_texto():
-    cookies = login("pi3@admin.com", "pi12345")
+    cookies = login("pi3", "pi12345")
     response = client.get("/productos/?q=%25", cookies=cookies)
     assert response.status_code == 200
     assert all("%" in p["nombre"] or "%" in p["codigo"] for p in response.json())
@@ -459,7 +463,7 @@ def test_aviso_de_privacidad_se_acepta_una_vez():
         conexion.execute(borrar, {"correo": correo})
 
     try:
-        response = client.post("/auth/login", json={"email": correo, "password": "Test12345"})
+        response = client.post("/auth/login", json={"usuario": "gerente.prueba", "password": "Test12345"})
         assert response.json()["acepto_privacidad"] is False
         cookies = response.cookies
 

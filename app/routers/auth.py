@@ -38,6 +38,7 @@ def to_auth_user(
     return AuthUser(
         id=user.id,
         nombre=user.nombre,
+        usuario=user.usuario,
         correo=user.correo,
         rol=get_role_name(user, db),
         sucursal_id=user.sucursal_id,
@@ -54,16 +55,17 @@ def login(
     request: Request,
     db: Session = Depends(get_db),
 ):
+    # Se inicia sesión con el nombre de usuario (sin importar mayúsculas)
     user = (
         db.query(User)
-        .filter(User.correo == data.email)
+        .filter(User.usuario == data.usuario.strip().lower())
         .first()
     )
 
     if user is None:
         raise HTTPException(
             status_code=401,
-            detail="Correo o contraseña incorrectos",
+            detail="Usuario o contraseña incorrectos",
         )
 
     if not user.activo:
@@ -80,7 +82,7 @@ def login(
     if not valid_password:
         raise HTTPException(
             status_code=401,
-            detail="Correo o contraseña incorrectos",
+            detail="Usuario o contraseña incorrectos",
         )
 
     request.session.clear()

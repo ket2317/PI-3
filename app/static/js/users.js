@@ -103,7 +103,7 @@ async function loadUsers() {
         <div class="entity-avatar badge-role-${String(role).toLowerCase()}">${initials(user.nombre)}</div>
         <div>
           <p class="entity-name">${user.nombre}</p>
-          <p class="entity-sub">${user.correo}</p>
+          <p class="entity-sub">@${user.usuario} · ${user.correo}</p>
         </div>
       </div>
       <div class="entity-tags">
@@ -134,6 +134,7 @@ async function loadUsers() {
 function editUser(user) {
   document.querySelector("#user-id").value = user.id;
   document.querySelector("#user-name").value = user.nombre;
+  document.querySelector("#user-username").value = user.usuario;
   document.querySelector("#user-email").value = user.correo;
   document.querySelector("#user-role-id").value = user.rol_id;
   document.querySelector("#user-branch-id").value = user.sucursal_id || "";
@@ -163,6 +164,7 @@ document.querySelector("#user-form").addEventListener("submit", async (event) =>
 
   const payload = {
     nombre: document.querySelector("#user-name").value.trim(),
+    usuario: document.querySelector("#user-username").value.trim().toLowerCase(),
     correo: document.querySelector("#user-email").value.trim(),
     rol_id: Number(document.querySelector("#user-role-id").value),
     sucursal_id: branchValue ? Number(branchValue) : null,

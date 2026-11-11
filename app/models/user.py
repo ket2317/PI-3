@@ -28,6 +28,7 @@ class User(Base):
     )
 
     nombre = Column(Text, nullable=False)
+    usuario = Column(Text, unique=True, nullable=False, index=True)
     correo = Column(Text, unique=True, nullable=False)
     password_hash = Column(Text, nullable=False)
 

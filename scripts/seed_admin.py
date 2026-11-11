@@ -10,6 +10,7 @@ from app.models import branch, category, product, inventory
 load_dotenv()
 
 ADMIN_NAME = os.getenv("ADMIN_NAME")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
@@ -42,6 +43,7 @@ def crear_admin():
 
         admin = User(
             nombre=ADMIN_NAME,
+            usuario=ADMIN_USERNAME.strip().lower(),
             correo=ADMIN_EMAIL,
             password_hash=password_hash,
             rol_id=rol_admin.id,

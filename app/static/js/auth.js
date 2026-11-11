@@ -9,7 +9,7 @@ form.addEventListener("submit", async (event) => {
   button.disabled = true;
 
   const payload = {
-    email: document.querySelector("#email").value.trim(),
+    usuario: document.querySelector("#username").value.trim(),
     password: document.querySelector("#password").value,
   };
 

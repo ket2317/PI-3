@@ -57,8 +57,16 @@
                 <input id="user-name" type="text" required>
               </div>
               <div class="field">
+                <label for="user-username">Usuario</label>
+                <input id="user-username" type="text" required minlength="3" maxlength="30"
+                       pattern="[A-Za-z0-9._\-]+" autocomplete="off" autocapitalize="none"
+                       title="Solo letras, números, punto, guion y guion bajo (sin espacios)">
+                <p class="field-hint">Con este usuario iniciará sesión</p>
+              </div>
+              <div class="field">
                 <label for="user-email">Correo</label>
                 <input id="user-email" type="email" required>
+                <p class="field-hint">Se usa para recuperar la contraseña</p>
               </div>
               <div class="field">
                 <label for="user-password">Contraseña</label>
