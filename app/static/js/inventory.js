@@ -116,7 +116,9 @@ function isLowStock(item) {
 function renderSummary() {
   const low = currentInventory.filter(isLowStock).length;
   const units = currentInventory.reduce((total, item) => total + item.existencia, 0);
-  document.querySelector("#summary-products").textContent = currentInventory.length;
+  // Ahora la lista trae también los productos en 0; solo se cuentan los que tienen piezas
+  document.querySelector("#summary-products").textContent =
+    currentInventory.filter((item) => item.existencia > 0).length;
   document.querySelector("#summary-low").textContent = low;
   document.querySelector("#summary-units").textContent = units.toLocaleString("es-MX");
 }
@@ -144,7 +146,6 @@ function renderInventoryTable() {
   }
 
   items.forEach((item) => {
-    const product = branchProducts.find((p) => p.id === item.producto_id);
     const low = isLowStock(item);
     // La barra se llena al 100% cuando hay el doble del stock mínimo
     const target = Math.max(item.stock_minimo * 2, 1);
@@ -154,8 +155,8 @@ function renderInventoryTable() {
     row.className = `stock-row${low ? " is-low" : ""}`;
     row.innerHTML = `
       <div>
-        <p class="entity-name">${product ? product.nombre : "Producto " + item.producto_id}</p>
-        <p class="entity-sub">Código ${product ? product.codigo : item.producto_id}</p>
+        <p class="entity-name">${item.nombre}</p>
+        <p class="entity-sub">Código ${item.codigo}${item.id ? "" : " · sin existencia registrada"}</p>
       </div>
       <div class="stock-level">
         <div class="stock-bar"><span style="width:${percent}%"></span></div>

@@ -52,15 +52,40 @@ def obtener_inventario(
     current_user: User = Depends(require_admin_or_manager),
 ):
     branch_id = resolve_read_branch(current_user, sucursal_id, db)
-    query = db.query(Inventory)
+
+    # Se parte de los productos (no del inventario) para que aparezcan todos
+    # los productos activos de la sucursal, aunque todavía no tengan
+    # existencia registrada. LEFT JOIN = outerjoin.
+    query = (
+        db.query(Product, Inventory)
+        .outerjoin(
+            Inventory,
+            (Inventory.producto_id == Product.id)
+            & (Inventory.sucursal_id == Product.sucursal_id),
+        )
+        .filter(Product.activo.is_(True))
+    )
     if branch_id is not None:
-        query = query.filter(Inventory.sucursal_id == branch_id)
+        query = query.filter(Product.sucursal_id == branch_id)
     pattern = like_term(q)
     if pattern is not None:
-        query = query.join(Product, Product.id == Inventory.producto_id).filter(
-            ilike_any(pattern, Product.nombre, Product.codigo)
+        query = query.filter(ilike_any(pattern, Product.nombre, Product.codigo))
+
+    resultado = []
+    for producto, inventario in query.order_by(Product.sucursal_id, Product.nombre).all():
+        resultado.append(
+            {
+                "id": inventario.id if inventario else None,
+                "sucursal_id": producto.sucursal_id,
+                "producto_id": producto.id,
+                "codigo": producto.codigo,
+                "nombre": producto.nombre,
+                "existencia": inventario.existencia if inventario else 0,
+                "stock_minimo": inventario.stock_minimo if inventario else 5,
+                "actualizado_at": inventario.actualizado_at if inventario else None,
+            }
         )
-    return query.order_by(Inventory.sucursal_id, Inventory.producto_id).all()
+    return resultado
 
 
 @router.get("/bajo-stock", response_model=list[InventoryResponse])
