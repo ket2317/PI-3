@@ -1,6 +1,6 @@
 <div align="center">
 
-<!-- CAPTURA 1: Logotipo del proyecto (opcional). Guardar como docs/capturas/logo.png -->
+<!-- CAPTURA 1: Logotipo del proyecto-->
 <img src="https://github.com/user-attachments/assets/9a090400-5839-48d1-855e-e7d277ed2312" alt="Logotipo del Sistema de Gestión de Pequeños Negocios" width="140">
 
 # Sistema de Gestión de Pequeños Negocios
@@ -64,7 +64,7 @@ Su principal característica es el enfoque **multi-sede**: un mismo negocio pued
 
 El sistema maneja distintos niveles de acceso —**Administrador**, **Gerente** y **Cajero**— de modo que cada usuario trabaja únicamente con la información y las acciones que corresponden a sus responsabilidades dentro de la organización.
 
-<!-- CAPTURA 2: Vista general del sistema (por ejemplo, el panel principal del Administrador). Guardar como docs/capturas/vista-general.png -->
+<!-- CAPTURA 2: Vista general del sistema -->
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c1fa7f97-10c2-4d96-88d0-37a096cc0b56" alt="Panel principal de Vendora" width="85%">
   <p><em>Panel principal con indicadores de ventas e inventario</em></p>
@@ -113,7 +113,6 @@ Desarrollar una solución integral para la gestión de pequeños negocios que pe
 | **Usuarios y Roles** | Creación de cuentas, asignación de roles y de sucursal a cada usuario. |
 | **Reportes** | Consulta de ventas e indicadores para apoyar la toma de decisiones. |
 
-> **Nota para el equipo:** ajustar esta tabla si algún módulo cambia de alcance o se agrega uno nuevo.
 
 ---
 
@@ -135,17 +134,13 @@ El sistema implementa un **control de acceso basado en roles (RBAC)**. Cada usua
 - **Gerente:** supervisa la operación de su sucursal, su inventario y sus reportes.
 - **Cajero:** opera el punto de venta de su sucursal.
 
-> **Nota para el equipo:** verificar que la matriz coincida exactamente con los permisos implementados en el backend.
-
 ---
 
 ## Capturas de Pantalla
 
-> Todas las imágenes se guardan en la carpeta `docs/capturas/` del repositorio con los nombres indicados.
-
 ### Inicio de Sesión
 
-<!-- CAPTURA 3: Pantalla de /login con el formulario vacío. Guardar como docs/capturas/login.png -->
+<!-- CAPTURA 3: login-->
 <div align="center">
   <img src="https://github.com/user-attachments/assets/17ad4a1e-2bec-4bd6-9248-5fd837fae6ad" alt="Pantalla de inicio de sesión de Vendora" width="85%">
   <p><em>Inicio de sesión</em></p>
@@ -154,7 +149,7 @@ El sistema implementa un **control de acceso basado en roles (RBAC)**. Cada usua
 
 ### Panel del Administrador
 
-<!-- CAPTURA 4: Pantalla principal que ve el Administrador al iniciar sesión. Guardar como docs/capturas/panel-administrador.png -->
+<!-- CAPTURA 4: Pantalla principal que ve el Administrador al iniciar sesión-->
 <div align="center">
   <img src="https://github.com/user-attachments/assets/f7a18926-e2f7-42f5-8342-77243216a7b5" alt="Panel del Administrador de Vendora" width="85%">
   <p><em>Panel principal del Administrador con indicadores de ventas e inventario</em></p>
@@ -162,7 +157,7 @@ El sistema implementa un **control de acceso basado en roles (RBAC)**. Cada usua
 
 ### Punto de Venta
 
-<!-- CAPTURA 5: Pantalla del cajero con una venta en proceso (varios productos agregados y el total visible). Guardar como docs/capturas/punto-de-venta.png -->
+<!-- CAPTURA 5: Pantalla del cajero con una venta en proceso (varios productos agregados y el total visible). -->
 <div align="center">
   <img src="https://github.com/user-attachments/assets/09d24d98-6c0d-4bed-b4f4-db11e2f76af7" alt="Punto de venta de Vendora" width="85%">
   <p><em>Punto de venta con ticket actual, cálculo de IVA y método de pago</em></p>
@@ -170,7 +165,7 @@ El sistema implementa un **control de acceso basado en roles (RBAC)**. Cada usua
 
 ### Inventario y Productos
 
-<!-- CAPTURA 6 y 7: Tabla de inventario de una sucursal y catálogo/formulario de productos. Guardar como docs/capturas/inventario.png y docs/capturas/productos.png -->
+<!-- CAPTURA 6 y 7: Tabla de inventario de una sucursal y catálogo/formulario de productos. -->
 <div align="center">
   <img src="https://github.com/user-attachments/assets/2444c761-40f5-41c4-b162-8be17872ed55" alt="Inventario de Vendora" width="85%">
   <p><em>Inventario por sucursal con alertas de bajo inventario</em></p>
@@ -186,7 +181,7 @@ El sistema implementa un **control de acceso basado en roles (RBAC)**. Cada usua
 
 ### Sucursales y Usuarios
 
-<!-- CAPTURA 8 y 9: Listado de sucursales y gestión de usuarios con sus roles. Guardar como docs/capturas/sucursales.png y docs/capturas/usuarios.png -->
+<!-- CAPTURA 8 y 9: Listado de sucursales y gestión de usuarios con sus roles. -->
 <div align="center">
   <img src="https://github.com/user-attachments/assets/3c3e6a3e-91f8-4a07-95d0-8f40b165b10c" alt="Sucursales de Vendora" width="85%">
   <p><em>Gestión de sucursales</em></p>
@@ -201,7 +196,7 @@ El sistema implementa un **control de acceso basado en roles (RBAC)**. Cada usua
 
 ### Reportes
 
-<!-- CAPTURA 10: Pantalla de reportes o resumen de ventas. Guardar como docs/capturas/reportes.png -->
+<!-- CAPTURA 10: Pantalla de reportes o resumen de ventas. -->
 <div align="center">
   <img src="https://github.com/user-attachments/assets/ff410f11-e15b-4cb0-acd3-1f95f940747b" alt="Reportes de Vendora" width="85%">
   <p><em>Reportes de ventas e indicadores</em></p>
@@ -265,9 +260,7 @@ erDiagram
     PRODUCTO ||--o{ DETALLE_VENTA : "aparece en"
 ```
 
-> **Nota para el equipo:** si el modelo final incluye otras tablas o relaciones, actualizar este diagrama. También se puede agregar el diagrama entidad-relación exportado desde la herramienta de diseño como `docs/capturas/diagrama-er.png`.
-
-<!-- CAPTURA 11 (opcional): Diagrama entidad-relación completo de la base de datos. Guardar como docs/capturas/diagrama-er.png -->
+<!-- CAPTURA 11 (opcional): Diagrama entidad-relación completo de la base de datos -->
 
 ---
 
@@ -307,9 +300,6 @@ erDiagram
 ├── LICENSE                 # Licencia AGPL-3.0
 └── README.md
 ```
-
-> **Nota para el equipo:** ajustar los nombres de carpetas para que coincidan exactamente con el repositorio.
-
 ---
 
 ## Instalación Local
