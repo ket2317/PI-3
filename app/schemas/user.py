@@ -19,7 +19,7 @@ NombreUsuario = Annotated[
 
 
 class UserLogin(BaseModel):
-    usuario: str
+    usuario: NombreUsuario
     password: str
 
 

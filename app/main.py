@@ -20,9 +20,11 @@ from app.models import (  # noqa: F401
     sale,
     sale_detail,
     user,
+    branch_photo,
 )
 from app.routers import (
     auth,
+    branch_photos,
     branches,
     categories,
     inventory,
@@ -65,6 +67,7 @@ app.mount(
 
 app.include_router(auth.router)
 app.include_router(branches.router)
+app.include_router(branch_photos.router)
 app.include_router(categories.router)
 app.include_router(products.router)
 app.include_router(users.router)

@@ -56,3 +56,9 @@ class Sucursal(Base):
         "Product",
         back_populates="sucursal"
     )
+
+    fotos = relationship(
+    "FotoSucursal",
+    order_by="FotoSucursal.id",
+    cascade="all, delete-orphan",
+)

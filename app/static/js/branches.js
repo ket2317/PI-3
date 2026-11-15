@@ -28,13 +28,61 @@ async function apiRequest(url, options = {}) {
   return data;
 }
 
+
+// Fotos
+function photoUrl(branchId, photoId) {
+    return `/sucursales/${branchId}/fotos/${photoId}`;
+}
+
+// Fotos que ya tiene la sucursal, cada una con su botón para eliminarla
+function renderPhotoManager(branch) {
+    const container = document.querySelector("#branch-photos");
+    container.innerHTML = "";
+    if (!branch) return;
+
+    branch.fotos.forEach((foto) => {
+        const item = document.createElement("div");
+        item.className = "photo-thumb";
+        item.innerHTML = `
+            <img src="${photoUrl(branch.id, foto.id)}" alt="Foto de ${branch.nombre}">
+            <button type="button" aria-label="Eliminar foto">&times;</button>
+        `;
+
+        item.querySelector("button").addEventListener("click", async () => {
+            if (!window.confirm("¿Eliminar esta foto?")) return;
+            try {
+                await apiRequest(photoUrl(branch.id, foto.id), { method: "DELETE" });
+                branch.fotos = branch.fotos.filter((f) => f.id !== foto.id);
+                renderPhotoManager(branch);
+                await loadBranches();
+            } catch (error) {
+                showError(error.message);
+            }
+        });
+
+        container.appendChild(item);
+    });
+}
+
+// Sube una por una las fotos elegidas en el campo de archivo
+async function uploadSelectedPhotos(branchId) {
+    const files = document.querySelector("#branch-photo-files").files;
+    for (const file of files) {
+        const formData = new FormData();
+        formData.append("archivo", file); // mismo nombre que el parámetro en FastAPI
+        // Sin Content-Type: el navegador lo pone solo con el "boundary" correcto
+        await apiRequest(`/sucursales/${branchId}/fotos`, { method: "POST", body: formData });
+    }
+}
+
 function resetForm() {
+  renderPhotoManager(null);
   document.querySelector("#branch-form").reset();
   document.querySelector("#branch-id").value = "";
   document.querySelector("#branch-modal-title").textContent = "Añadir sucursal";
   document.querySelector("#branch-submit").textContent = "Guardar sucursal";
   document.querySelector("#branch-active").hidden = true;
-  document.querySelector("#branch-active-label").hidden = true;
+  //document.querySelector("#branch-active-label").hidden = true;
   renderManagerOptions(null);
   clearError();
 }
@@ -85,10 +133,11 @@ function editBranch(branch) {
   document.querySelector("#branch-manager-id").value = branch.gerente_id || "";
 
   const activeField = document.querySelector("#branch-active");
-  const activeLabel = document.querySelector("#branch-active-label");
+
   activeField.hidden = false;
-  activeLabel.hidden = false;
+
   activeField.value = String(branch.activo);
+  renderPhotoManager(branch);
 
   document.querySelector("#branch-modal-title").textContent = "Editar sucursal";
   document.querySelector("#branch-submit").textContent = "Guardar cambios";
@@ -108,6 +157,38 @@ async function deactivateBranch(branch) {
   } catch (error) {
     showError(error.message);
   }
+}
+
+
+// Foto principal arriba de la tarjeta y miniaturas para cambiarla
+function renderBranchGallery(branch) {
+    if (branch.fotos.length === 0) {
+        return `<div class="branch-cover is-empty">${ICONS.store}<span>Sin fotos</span></div>`;
+    }
+    const first = photoUrl(branch.id, branch.fotos[0].id);
+    const thumbs = branch.fotos.length > 1
+        ? `<div class="branch-thumbs">${branch.fotos
+            .map((foto, i) => `
+                <button type="button" class="${i === 0 ? "is-active" : ""}" data-src="${photoUrl(branch.id, foto.id)}" aria-label="Ver foto ${i + 1}">
+                    <img src="${photoUrl(branch.id, foto.id)}" alt="" loading="lazy">
+                </button>`)
+            .join("")}</div>`
+        : "";
+    return `
+        <div class="branch-cover"><img src="${first}" alt="Foto de ${branch.nombre}" loading="lazy"></div>
+        ${thumbs}`;
+}
+
+function connectGallery(card) {
+    const cover = card.querySelector(".branch-cover img");
+    card.querySelectorAll(".branch-thumbs button").forEach((thumb) => {
+        thumb.addEventListener("click", () => {
+            cover.src = thumb.dataset.src;
+            card.querySelectorAll(".branch-thumbs button").forEach((b) =>
+                b.classList.remove("is-active"));
+            thumb.classList.add("is-active");
+        });
+    });
 }
 
 async function loadBranches() {
@@ -132,6 +213,7 @@ async function loadBranches() {
     const card = document.createElement("article");
     card.className = `entity-card${branch.activo ? "" : " is-inactive"}`;
     card.innerHTML = `
+    ${renderBranchGallery(branch)}
       <div class="entity-head">
         <div class="entity-avatar is-square">${ICONS.store}</div>
         <div>
@@ -150,6 +232,7 @@ async function loadBranches() {
       </div>
     `;
 
+    connectGallery(card);
     if (currentUser.rol === "ADMIN") {
       const actions = card.querySelector(".entity-actions");
 
@@ -190,11 +273,14 @@ document.querySelector("#branch-form").addEventListener("submit", async (event) 
     clearSuccess();
 
     const url = branchId ? `/sucursales/${branchId}` : "/sucursales/";
-    await apiRequest(url, {
+    const saved = await apiRequest(url, {
       method: branchId ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+
+    // Las fotos se suben después, porque una sucursal nueva necesita su id 
+    await uploadSelectedPhotos(saved.id);
 
     showSuccess(branchId ? "Sucursal actualizada correctamente" : "Sucursal creada correctamente");
     closeModal("branch-modal");
