@@ -41,3 +41,17 @@ function showToast(message, type = "success", duration = 4000) {
 
   return remove;
 }
+
+// El servidor a veces manda el error como lista (validaciones de FastAPI).
+// Esto lo convierte en texto para que nunca se vea "[object Object]".
+function errorDetail(detail) {
+  if (!detail) return "";
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => (item && item.msg ? String(item.msg).replace(/^Value error, /, "") : String(item)))
+      .join(". ");
+  }
+  if (typeof detail === "object" && detail.msg) return String(detail.msg);
+  return "";
+}

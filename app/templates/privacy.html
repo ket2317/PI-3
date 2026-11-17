@@ -18,7 +18,9 @@
 </head>
 <body>
   <main class="privacy-page">
+    {% if not request.query_params.get("embed") %}
     <a class="privacy-back" href="/login">&larr; Volver al inicio de sesión</a>
+    {% endif %}
 
     <header class="privacy-header">
       <p class="privacy-eyebrow">Sistema de Gestión de Pequeños Negocios</p>

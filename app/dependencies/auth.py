@@ -35,6 +35,14 @@ def get_current_user(
             detail="Sesión inválida o usuario inactivo",
         )
 
+    # Mientras no cambie la contraseña que le asignaron, solo puede usar
+    # las rutas de sesión (/auth) y el aviso de privacidad
+    if user.debe_cambiar_password and not request.url.path.startswith(("/auth/", "/privacidad/")):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Debes cambiar tu contraseña antes de continuar",
+        )
+
     return user
 
 

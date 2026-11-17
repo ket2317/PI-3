@@ -19,8 +19,14 @@ NombreUsuario = Annotated[
 
 
 class UserLogin(BaseModel):
-    usuario: NombreUsuario
+    # Texto libre: si no existe se responde "Usuario o contraseña incorrectos"
+    usuario: str
     password: str
+
+
+class CambiarPassword(BaseModel):
+    password_actual: str
+    nueva_password: str
 
 
 class UserCreate(BaseModel):
@@ -40,6 +46,7 @@ class AuthUser(BaseModel):
     rol :  str
     sucursal_id : int | None
     acepto_privacidad: bool = False
+    debe_cambiar_password: bool = False
 
 class UserUpdate(BaseModel):
     nombre : str

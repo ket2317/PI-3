@@ -8,7 +8,7 @@ async function apiRequest(url) {
     throw new Error("Debes iniciar sesión");
   }
   if (!response.ok) {
-    throw new Error(data.detail || `Error ${response.status}`);
+    throw new Error(errorDetail(data.detail) || `Error ${response.status}`);
   }
   return data;
 }
@@ -269,7 +269,7 @@ document.querySelector("#stats-pdf").addEventListener("click", async (event) => 
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      throw new Error(data.detail || "No se pudo generar el PDF");
+      throw new Error(errorDetail(data.detail) || "No se pudo generar el PDF");
     }
 
     // Se crea un enlace temporal al archivo y se "le da clic" para descargarlo

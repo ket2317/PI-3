@@ -9,7 +9,8 @@ from app.database import get_db
 from app.dependencies.auth import get_current_user, get_role_name
 from app.models.user import User
 from app.routers.privacy import acepto_privacidad
-from app.schemas.user import AuthUser, UserLogin
+from app.schemas.user import AuthUser, CambiarPassword, UserLogin
+from app.utils.passwords import revisar_password
 from app.services.email import enviar_correo_recuperacion
 import uuid
 
@@ -43,6 +44,7 @@ def to_auth_user(
         rol=get_role_name(user, db),
         sucursal_id=user.sucursal_id,
         acepto_privacidad=acepto_privacidad(user, db),
+        debe_cambiar_password=bool(user.debe_cambiar_password),
     )
 
 
@@ -100,6 +102,36 @@ def me(
     db: Session = Depends(get_db),
 ):
     return to_auth_user(current_user, db)
+
+
+@router.post("/cambiar-password")
+def cambiar_password(
+    data: CambiarPassword,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Desde el panel: basta con confirmar la contraseña actual, sin correo
+    valid_password = bcrypt.checkpw(
+        data.password_actual.encode("utf-8"),
+        current_user.password_hash.encode("utf-8"),
+    )
+    if not valid_password:
+        raise HTTPException(status_code=400, detail="La contraseña actual no es correcta")
+
+    if data.nueva_password == data.password_actual:
+        raise HTTPException(status_code=422, detail="La nueva contraseña debe ser distinta a la actual")
+
+    revisar_password(data.nueva_password, current_user.usuario)
+
+    current_user.password_hash = bcrypt.hashpw(
+        data.nueva_password.encode("utf-8"),
+        bcrypt.gensalt(),
+    ).decode("utf-8")
+    current_user.reset_token = None
+    current_user.debe_cambiar_password = False
+    db.commit()
+
+    return {"message": "Contraseña actualizada correctamente"}
 
 
 @router.post("/logout")
@@ -166,12 +198,15 @@ async def actualizar_password(payload: ResetPasswordSchema, db: Session = Depend
     if not user:
         raise HTTPException(status_code=400, detail="El enlace es inválido o ha expirado.")
 
+    revisar_password(payload.nueva_password, user.usuario)
+
     # Generamos el hash seguro con bcrypt de la nueva contraseña
     hashed_bytes = bcrypt.hashpw(payload.nueva_password.encode("utf-8"), bcrypt.gensalt())
 
     # Actualizamos la contraseña y BORRAMOS el token para que no se pueda volver a usar
     user.password_hash = hashed_bytes.decode("utf-8")
     user.reset_token = None
+    user.debe_cambiar_password = False
     db.commit()
 
     return {"message": "Contraseña actualizada exitosamente"}

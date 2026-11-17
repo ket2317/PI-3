@@ -22,7 +22,8 @@ form.addEventListener("submit", async (event) => {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      errorMessage.textContent = data.detail || "No fue posible iniciar sesión";
+      errorMessage.textContent =
+        typeof data.detail === "string" ? data.detail : "Usuario o contraseña incorrectos";
       errorMessage.hidden = false;
       return;
     }

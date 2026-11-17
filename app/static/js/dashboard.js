@@ -22,7 +22,7 @@ async function apiRequest(url, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(data.detail || "No fue posible completar la operación");
+    throw new Error(errorDetail(data.detail) || "No fue posible completar la operación");
   }
 
   return data;

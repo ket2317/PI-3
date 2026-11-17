@@ -43,7 +43,7 @@ async function apiRequest(url, options = {}) {
     }
     
     if (!response.ok) {
-      throw new Error(data.detail || `Error ${response.status}`);
+      throw new Error(errorDetail(data.detail) || `Error ${response.status}`);
     }
     
     return data;

@@ -121,7 +121,7 @@ function markActiveNavLink() {
 
 // Aviso de privacidad: se muestra hasta que el usuario lo acepta y no se
 // puede cerrar de otra forma (ni con Esc ni haciendo clic afuera).
-function showPrivacyNotice() {
+function showPrivacyNotice(onAccepted) {
   if (document.querySelector(".privacy-dialog")) return;
 
   const dialog = document.createElement("dialog");
@@ -136,7 +136,7 @@ function showPrivacyNotice() {
       En él se explica qué datos personales se recaban, para qué se usan y cómo ejercer
       tus derechos ARCO.
     </p>
-    <p><a href="/aviso-de-privacidad" target="_blank" rel="noopener">Leer el aviso completo</a></p>
+    <p><a href="/aviso-de-privacidad">Leer el aviso completo</a></p>
     <div class="confirm-actions">
       <button type="button" class="confirm-ok privacy-accept">Acepto el aviso de privacidad</button>
     </div>
@@ -163,6 +163,7 @@ function showPrivacyNotice() {
       dialog.close();
       dialog.remove();
       if (typeof showToast === "function") showToast("Aviso de privacidad aceptado", "success");
+      if (typeof onAccepted === "function") onAccepted();
     } catch (error) {
       accept.disabled = false;
       if (typeof showToast === "function") showToast("No se pudo registrar la aceptación", "error");
@@ -171,6 +172,141 @@ function showPrivacyNotice() {
 
   document.body.appendChild(dialog);
   dialog.showModal();
+}
+
+// Cambio de contraseña desde el panel: solo se confirma la contraseña actual.
+// Con forced, es el primer inicio de sesión y no se puede cerrar sin cambiarla.
+const PASSWORD_RULES = "Mínimo 8 caracteres, con al menos una mayúscula, una minúscula y un número.";
+
+function passwordProblem(password) {
+  if (password.length < 8) return "La contraseña debe tener al menos 8 caracteres";
+  if (!/[a-záéíóúñ]/.test(password)) return "La contraseña debe tener al menos una letra minúscula";
+  if (!/[A-ZÁÉÍÓÚÑ]/.test(password)) return "La contraseña debe tener al menos una letra mayúscula";
+  if (!/\d/.test(password)) return "La contraseña debe tener al menos un número";
+  return null;
+}
+
+function showPasswordDialog({ forced = false } = {}) {
+  if (document.querySelector(".password-dialog")) return;
+
+  const dialog = document.createElement("dialog");
+  dialog.className = "confirm-dialog password-dialog";
+  dialog.innerHTML = `
+    <form method="dialog" novalidate>
+      <div class="confirm-icon password-icon">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      </div>
+      <h2>${forced ? "Crea tu contraseña" : "Cambiar contraseña"}</h2>
+      <p>${forced
+        ? "Por seguridad, cambia la contraseña que te asignaron antes de continuar."
+        : "Confirma tu contraseña actual y escribe la nueva."}</p>
+      <div class="password-fields">
+        <label>${forced ? "Contraseña que te asignaron" : "Contraseña actual"}
+          <input type="password" name="actual" autocomplete="current-password" required>
+        </label>
+        <label>Nueva contraseña
+          <input type="password" name="nueva" autocomplete="new-password" minlength="8" required>
+        </label>
+        <label>Confirmar nueva contraseña
+          <input type="password" name="confirmar" autocomplete="new-password" minlength="8" required>
+        </label>
+        <small class="password-rules">${PASSWORD_RULES}</small>
+        <p class="password-error" role="alert" hidden></p>
+      </div>
+      <div class="confirm-actions">
+        <button type="button" class="confirm-cancel">${forced ? "Cerrar sesión" : "Cancelar"}</button>
+        <button type="submit" class="confirm-ok">Guardar</button>
+      </div>
+    </form>
+  `;
+
+  const form = dialog.querySelector("form");
+  const errorEl = dialog.querySelector(".password-error");
+  const saveButton = dialog.querySelector(".confirm-ok");
+  let done = false;
+
+  const showProblem = (message) => {
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+  };
+  const close = () => {
+    done = true;
+    dialog.close();
+    dialog.remove();
+  };
+
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    if (!forced) close();
+  });
+  // Si se cerró sin cambiarla siendo obligatoria, se vuelve a abrir
+  dialog.addEventListener("close", () => {
+    if (forced && !done) dialog.showModal();
+  });
+
+  dialog.querySelector(".confirm-cancel").addEventListener("click", async () => {
+    if (!forced) {
+      close();
+      return;
+    }
+    done = true;
+    await fetch("/auth/logout", { method: "POST", credentials: "same-origin" }).catch(() => {});
+    window.location.href = "/login";
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    errorEl.hidden = true;
+    const actual = form.actual.value;
+    const nueva = form.nueva.value;
+    const confirmar = form.confirmar.value;
+
+    if (!actual) return showProblem("Escribe tu contraseña actual");
+    const problem = passwordProblem(nueva);
+    if (problem) return showProblem(problem);
+    if (nueva !== confirmar) return showProblem("Las contraseñas nuevas no coinciden");
+    if (nueva === actual) return showProblem("La nueva contraseña debe ser distinta a la actual");
+
+    saveButton.disabled = true;
+    try {
+      const response = await fetch("/auth/cambiar-password", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password_actual: actual, nueva_password: nueva }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = typeof errorDetail === "function" ? errorDetail(data.detail) : data.detail;
+        throw new Error(message || "No se pudo cambiar la contraseña");
+      }
+      close();
+      if (typeof showToast === "function") showToast("Contraseña actualizada correctamente", "success");
+      // La primera vez se recarga para que la página cargue sus datos
+      if (forced) setTimeout(() => window.location.reload(), 900);
+    } catch (error) {
+      showProblem(error.message);
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
+
+  document.body.appendChild(dialog);
+  dialog.showModal();
+  form.actual.focus();
+}
+
+function initPasswordButton() {
+  const button = document.querySelector("#password-button");
+  if (!button) return;
+  button.addEventListener("click", () => showPasswordDialog());
+}
+
+function loadPrivacyModal() {
+  if (window.openPrivacyModal || document.querySelector('script[src="/static/js/privacy-modal.js"]')) return;
+  const script = document.createElement("script");
+  script.src = "/static/js/privacy-modal.js";
+  document.head.appendChild(script);
 }
 
 // Muestra solo las secciones que el rol puede usar. Mientras no se conoce
@@ -206,8 +342,14 @@ async function initSidebarUser() {
     nameEl.textContent = user.nombre;
     roleEl.textContent = user.rol;
 
+    // Primero el aviso de privacidad y después, si hace falta, el cambio de contraseña
+    const askPassword = () => {
+      if (user.debe_cambiar_password) showPasswordDialog({ forced: true });
+    };
     if (user.acepto_privacidad === false) {
-      showPrivacyNotice();
+      showPrivacyNotice(askPassword);
+    } else {
+      askPassword();
     }
 
     applyNavRole(user.rol);
@@ -328,6 +470,8 @@ document.addEventListener("DOMContentLoaded", () => {
   markActiveNavLink();
   initSidebarUser();
   initLogoutButton();
+  initPasswordButton();
+  loadPrivacyModal();
   initSearch();
   initSidebarToggle();
   document.querySelectorAll("[data-theme-toggle]").forEach((button) => {

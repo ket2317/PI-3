@@ -58,3 +58,6 @@ class User(Base):
     )
 
     reset_token = Column(String, nullable=True)
+
+    # Los usuarios que crea un admin o gerente deben poner su propia contraseña al entrar
+    debe_cambiar_password = Column(Boolean, nullable=False, default=False, server_default="false")

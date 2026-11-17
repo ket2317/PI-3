@@ -21,7 +21,7 @@ async function apiRequest(url, options = {}) {
     throw new Error("Debes iniciar sesión");
   }
   if (!response.ok) {
-    throw new Error(data.detail || `Error ${response.status}`);
+    throw new Error(errorDetail(data.detail) || `Error ${response.status}`);
   }
   return data;
 }

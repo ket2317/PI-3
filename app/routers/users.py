@@ -14,6 +14,7 @@ from app.dependencies.auth import (
 from app.models.branch import Sucursal
 from app.models.user import Role, User
 from app.utils.search import ilike_any, like_term
+from app.utils.passwords import revisar_password
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 
@@ -178,6 +179,8 @@ def crear_usuario(
             detail="El nombre de usuario ya está en uso",
         )
 
+    revisar_password(usuario.password, usuario.usuario)
+
     datos = usuario.model_dump(exclude={"password"})
 
     datos["password_hash"] = bcrypt.hashpw(
@@ -188,6 +191,7 @@ def crear_usuario(
     nuevo_usuario = User(
         **datos,
         activo=True,
+        debe_cambiar_password=True,
     )
 
     try:
@@ -283,6 +287,9 @@ def actualizar_usuario(
     usuario_db.activo = usuario.activo
 
     if usuario.password:
+        revisar_password(usuario.password, usuario.usuario)
+        # Si otro le asignó la contraseña, el usuario debe cambiarla al entrar
+        usuario_db.debe_cambiar_password = usuario_db.id != current_user.id
         usuario_db.password_hash = bcrypt.hashpw(
             usuario.password.encode("utf-8"),
             bcrypt.gensalt(),

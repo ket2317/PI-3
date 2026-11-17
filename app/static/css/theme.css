@@ -875,3 +875,65 @@ dialog.privacy-dialog { width: min(440px, calc(100vw - 32px)); }
 .app-shell[data-rol="CAJERO"] .app-nav a.admin-manager {
   display: none;
 }
+
+
+/* ---------- Cambio de contraseña ---------- */
+
+.app-logout.app-password { margin-top: 10px; }
+.app-logout.app-password + .app-logout { margin-top: 6px; }
+.page-dashboard .app-logout.app-password:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+dialog.password-dialog { width: min(420px, calc(100vw - 32px)); }
+.password-dialog .confirm-icon.password-icon {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.password-dialog .confirm-ok { background: var(--color-primary); }
+.password-dialog .confirm-ok:disabled { opacity: 0.6; cursor: wait; }
+.password-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.password-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.password-fields input {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 400;
+}
+.password-fields input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+.password-fields .password-rules {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+.password-dialog .password-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-error-soft);
+  color: var(--color-error);
+  font-size: 0.82rem;
+}
