@@ -36,6 +36,7 @@ function photoUrl(branchId, photoId) {
 
 // Fotos que ya tiene la sucursal, cada una con su botón para eliminarla
 function renderPhotoManager(branch) {
+    editingBranch = branch;
     const container = document.querySelector("#branch-photos");
     container.innerHTML = "";
     if (!branch) return;
@@ -64,6 +65,29 @@ function renderPhotoManager(branch) {
     });
 }
 
+const MAX_PHOTO_SIZE = 2 * 1024 * 1024;
+const MAX_PHOTOS = 6;
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+let editingBranch = null;
+
+// Revisa las fotos elegidas antes de guardar, para no guardar la sucursal y luego fallar
+document.querySelector("#branch-photo-files").addEventListener("change", (event) => {
+    const files = Array.from(event.target.files);
+    const current = editingBranch ? editingBranch.fotos.length : 0;
+    let problem = null;
+    if (files.some((file) => !PHOTO_TYPES.includes(file.type))) {
+        problem = "Solo se permiten fotos JPG, PNG o WEBP";
+    } else if (files.some((file) => file.size > MAX_PHOTO_SIZE)) {
+        problem = "Cada foto puede pesar máximo 2 MB";
+    } else if (current + files.length > MAX_PHOTOS) {
+        problem = `Cada sucursal puede tener máximo ${MAX_PHOTOS} fotos (ya tiene ${current})`;
+    }
+    if (problem) {
+        showError(problem);
+        event.target.value = "";
+    }
+});
+
 // Sube una por una las fotos elegidas en el campo de archivo
 async function uploadSelectedPhotos(branchId) {
     const files = document.querySelector("#branch-photo-files").files;
@@ -82,7 +106,7 @@ function resetForm() {
   document.querySelector("#branch-modal-title").textContent = "Añadir sucursal";
   document.querySelector("#branch-submit").textContent = "Guardar sucursal";
   document.querySelector("#branch-active").hidden = true;
-  //document.querySelector("#branch-active-label").hidden = true;
+  document.querySelector("#branch-active-label").hidden = true;
   renderManagerOptions(null);
   clearError();
 }
@@ -135,6 +159,7 @@ function editBranch(branch) {
   const activeField = document.querySelector("#branch-active");
 
   activeField.hidden = false;
+  document.querySelector("#branch-active-label").hidden = false;
 
   activeField.value = String(branch.activo);
   renderPhotoManager(branch);

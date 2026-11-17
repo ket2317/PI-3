@@ -25,3 +25,5 @@ class SucursalResponse(SucursalCreate):
     activo: bool
     # Solo los id; cada imagen se pide aparte en /sucursales/{id}/fotos/{foto_id}
     fotos: list[FotoSucursalResponse] = []
+
+    model_config = {"from_attributes": True}
