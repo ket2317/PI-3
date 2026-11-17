@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
 from app.database import get_db
 from app.dependencies.auth import (
@@ -322,3 +323,90 @@ def desactivar_producto(
     return {
         "message": "Producto desactivado correctamente",
     }
+
+
+TAMANO_MAXIMO_IMAGEN = 2 * 1024 * 1024  # 2 MB
+
+# Los primeros bytes de cada formato: confirman que el archivo de verdad es una imagen
+FIRMAS_IMAGEN = {
+    "image/jpeg": [b"\xff\xd8\xff"],
+    "image/png": [b"\x89PNG\r\n\x1a\n"],
+    "image/webp": [b"RIFF"],
+}
+
+
+def es_imagen_valida(tipo: str | None, contenido: bytes) -> bool:
+    if tipo not in FIRMAS_IMAGEN:
+        return False
+    if tipo == "image/webp" and contenido[8:12] != b"WEBP":
+        return False
+    return any(contenido.startswith(firma) for firma in FIRMAS_IMAGEN[tipo])
+
+
+@router.put(
+    "/{producto_id}/imagen",
+    response_model=ProductResponse,
+)
+async def subir_imagen(
+    producto_id: int,
+    archivo: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_or_manager),
+):
+    product = get_product_or_404(producto_id, db)
+    ensure_branch_access(current_user, product.sucursal_id, db)
+
+    # Se lee un byte de más para saber si el archivo rebasa el límite
+    contenido = await archivo.read(TAMANO_MAXIMO_IMAGEN + 1)
+    if len(contenido) > TAMANO_MAXIMO_IMAGEN:
+        raise HTTPException(status_code=413, detail="La imagen no puede pesar más de 2 MB")
+
+    if not es_imagen_valida(archivo.content_type, contenido):
+        raise HTTPException(status_code=415, detail="Solo se permiten imágenes JPG, PNG o WEBP")
+
+    product.imagen = contenido
+    product.imagen_tipo = archivo.content_type
+    product.imagen_actualizada = func.now()
+    db.commit()
+    db.refresh(product)
+    return product
+
+
+@router.get("/{producto_id}/imagen")
+def ver_imagen(
+    producto_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_authenticated),
+):
+    product = get_product_or_404(producto_id, db)
+    ensure_branch_access(current_user, product.sucursal_id, db)
+
+    if not product.imagen_tipo or product.imagen is None:
+        raise HTTPException(status_code=404, detail="El producto no tiene imagen")
+
+    # La URL cambia con cada foto nueva, así que el navegador puede guardarla un día
+    return Response(
+        content=product.imagen,
+        media_type=product.imagen_tipo,
+        headers={"Cache-Control": "private, max-age=86400"},
+    )
+
+
+@router.delete(
+    "/{producto_id}/imagen",
+    response_model=ProductResponse,
+)
+def eliminar_imagen(
+    producto_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_or_manager),
+):
+    product = get_product_or_404(producto_id, db)
+    ensure_branch_access(current_user, product.sucursal_id, db)
+
+    product.imagen = None
+    product.imagen_tipo = None
+    product.imagen_actualizada = func.now()
+    db.commit()
+    db.refresh(product)
+    return product

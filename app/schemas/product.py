@@ -16,5 +16,6 @@ class ProductResponse(ProductCreate):
     id: int
     created_at: datetime
     activo: bool
+    imagen_url: str | None = None
 
     model_config = {"from_attributes": True}

@@ -1,5 +1,22 @@
 let currentUser = null;
 let branches = [];
+let removeImage = false;
+
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function showImagePreview(url) {
+  const img = document.querySelector("#product-image-img");
+  const preview = document.querySelector("#product-image-preview");
+  img.hidden = !url;
+  preview.classList.toggle("has-image", Boolean(url));
+  if (url) {
+    img.src = url;
+  } else {
+    img.removeAttribute("src");
+  }
+  document.querySelector("#product-image-remove").hidden = !url;
+}
 
 function showError(message) {
   showToast(message, "error");
@@ -45,6 +62,9 @@ async function apiRequest(url, options = {}) {
     "Añadir producto";
     document.querySelector("#product-submit").textContent =
     "Guardar producto";
+    document.querySelector("#product-image").value = "";
+    removeImage = false;
+    showImagePreview(null);
 
     const branchSelect = document.querySelector("#product-branch-id");
     const filterValue = document.querySelector("#product-filter-branch").value;
@@ -127,10 +147,19 @@ async function loadProducts() {
   products.forEach((product) => {
     const row = document.createElement("tr");
 
+    const thumb = product.imagen_url
+      ? `<img class="product-thumb" src="${product.imagen_url}" alt="" loading="lazy">`
+      : `<span class="product-thumb product-thumb-empty"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg></span>`;
+
     row.innerHTML = `
       <td class="cell-strong">
-        ${product.nombre}
-        <span class="cell-sub">Código ${product.codigo}</span>
+        <div class="product-cell">
+          ${thumb}
+          <div>
+            ${product.nombre}
+            <span class="cell-sub">Código ${product.codigo}</span>
+          </div>
+        </div>
       </td>
       <td>${getBranchName(product.sucursal_id)}</td>
       <td>$${Number(product.precio).toFixed(2)}</td>
@@ -160,6 +189,9 @@ function editProduct(product) {
   document.querySelector("#product-name").value = product.nombre;
   document.querySelector("#product-price").value = product.precio;
   document.querySelector("#product-tax").value = product.iva;
+  document.querySelector("#product-image").value = "";
+  removeImage = false;
+  showImagePreview(product.imagen_url);
   document.querySelector("#product-modal-title").textContent =
     "Editar producto";
   document.querySelector("#product-submit").textContent =
@@ -218,12 +250,26 @@ document.querySelector("#product-form")
         ? `/productos/${productId}`
         : "/productos/";
         
-      await apiRequest(url, {
+      const saved = await apiRequest(url, {
         method: productId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       });
+
+      const file = document.querySelector("#product-image").files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("archivo", file);
+        await apiRequest(`/productos/${saved.id}/imagen`, {
+          method: "PUT",
+          body: formData,
+        });
+      } else if (removeImage && saved.imagen_url) {
+        await apiRequest(`/productos/${saved.id}/imagen`, {
+          method: "DELETE",
+        });
+      }
 
       showSuccess(
         productId
@@ -236,6 +282,33 @@ document.querySelector("#product-form")
     } catch (error) {
       showError(error.message);
     }
+  });
+
+document.querySelector("#product-image")
+  .addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
+    }
+    if (!IMAGE_TYPES.includes(file.type)) {
+      showError("Solo se permiten imágenes JPG, PNG o WEBP");
+      event.target.value = "";
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      showError("La imagen no puede pesar más de 2 MB");
+      event.target.value = "";
+      return;
+    }
+    removeImage = false;
+    showImagePreview(URL.createObjectURL(file));
+  });
+
+document.querySelector("#product-image-remove")
+  .addEventListener("click", () => {
+    document.querySelector("#product-image").value = "";
+    removeImage = true;
+    showImagePreview(null);
   });
 
 document.querySelector("#product-new")

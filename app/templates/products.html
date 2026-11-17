@@ -95,6 +95,21 @@
               </div>
             </div>
 
+            <div class="field product-image-field">
+              <label for="product-image">Imagen</label>
+              <div class="product-image-picker">
+                <div class="product-image-preview" id="product-image-preview">
+                  <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+                  <img id="product-image-img" alt="" hidden>
+                </div>
+                <div class="product-image-actions">
+                  <input id="product-image" type="file" accept="image/jpeg,image/png,image/webp">
+                  <button type="button" class="btn-ghost" id="product-image-remove" hidden>Quitar imagen</button>
+                  <p class="field-hint">JPG, PNG o WEBP de hasta 2 MB</p>
+                </div>
+              </div>
+            </div>
+
             <div class="modal-footer">
               <button type="button" class="btn-ghost" data-modal-close>Cancelar</button>
               <button type="submit" id="product-submit">Guardar producto</button>

@@ -60,10 +60,13 @@ function renderProductGrid(products) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "product-card";
-    card.innerHTML = `
-      <span class="product-card-icon">
+    const media = p.imagen_url
+      ? `<img class="product-card-img" src="${p.imagen_url}" alt="" loading="lazy">`
+      : `<span class="product-card-icon">
         <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
-      </span>
+      </span>`;
+    card.innerHTML = `
+      ${media}
       <span class="product-card-name">${p.nombre}</span>
       <span class="product-card-code">${p.codigo}</span>
       <span class="product-card-price">$${Number(p.precio).toFixed(2)}</span>

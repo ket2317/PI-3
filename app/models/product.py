@@ -1,6 +1,6 @@
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, Numeric, Text, UniqueConstraint
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, ForeignKey, LargeBinary, Numeric, Text, UniqueConstraint
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import deferred, relationship
 
 from app.database import Base
 
@@ -57,6 +57,19 @@ class Product(Base):
     )
 
     activo = Column(Boolean, default=True, nullable=False)
+
+    # Foto del producto. deferred() evita cargar los bytes al listar productos
+    imagen = deferred(Column(LargeBinary, nullable=True))
+    imagen_tipo = Column(Text, nullable=True)
+    imagen_actualizada = Column(DateTime(timezone=True), nullable=True)
+
+    @property
+    def imagen_url(self):
+        if not self.imagen_tipo:
+            return None
+        # ?v= cambia al subir otra foto para que el navegador no muestre la vieja
+        version = int(self.imagen_actualizada.timestamp()) if self.imagen_actualizada else 0
+        return f"/productos/{self.id}/imagen?v={version}"
 
     inventarios = relationship(
         "Inventory",
