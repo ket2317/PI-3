@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import engine
 from app.models.user import User, Role
-from app.models import branch, category, product, inventory
+from app.models import branch, branch_photo, category, product, inventory  # noqa: F401
 
 load_dotenv()
 
