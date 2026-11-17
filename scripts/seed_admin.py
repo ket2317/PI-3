@@ -15,6 +15,14 @@ ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 
+def elegir_usuario(db):
+    candidatos = [ADMIN_USERNAME.strip().lower(), ADMIN_EMAIL.split("@")[0].strip().lower()]
+    for candidato in candidatos:
+        if candidato and not db.query(User).filter(User.usuario == candidato).first():
+            return candidato
+    return None
+
+
 def crear_admin():
     if not ADMIN_NAME or not ADMIN_EMAIL or not ADMIN_PASSWORD:
         raise ValueError("Faltan las variables del administrador en el .env")
@@ -36,6 +44,11 @@ def crear_admin():
             print("El administrador ya existe")
             return
 
+        usuario = elegir_usuario(db)
+        if not usuario:
+            print("El nombre de usuario del administrador ya está en uso; no se creó otro")
+            return
+
         password_hash = bcrypt.hashpw(
             ADMIN_PASSWORD.encode("utf-8"),
             bcrypt.gensalt()
@@ -43,7 +56,7 @@ def crear_admin():
 
         admin = User(
             nombre=ADMIN_NAME,
-            usuario=ADMIN_USERNAME.strip().lower(),
+            usuario=usuario,
             correo=ADMIN_EMAIL,
             password_hash=password_hash,
             rol_id=rol_admin.id,
