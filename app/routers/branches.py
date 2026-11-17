@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
 from app.dependencies.auth import require_admin, require_admin_or_manager, require_authenticated
@@ -31,7 +31,12 @@ def obtener_sucursales(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_authenticated),
 ):
-    query = db.query(Sucursal).filter(Sucursal.activo.is_(True))
+    # selectinload trae las fotos de todas las sucursales en una sola consulta
+    query = (
+        db.query(Sucursal)
+        .options(selectinload(Sucursal.fotos))
+        .filter(Sucursal.activo.is_(True))
+    )
     if current_user.role_name in ("GERENTE", "CAJERO"):
         query = query.filter(Sucursal.id == current_user.sucursal_id)
     pattern = like_term(q)

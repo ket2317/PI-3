@@ -75,11 +75,17 @@
                 </select>
               </div>
               <div class="field">
-                <label for="branch-active" id="branch-active-label" hidden>Estado</label>
                 <select id="branch-active" hidden>
-                  <option value="true">Activa</option>
-                  <option value="false">Inactiva</option>
+                    <option value="true">Activa</option>
+                    <option value="false">Inactiva</option>
                 </select>
+              </div>
+              <div class="field field-full">
+                  <label for="branch-photo-files">Fotos de la sucursal</label>
+                  <div class="photo-manager" id="branch-photos"></div>
+                  <input id="branch-photo-files" type="file"
+                      accept="image/jpeg,image/png,image/webp" multiple>
+                  <p class="field-hint">JPG, PNG o WEBP de máximo 2 MB. Hasta 6 fotos por sucursal.</p>
               </div>
             </div>
 

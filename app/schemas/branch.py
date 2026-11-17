@@ -15,9 +15,13 @@ class SucursalUpdate(SucursalCreate):
     activo: bool = True
 
 
+class FotoSucursalResponse(BaseModel):
+    id: int
+    model_config = {"from_attributes": True}
+
 class SucursalResponse(SucursalCreate):
     id: int
     created_at: datetime
     activo: bool
-
-    model_config = {"from_attributes": True}
+    # Solo los id; cada imagen se pide aparte en /sucursales/{id}/fotos/{foto_id}
+    fotos: list[FotoSucursalResponse] = []
