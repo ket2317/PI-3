@@ -275,15 +275,26 @@ a { color: inherit; }
   font-weight: 700;
   letter-spacing: 0.02em;
 }
-
-.app-content { padding: 0 32px 40px; }
-
-@media (max-width: 860px) {
-  .app-sidebar { position: static; width: 100%; height: auto; }
-  .app-main { margin-left: 0; }
-  .app-topbar { flex-wrap: wrap; }
+.app-content {
+  padding: 38px 32px 40px 32px; /* Aumenta el padding superior para bajar el título a la altura del botón */
 }
 
+/* Asegurar que el contenedor interno de la página no tenga márgenes superiores extra */
+.page-container {
+  margin-top: 0;
+}
+
+.page-header h1 {
+  font-size: 1.6rem; /* Cambia este valor (por ejemplo a 1.4rem o 24px) */
+  color: var(--color-text);
+  margin-top: 0;
+}
+.page-header p {
+  font-size: 0.82rem; /* O el tamaño exacto que usas en otras vistas (ej. 0.8rem u 0.85rem) */
+  color: var(--color-text-muted); /* Mantiene el color gris secundario uniforme */
+  margin: 2px 0 70px 0;
+  
+}
 /* ---------- Stat cards ---------- */
 
 .stat-grid {
@@ -874,4 +885,63 @@ dialog.privacy-dialog { width: min(440px, calc(100vw - 32px)); }
 .app-shell[data-rol="CAJERO"] .app-nav a.admin-only,
 .app-shell[data-rol="CAJERO"] .app-nav a.admin-manager {
   display: none;
+}
+/* ---------- Cambiar contraseña ---------- */
+.app-password { margin-top: 10px; }
+.app-password + .app-logout { margin-top: 8px; }
+dialog.password-dialog { text-align: left; }
+.password-form { display: flex; flex-direction: column; }
+.password-form h2 { margin-bottom: 14px; }
+.password-form label {
+margin: 10px 0 6px;
+font-size: 0.85rem;
+font-weight: 600;
+color: var(--color-text);
+}
+.password-form input {
+min-height: 40px;
+padding: 8px 12px;
+border: 1px solid var(--color-border);
+border-radius: var(--radius-sm);
+background: var(--color-surface);
+color: var(--color-text);
+font: inherit;
+}
+.password-form input:focus {
+outline: none;
+border-color: var(--color-primary);
+box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+.password-form .password-hint { margin: 8px 0 0; font-size: 0.78rem; }
+.password-form .password-error {
+margin: 10px 0 0;
+padding: 8px 10px;
+border-radius: var(--radius-sm);
+background: var(--color-error-soft);
+color: var(--color-error);
+font-size: 0.85rem;
+}
+.password-form .confirm-actions { margin-top: 20px; }
+.password-form .confirm-ok { background: var(--color-primary); }
+
+/* ==========================================
+   AJUSTE DE POSICIÓN DEL MENÚ LATERAL
+   ========================================== */
+
+/* Mantener todos los enlaces juntos en la parte superior */
+.app-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 5px;
+}
+
+/* Mantener el perfil en la parte inferior */
+.app-sidebar-footer {
+  margin-top: auto;
+}
+
+/* Mantener cerrar sesión debajo del perfil */
+.app-logout {
+  flex-shrink: 0;
 }

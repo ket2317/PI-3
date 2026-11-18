@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración</title>
+
+    <link rel="stylesheet" href="/static/css/theme.css">
+    <link rel="stylesheet" href="/static/css/crud.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        {% include "_sidebar.html" %}
+
+        <div class="app-main">
+
+            <main class="app-content">
+                <section class="page-container">
+
+                    <div class="page-header">
+                        <h1>Configuración</h1>
+                        <p>Consulta la información de tu cuenta y administra tu contraseña.</p>
+                    </div>
+
+                    <!-- Información de la cuenta -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h2>Información de mi cuenta</h2>
+                            <p>Datos del usuario que inició sesión.</p>
+                        </div>
+
+                        <div class="settings-profile">
+                            <div class="settings-avatar">
+                                {{ usuario.nombre[:1]|upper }}
+                            </div>
+
+                            <div>
+                                <h3>{{ usuario.nombre }}</h3>
+                                <span>{{ usuario.rol.nombre }}</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-info-grid">
+
+                            <div class="settings-info-item">
+                                <span>Nombre completo</span>
+                                <strong>{{ usuario.nombre }}</strong>
+                            </div>
+
+                            <div class="settings-info-item">
+                                <span>Correo electrónico</span>
+                                <strong>{{ usuario.correo }}</strong>
+                            </div>
+
+                            <div class="settings-info-item">
+                                <span>Usuario</span>
+                                <strong>{{ usuario.usuario }}</strong>
+                            </div>
+
+                            <div class="settings-info-item">
+                                <span>Rol</span>
+                                <strong>{{ usuario.rol.nombre }}</strong>
+                            </div>
+
+                            <div class="settings-info-item">
+                                <span>Sucursal asignada</span>
+                                <strong>
+                                    {{ usuario.sucursal.nombre if usuario.sucursal else "Sin sucursal asignada" }}
+                                </strong>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Seguridad -->
+                    <div class="settings-card">
+                        <div class="settings-card-header">
+                            <h2>Seguridad</h2>
+                            <p>Protege el acceso a tu cuenta.</p>
+                        </div>
+
+                        <div class="settings-security">
+                            <div>
+                                <h3>Cambiar contraseña</h3>
+                                <p>Actualiza tu contraseña para mantener segura tu cuenta.</p>
+                            </div>
+
+                            <button type="button" id="change-password-button" class="app-logout app-password"
+                                title="Cambiar contraseña">
+                                <span>Cambiar contraseña</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar contraseña -->
+    <dialog class="modal" id="change-password-modal">
+
+        <form id="change-password-form">
+
+            <div class="modal-header">
+                <h2 class="section-title">
+                    Cambiar contraseña
+                </h2>
+
+                <button type="button" class="modal-x" data-modal-close aria-label="Cerrar">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="form-grid">
+
+                    <div class="field field-full">
+                        <label for="current-password">
+                            Contraseña actual
+                        </label>
+
+                        <input type="password" id="current-password" required autocomplete="current-password">
+                    </div>
+
+                    <div class="field field-full">
+                        <label for="new-password">
+                            Nueva contraseña
+                        </label>
+
+                        <input type="password" id="new-password" required autocomplete="new-password">
+                    </div>
+
+                    <div class="field field-full">
+                        <label for="confirm-password">
+                            Confirmar nueva contraseña
+                        </label>
+
+                        <input type="password" id="confirm-password" required autocomplete="new-password">
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button" class="btn-ghost" data-modal-close>
+                        Cancelar
+                    </button>
+
+                    <button type="submit" id="save-password-button">
+                        Guardar cambios
+                    </button>
+
+                </div>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="/static/js/i18n.js"></script>
+    <script src="/static/js/toast.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/modal.js"></script>
+
+    <script>
+        
+        const changePasswordButton = document.getElementById("change-password-button");
+
+        changePasswordButton.addEventListener("click", () => {
+            openModal("change-password-modal");
+        });
+
+        const changePasswordForm = document.getElementById("change-password-form");
+
+        changePasswordForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const passwordActual = document.getElementById("current-password").value;
+            const passwordNueva = document.getElementById("new-password").value;
+            const confirmarPassword = document.getElementById("confirm-password").value;
+
+            if (passwordNueva !== confirmarPassword) {
+                showToast("Las contraseñas nuevas no coinciden", "error");
+                return;
+            }
+
+            if (passwordNueva.length < 8) {
+                showToast("La contraseña debe tener al menos 8 caracteres", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch("/auth/cambiar-password", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    credentials: "same-origin",
+                    body: JSON.stringify({
+                        password_actual: passwordActual,
+                        password_nueva: passwordNueva
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showToast(data.detail || "No se pudo cambiar la contraseña", "error");
+                    return;
+                }
+
+                showToast("Contraseña actualizada correctamente", "success");
+
+                changePasswordForm.reset();
+                closeModal("change-password-modal");
+
+            } catch (error) {
+                console.error("Error al cambiar contraseña:", error);
+                showToast("Ocurrió un error al actualizar la contraseña", "error");
+            }
+        });
+
+    </script>
+
+
+</body>
+
+</html>

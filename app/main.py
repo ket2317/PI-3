@@ -33,6 +33,9 @@ from app.routers import (
     sales,
     users,
 )
+from app.dependencies.auth import get_current_user
+from app.models.user import User
+
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -147,3 +150,18 @@ def reports_page(request: Request):
         request = request,
         name = "reports.html",
     )
+
+@app.get("/configuracion-ui")
+def configuracion_page(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="configuracion.html",
+        context={
+            "usuario": current_user,
+        },
+    )
+
+

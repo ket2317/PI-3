@@ -2,7 +2,7 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -17,6 +17,12 @@ import uuid
 class ResetPasswordSchema(BaseModel):
     token: str
     nueva_password: str
+
+    # Esquema para cambiar la contraseña ya con la sesión iniciada
+
+class CambioPasswordSchema(BaseModel):
+    password_actual: str
+    password_nueva: str = Field(min_length=8, max_length=72)
 
 router = APIRouter(
     prefix="/auth",
@@ -180,3 +186,40 @@ async def actualizar_password(payload: ResetPasswordSchema, db: Session = Depend
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse(request=request, name="login.html")
+
+# Cambio de contraseña desde dentro del sistema (usuario con sesión iniciada)
+@router.post("/cambiar-password")
+def cambiar_password(
+    payload: CambioPasswordSchema,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    # 1. Confirmar que quien la cambia sabe la contraseña actual
+    password_correcta = bcrypt.checkpw(
+        payload.password_actual.encode("utf-8"),
+        current_user.password_hash.encode("utf-8"),
+    )
+
+    if not password_correcta:
+        raise HTTPException(
+            status_code=400,
+            detail="La contraseña actual no es correcta",
+        )
+
+    if payload.password_actual == payload.password_nueva:
+        raise HTTPException(
+            status_code=400,
+            detail="La nueva contraseña debe ser diferente a la actual",
+        )
+
+    # 2. Guardar la nueva contraseña cifrada con bcrypt
+    current_user.password_hash = bcrypt.hashpw(
+        payload.password_nueva.encode("utf-8"),
+        bcrypt.gensalt(),
+    ).decode("utf-8")
+
+    # 3. Si había un enlace de recuperación pendiente, deja de servir
+    current_user.reset_token = None
+    db.commit()
+
+    return {"message": "Contraseña actualizada correctamente"}

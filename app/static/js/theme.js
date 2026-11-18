@@ -213,7 +213,7 @@ async function initSidebarUser() {
     applyNavRole(user.rol);
     try {
       sessionStorage.setItem("vendora-rol", user.rol);
-    } catch (error) {}
+    } catch (error) { }
   } catch (error) {
     // silencioso: cada pagina ya maneja sus propios errores de sesion
   }
@@ -255,6 +255,81 @@ function confirmLogout() {
   });
 }
 
+// Ventana para cambiar la contraseña sin salir del sistema
+function openChangePasswordDialog() {
+  const dialog = document.createElement("dialog");
+  dialog.className = "confirm-dialog password-dialog";
+  dialog.innerHTML = ` <form method="dialog" class="password-form"> <h2>Cambiar contraseña</h2> <label for="pwd-current">Contraseña actual</label>
+<input id="pwd-current" type="password" autocomplete="current-password" required> <label for="pwd-new">Nueva contraseña</label>
+<input id="pwd-new" type="password" autocomplete="new-password" minlength="8"
+maxlength="72" required>
+<label for="pwd-confirm">Confirmar nueva contraseña</label>
+<input id="pwd-confirm" type="password" autocomplete="new-password" minlength="8"
+maxlength="72" required>
+<p class="password-hint">Mínimo 8 caracteres.</p>
+<p class="password-error" role="alert" hidden></p>
+<div class="confirm-actions">
+<button type="button" class="confirm-cancel">Cancelar</button>
+<button type="submit" class="confirm-ok">Guardar</button>
+</div>
+</form>
+`;
+  const form = dialog.querySelector("form");
+  const error = dialog.querySelector(".password-error");
+  const saveButton = dialog.querySelector(".confirm-ok");
+  const close = () => {
+    dialog.close();
+    dialog.remove();
+  };
+  dialog.querySelector(".confirm-cancel").addEventListener("click", close);
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    error.hidden = true;
+
+    const actual = dialog.querySelector("#pwd-current").value;
+    const nueva = dialog.querySelector("#pwd-new").value;
+    const confirmacion = dialog.querySelector("#pwd-confirm").value;
+
+    if (nueva !== confirmacion) {
+      error.textContent = "Las contraseñas nuevas no coinciden";
+      error.hidden = false;
+      return;
+    }
+
+    saveButton.disabled = true;
+    try {
+      const response = await fetch("/auth/cambiar-password", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password_actual: actual, password_nueva: nueva }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        // FastAPI manda los errores de validación como lista
+        const detail = Array.isArray(data.detail)
+          ? "La nueva contraseña debe tener entre 8 y 72 caracteres"
+          : data.detail;
+        throw new Error(detail || "No se pudo cambiar la contraseña");
+      }
+      close();
+      if (typeof showToast === "function") showToast("Contraseña actualizada", "success");
+    } catch (err) {
+      error.textContent = err.message;
+      error.hidden = false;
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
+  document.body.appendChild(dialog);
+  dialog.showModal();
+}
+
 function initLogoutButton() {
   const button = document.querySelector("#logout-button");
   if (!button) return;
@@ -266,7 +341,7 @@ function initLogoutButton() {
     SESSION_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
     try {
       sessionStorage.removeItem("vendora-rol");
-    } catch (error) {}
+    } catch (error) { }
     try {
       await fetch("/auth/logout", { method: "POST", credentials: "same-origin" });
       if (typeof showToast === "function") {
@@ -320,8 +395,6 @@ function initSidebarToggle() {
     localStorage.setItem(storageKey, String(collapsed));
   });
 }
-
-
 
 document.addEventListener("DOMContentLoaded", () => {
   applyColorMode();
