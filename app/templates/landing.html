@@ -494,7 +494,7 @@
         window.addEventListener("load", function () {
 
             // Eliminar cualquier hashtag de la URL
-            history.replaceState(null, document.title, "/landing");
+            history.replaceState(null, document.title, window.location.pathname);
 
             // Evitar que Chrome restaure la posición anterior
             if ("scrollRestoration" in history) {

@@ -85,8 +85,12 @@ def health(db: Session = Depends(get_db)):
 
 
 @app.get("/")
-def root():
-    return RedirectResponse(url = "/login",status_code=302)
+def root(request: Request):
+    # La portada del sitio es la página de presentación de Vendora
+    return templates.TemplateResponse(
+        request=request,
+        name="landing.html",
+    )
 
 @app.get("/login")
 def login_page(request: Request):
