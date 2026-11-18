@@ -1,6 +1,7 @@
 let currentUser = null;
 let branches = [];
 let removeImage = false;
+let editingCategoryId = null;
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -105,20 +106,6 @@ async function apiRequest(url, options = {}) {
   filter.hidden = currentUser.rol !== "ADMIN";
 }
 
-async function loadCategories() {
-  const categories = await apiRequest("/categorias/");
-  const select = document.querySelector("#product-category-id");
-  
-  select.innerHTML = `<option value="">Sin categoría</option>`;
-  
-  categories.forEach((category) => {
-    const option = document.createElement("option");
-    option.value = category.id;
-    option.textContent = category.nombre;
-    select.appendChild(option);
-  });
-}
-
 async function loadProducts() {
   const branchId = Number(
     document.querySelector("#product-filter-branch").value
@@ -183,8 +170,7 @@ function editProduct(product) {
   document.querySelector("#product-id").value = product.id;
   document.querySelector("#product-branch-id").value =
     product.sucursal_id;
-  document.querySelector("#product-category-id").value =
-    product.categoria_id || "";
+  editingCategoryId = product.categoria_id || null;
   document.querySelector("#product-code").value = product.codigo;
   document.querySelector("#product-name").value = product.nombre;
   document.querySelector("#product-price").value = product.precio;
@@ -228,9 +214,6 @@ document.querySelector("#product-form")
     event.preventDefault();
     
     const productId = document.querySelector("#product-id").value;
-    const categoryValue =
-      document.querySelector("#product-category-id").value;
-    
     const payload = {
       sucursal_id: Number(
         document.querySelector("#product-branch-id").value
@@ -239,7 +222,8 @@ document.querySelector("#product-form")
       nombre: document.querySelector("#product-name").value.trim(),
       precio: document.querySelector("#product-price").value,
       iva: document.querySelector("#product-tax").value,
-      categoria_id: categoryValue ? Number(categoryValue) : null,
+      // Ya no se elige categoría; al editar se conserva la que tuviera
+      categoria_id: productId ? editingCategoryId : null,
     };
     
     try {
@@ -333,7 +317,6 @@ document.querySelector("#product-filter-branch")
   try {
     await loadCurrentUser();
     await loadBranches();
-    await loadCategories();
     await loadProducts();
     onSearch(loadProducts);
   } catch (error) {

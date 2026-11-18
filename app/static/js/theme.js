@@ -302,11 +302,16 @@ function initPasswordButton() {
   button.addEventListener("click", () => showPasswordDialog());
 }
 
-function loadPrivacyModal() {
-  if (window.openPrivacyModal || document.querySelector('script[src="/static/js/privacy-modal.js"]')) return;
+function loadScriptOnce(src) {
+  if (document.querySelector(`script[src="${src}"]`)) return;
   const script = document.createElement("script");
-  script.src = "/static/js/privacy-modal.js";
+  script.src = src;
   document.head.appendChild(script);
+}
+
+function loadPrivacyModal() {
+  if (window.openPrivacyModal) return;
+  loadScriptOnce("/static/js/privacy-modal.js");
 }
 
 // Muestra solo las secciones que el rol puede usar. Mientras no se conoce
@@ -472,6 +477,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initLogoutButton();
   initPasswordButton();
   loadPrivacyModal();
+  // Ojo para mostrar u ocultar en todos los campos de contraseña
+  loadScriptOnce("/static/js/password-toggle.js");
   initSearch();
   initSidebarToggle();
   document.querySelectorAll("[data-theme-toggle]").forEach((button) => {

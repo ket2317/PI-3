@@ -903,6 +903,8 @@ dialog.password-dialog { width: min(420px, calc(100vw - 32px)); }
 .password-fields label {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  text-align: left;
   gap: 6px;
   font-size: 0.82rem;
   font-weight: 600;
