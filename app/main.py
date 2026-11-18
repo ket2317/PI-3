@@ -150,3 +150,10 @@ def reports_page(request: Request):
         request = request,
         name = "reports.html",
     )
+
+@app.get("/landing")
+def landing_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="landing.html",
+    )
