@@ -275,15 +275,29 @@ a { color: inherit; }
   font-weight: 700;
   letter-spacing: 0.02em;
 }
-
 .app-content { padding: 0 32px 40px; }
 
 @media (max-width: 860px) {
-  .app-sidebar { position: static; width: 100%; height: auto; }
-  .app-main { margin-left: 0; }
   .app-topbar { flex-wrap: wrap; }
 }
 
+/* Configuración no tiene barra superior: el espacio de arriba va solo en esa página */
+.page-container {
+  margin-top: 0;
+  padding-top: 38px;
+}
+
+.page-header h1 {
+  font-size: 1.6rem; /* Cambia este valor (por ejemplo a 1.4rem o 24px) */
+  color: var(--color-text);
+  margin-top: 0;
+}
+.page-header p {
+  font-size: 0.82rem; /* O el tamaño exacto que usas en otras vistas (ej. 0.8rem u 0.85rem) */
+  color: var(--color-text-muted); /* Mantiene el color gris secundario uniforme */
+  margin: 2px 0 70px 0;
+  
+}
 /* ---------- Stat cards ---------- */
 
 .stat-grid {
@@ -938,4 +952,26 @@ dialog.password-dialog { width: min(420px, calc(100vw - 32px)); }
   background: var(--color-error-soft);
   color: var(--color-error);
   font-size: 0.82rem;
+}
+
+/* ==========================================
+   AJUSTE DE POSICIÓN DEL MENÚ LATERAL
+   ========================================== */
+
+/* Mantener todos los enlaces juntos en la parte superior */
+.app-nav {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 5px;
+}
+
+/* Mantener el perfil en la parte inferior */
+.app-sidebar-footer {
+  margin-top: auto;
+}
+
+/* Mantener cerrar sesión debajo del perfil */
+.app-logout {
+  flex-shrink: 0;
 }

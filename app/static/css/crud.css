@@ -710,3 +710,186 @@ input[type="file"] {
 }
 
 .product-image-actions input[type="file"] { max-width: 100%; }
+
+/* ==========================================
+   CONFIGURACIÓN - VENDORA
+   ========================================== */
+
+.settings-card,
+.settings-card * {
+  font-family: inherit;
+}
+
+.settings-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+/* Encabezado de cada tarjeta */
+.settings-card-header {
+  margin-bottom: 22px;
+}
+
+.settings-card-header h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 5px;
+}
+
+.settings-card-header p {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Perfil del usuario */
+.settings-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  margin-bottom: 22px;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.settings-avatar {
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.settings-profile h3 {
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+}
+
+.settings-profile span {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+/* Información de la cuenta */
+.settings-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.settings-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 15px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  min-width: 0;
+  transition: border-color 0.2s ease;
+}
+
+.settings-info-item:hover {
+  border-color: var(--color-primary);
+}
+
+.settings-info-item span {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.settings-info-item strong {
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Seguridad */
+.settings-security {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.settings-security h3 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.settings-security p {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Botón cambiar contraseña */
+.settings-security .app-password {
+  width: auto;
+  min-width: 180px;
+  margin: 0;
+  padding: 11px 18px;
+  justify-content: center;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.settings-security .app-password:hover {
+  background: var(--vendora-accent-hover);
+  border-color: var(--vendora-accent-hover);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Adaptación a pantallas pequeñas */
+@media (max-width: 650px) {
+  .settings-card {
+    padding: 18px;
+  }
+
+  .settings-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-security {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .settings-security .app-password {
+    width: 100%;
+  }
+}

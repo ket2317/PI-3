@@ -35,6 +35,8 @@ from app.routers import (
     sales,
     users,
 )
+from app.models.user import User
+
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -160,4 +162,25 @@ def landing_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="landing.html",
+    )
+
+
+@app.get("/configuracion-ui")
+def configuracion_page(request: Request, db: Session = Depends(get_db)):
+    # Como las demás pantallas: sin sesión se manda al login en vez de responder un JSON
+    user_id = request.session.get("user_id")
+    usuario = (
+        db.query(User).filter(User.id == user_id, User.activo.is_(True)).first()
+        if user_id is not None
+        else None
+    )
+    if usuario is None:
+        return RedirectResponse(url="/login", status_code=302)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="configuracion.html",
+        context={
+            "usuario": usuario,
+        },
     )

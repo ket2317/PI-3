@@ -19,6 +19,7 @@ class ResetPasswordSchema(BaseModel):
     token: str
     nueva_password: str
 
+
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],

@@ -360,7 +360,7 @@ async function initSidebarUser() {
     applyNavRole(user.rol);
     try {
       sessionStorage.setItem("vendora-rol", user.rol);
-    } catch (error) {}
+    } catch (error) { }
   } catch (error) {
     // silencioso: cada pagina ya maneja sus propios errores de sesion
   }
@@ -413,7 +413,7 @@ function initLogoutButton() {
     SESSION_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
     try {
       sessionStorage.removeItem("vendora-rol");
-    } catch (error) {}
+    } catch (error) { }
     try {
       await fetch("/auth/logout", { method: "POST", credentials: "same-origin" });
       if (typeof showToast === "function") {
@@ -467,8 +467,6 @@ function initSidebarToggle() {
     localStorage.setItem(storageKey, String(collapsed));
   });
 }
-
-
 
 document.addEventListener("DOMContentLoaded", () => {
   applyColorMode();
